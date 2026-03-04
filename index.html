@@ -3,342 +3,641 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Image Detail Extractor</title>
+<title>Tarot Detail Extractor</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0d0d0f; --surface: #16161a; --surface2: #1e1e24;
-    --border: #2a2a35; --accent: #7c6af7; --accent2: #f76a8c;
-    --text: #e8e8f0; --muted: #7a7a90; --card-w: 220px;
+  :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+  body { margin: 0; background: #0b0e14; color: #e7eaf0; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
+
+  .card {
+    background: #121826;
+    border: 1px solid #1f2a3d;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    margin-bottom: 14px;
   }
-  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; min-height:100vh; overflow-x:hidden; }
-  header { padding:2.5rem 2rem 1.5rem; text-align:center; }
-  header::after { content:''; display:block; width:120px; height:3px; background:linear-gradient(90deg,var(--accent),var(--accent2)); margin:1rem auto 0; border-radius:2px; }
-  header h1 { font-size:clamp(1.6rem,4vw,2.4rem); font-weight:700; letter-spacing:-.02em; background:linear-gradient(135deg,#fff 30%,var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-  header p { margin-top:.5rem; color:var(--muted); font-size:.95rem; }
-  #drop-zone { margin:1.5rem auto; max-width:640px; border:2px dashed var(--border); border-radius:20px; padding:3rem 2rem; text-align:center; cursor:pointer; transition:border-color .25s,background .25s; }
-  #drop-zone:hover,#drop-zone.drag-over { border-color:var(--accent); background:rgba(124,106,247,.06); }
-  #drop-zone svg { opacity:.5; }
-  #drop-zone h2 { font-size:1.1rem; margin:1rem 0 .3rem; }
-  #drop-zone p  { color:var(--muted); font-size:.85rem; }
-  #file-input { display:none; }
-  .btn { display:inline-flex; align-items:center; gap:.4rem; margin-top:1.2rem; padding:.6rem 1.4rem; border-radius:10px; border:none; cursor:pointer; font-size:.9rem; font-weight:600; transition:transform .15s,opacity .15s; }
-  .btn:active { transform:scale(.97); }
-  .btn-primary { background:linear-gradient(135deg,var(--accent),#9b8bf7); color:#fff; }
-  .btn-primary:hover { opacity:.9; }
-  .btn-sm { padding:.35rem .8rem; font-size:.78rem; border-radius:7px; }
-  .btn-dl { background:rgba(124,106,247,.18); color:var(--accent); border:1px solid rgba(124,106,247,.3); }
-  .btn-dl:hover { background:rgba(124,106,247,.3); }
-  #preview-section { display:none; max-width:900px; margin:0 auto 2rem; padding:0 1.5rem; }
-  #preview-section h2 { font-size:.78rem; color:var(--muted); margin-bottom:.75rem; text-transform:uppercase; letter-spacing:.08em; }
-  #preview-wrap { position:relative; display:inline-block; border-radius:14px; overflow:hidden; border:1px solid var(--border); max-width:100%; }
-  #preview-img { display:block; max-width:100%; max-height:420px; object-fit:contain; }
-  #overlay-canvas { position:absolute; top:0; left:0; pointer-events:none; }
-  .controls { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-top:1rem; }
-  #status { text-align:center; color:var(--muted); font-size:.85rem; padding:.5rem; min-height:1.6rem; transition:color .3s; }
-  #status.working { color:var(--accent); }
-  #status.done { color:#6fcf97; }
-  #grid-section { display:none; padding:0 1.5rem 4rem; max-width:1400px; margin:0 auto; }
-  #grid-section > h2 { font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:1.25rem; }
-  #grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(var(--card-w),1fr)); gap:1.25rem; }
-  .card { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; transition:transform .25s,box-shadow .25s,border-color .25s; animation:fadeUp .4s ease both; }
-  .card:hover { transform:translateY(-5px); box-shadow:0 16px 40px rgba(0,0,0,.5),0 0 0 1px var(--accent); border-color:var(--accent); }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-  .card-img-wrap { position:relative; overflow:hidden; aspect-ratio:1; background:var(--surface2); }
-  .card-img-wrap canvas { width:100%; height:100%; object-fit:cover; display:block; transition:transform .35s ease; }
-  .card:hover .card-img-wrap canvas { transform:scale(1.06); }
-  .badge { position:absolute; top:8px; left:8px; background:rgba(13,13,15,.75); backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,.12); color:#fff; font-size:.65rem; font-weight:700; padding:.2rem .5rem; border-radius:6px; letter-spacing:.04em; }
-  .card-overlay { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(to top,rgba(13,13,15,.96) 60%,transparent); padding:.8rem .75rem .65rem; transform:translateY(101%); transition:transform .3s ease; pointer-events:none; }
-  .card:hover .card-overlay { transform:translateY(0); }
-  .card-overlay p { font-size:.75rem; color:#ddd; line-height:1.4; }
-  .card-body { padding:.75rem .85rem .9rem; flex:1; display:flex; flex-direction:column; gap:.5rem; }
-  .card-title { font-size:.88rem; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .card-desc { font-size:.75rem; color:var(--muted); line-height:1.45; flex:1; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-  .card-footer { display:flex; align-items:center; justify-content:space-between; padding:0 .85rem .85rem; }
-  .card-coords { font-size:.68rem; color:#444; font-variant-numeric:tabular-nums; }
-  @media(max-width:500px){:root{--card-w:160px}#drop-zone{padding:2rem 1rem}}
-  ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+  h1 { font-size: 22px; margin: 0 0 8px; }
+  h2 { font-size: 15px; margin: 0 0 12px; color: #d6dcff; }
+  p  { margin: 8px 0; color: #b9c2d3; }
+
+  label { display: block; font-size: 12px; color: #b9c2d3; margin-bottom: 6px; }
+
+  input, select, button {
+    width: 100%; box-sizing: border-box;
+    border-radius: 12px; border: 1px solid #27344d;
+    background: #0f1420; color: #e7eaf0;
+    padding: 10px 12px; font-size: 14px;
+  }
+  button { cursor: pointer; background: #1a2540; border-color: #2b3a59; }
+  button:hover { filter: brightness(1.08); }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+
+  .row { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media(min-width:520px){ .row { grid-template-columns: 1fr 1fr 1fr; } }
+
+  .row2 { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media(min-width:520px){ .row2 { grid-template-columns: 1fr 1fr; } }
+
+  .out {
+    margin-top: 14px; padding: 14px;
+    border-radius: 14px; background: #0f1420;
+    border: 1px solid #27344d;
+  }
+
+  .big   { font-size: 18px; font-weight: 650; letter-spacing: .2px; }
+  .mono  { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+  .hint  { font-size: 12px; color: #8fa0bf; margin-top: 10px; line-height: 1.35; }
+
+  .pill {
+    display: inline-block; padding: 4px 10px;
+    border: 1px solid #27344d; border-radius: 999px;
+    background: #0b1020; color: #b9c2d3; font-size: 12px;
+  }
+  .pill-accent {
+    background: #0f1a30; border-color: #2b4070; color: #7fa8ff;
+  }
+
+  details {
+    margin-top: 10px; border: 1px solid #27344d;
+    border-radius: 12px; padding: 10px 12px; background: #0b1020;
+  }
+  summary { cursor: pointer; font-size: 13px; color: #d6dcff; user-select: none; }
+  summary::-webkit-details-marker { display: none; }
+
+  /* ── Thumbnail library ── */
+  #library-wrap { margin-top: 14px; }
+  .lib-label { font-size: 12px; color: #b9c2d3; margin-bottom: 8px; }
+
+  .thumbs-row {
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start;
+  }
+
+  .thumb {
+    position: relative; width: 64px; height: 64px;
+    border-radius: 10px; overflow: hidden;
+    border: 2px solid #27344d; cursor: pointer;
+    transition: border-color .15s;
+    flex-shrink: 0;
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb.active { border-color: #4a7aff; }
+  .thumb:not(.active):hover { border-color: #3a5080; }
+
+  .thumb-x {
+    position: absolute; top: 2px; right: 2px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: rgba(11,14,20,.85); border: none;
+    color: #ff6a7a; font-size: .6rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity .12s; padding: 0; width: auto; line-height:1;
+  }
+  .thumb:hover .thumb-x { opacity: 1; }
+
+  .thumb-add {
+    width: 64px; height: 64px; border-radius: 10px; flex-shrink: 0;
+    border: 1px dashed #27344d; background: #0b1020;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; color: #b9c2d3; font-size: 11px; gap: 3px;
+    transition: border-color .15s, color .15s;
+  }
+  .thumb-add:hover { border-color: #4a7aff; color: #7fa8ff; }
+  .thumb-add-icon { font-size: 1.2rem; }
+
+  /* ── Grid ── */
+  #grid-section { margin-top: 14px; }
+
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 12px;
+  }
+
+  /* ── Card ── */
+  .tcard {
+    background: #121826;
+    border: 1px solid #1f2a3d;
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    animation: fadeUp .35s ease both;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .tcard:hover {
+    border-color: #2b3a59;
+    box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* Number + symbol row (top) */
+  .tcard-num {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px 4px;
+    font-size: 11px; color: #8fa0bf;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  }
+  .tcard-num .roman { color: #d6dcff; font-size: 12px; font-weight: 600; }
+  .tcard-num .sym   { font-size: 1rem; }
+
+  /* Image */
+  .tcard-img {
+    position: relative; overflow: hidden;
+    margin: 0 8px; border-radius: 8px;
+    aspect-ratio: 1; background: #0f1420;
+  }
+  .tcard-img canvas {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform .3s ease;
+  }
+  .tcard:hover .tcard-img canvas { transform: scale(1.04); }
+
+  /* Tooltip on hover */
+  .tcard-tip {
+    position: absolute; inset: 0; border-radius: 8px;
+    background: linear-gradient(to top, rgba(11,14,20,.97) 55%, rgba(11,14,20,.65) 85%, transparent);
+    padding: .75rem .7rem .65rem;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    opacity: 0; transition: opacity .25s;
+    pointer-events: none;
+  }
+  .tcard:hover .tcard-tip { opacity: 1; }
+  .tcard-tip .tip-name { font-size: 11px; font-weight: 600; color: #d6dcff; margin-bottom: 4px; }
+  .tcard-tip p { font-size: 11px; color: #b9c2d3; line-height: 1.4; margin: 0; }
+
+  /* Title block (bottom) */
+  .tcard-body {
+    padding: 7px 10px 4px; text-align: center;
+  }
+  .tcard-title {
+    font-size: 13px; font-weight: 600; color: #e7eaf0;
+  }
+  .tcard-kw {
+    font-size: 11px; color: #8fa0bf; margin-top: 2px; line-height: 1.35;
+  }
+  .tcard-el {
+    font-size: 10px; color: #4a5a7a; margin-top: 2px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  }
+
+  .tcard-footer {
+    padding: 5px 10px 9px;
+    display: flex; justify-content: center;
+  }
+  .btn-dl-small {
+    font-size: 11px; padding: 4px 12px; border-radius: 8px;
+    background: #0f1420; border: 1px solid #27344d;
+    color: #b9c2d3; cursor: pointer;
+    transition: filter .15s;
+  }
+  .btn-dl-small:hover { filter: brightness(1.12); }
+
+  /* ── Export overlay ── */
+  #export-overlay {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(11,14,20,.92); backdrop-filter: blur(8px);
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 12px;
+  }
+  #export-overlay.visible { display: flex; }
+  #export-overlay .ex-title { font-size: 15px; font-weight: 600; color: #d6dcff; }
+  #exp-track { width: 260px; height: 4px; background: #1f2a3d; border-radius: 2px; overflow: hidden; }
+  #exp-fill  { height: 100%; background: #4a7aff; border-radius: 2px; width: 0%; transition: width .12s; }
+  #exp-msg   { font-size: 12px; color: #8fa0bf; }
+
+  /* Shuffle exit */
+  .tcard.exiting {
+    animation: cardOut .22s ease forwards;
+  }
+  @keyframes cardOut {
+    to { opacity:0; transform:translateY(-10px) scale(.97); }
+  }
+
+  #status { font-size: 12px; color: #8fa0bf; margin-top: 10px; min-height: 18px; }
+  #status.working { color: #7fa8ff; }
+  #status.done    { color: #6fcf97; }
+
+  .smallmono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 12px; color: #b9c2d3;
+  }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<header>
-  <h1>🔍 Image Detail Extractor</h1>
-  <p>Upload een afbeelding — 22 interessante details worden automatisch uitgeknipd &amp; getoond</p>
-</header>
+  <!-- ── Main card ── -->
+  <div class="card">
+    <h1>Tarot Detail Extractor</h1>
+    <p>Upload één of meerdere afbeeldingen. De app snijdt automatisch 22 details uit die worden gekoppeld aan de Grote Arcana (0–XXI). Hover over een kaart voor de volledige lezing. Werkt volledig offline.</p>
 
-<div id="drop-zone">
-  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-    <polyline points="17 8 12 3 7 8"/>
-    <line x1="12" y1="3" x2="12" y2="15"/>
-  </svg>
-  <h2>Sleep een afbeelding hiernaartoe</h2>
-  <p>of klik om een bestand te kiezen (JPG, PNG, WEBP)</p>
-  <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">📂 Bestand kiezen</button>
-  <input type="file" id="file-input" accept="image/*">
-</div>
+    <!-- Upload row -->
+    <div class="row" style="margin-top:14px;">
+      <div>
+        <label>Afbeelding(en) uploaden</label>
+        <button id="upload-btn">＋ Bestand kiezen</button>
+        <input type="file" id="file-input" accept="image/*" multiple style="display:none">
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button id="reshuffle-btn" disabled>🔀 Reshuffle arcana</button>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button id="export-btn" disabled>⬇ Exporteer alles (ZIP)</button>
+      </div>
+    </div>
 
-<div id="preview-section">
-  <h2>Bronafbeelding</h2>
-  <div id="preview-wrap">
-    <img id="preview-img" alt="preview">
-    <canvas id="overlay-canvas"></canvas>
+    <!-- Drop zone (shown when no images) -->
+    <div id="drop-zone" class="out" style="text-align:center; padding:32px 16px; cursor:pointer; margin-top:14px;">
+      <div class="big" style="font-size:14px;">Sleep afbeeldingen hiernaartoe</div>
+      <div class="hint">of klik op "Bestand kiezen" — JPG · PNG · WEBP · meerdere tegelijk</div>
+    </div>
+
+    <!-- Library (shown when images loaded) -->
+    <div id="library-wrap" style="display:none;">
+      <div class="lib-label">Geladen afbeeldingen</div>
+      <div class="thumbs-row" id="thumbs-row"></div>
+    </div>
+
+    <div id="status"></div>
+
+    <!-- Info block -->
+    <details style="margin-top:14px;">
+      <summary>Wat je ziet — uitleg per kaart</summary>
+      <div style="margin-top:10px; color:#b9c2d3; font-size:13px; line-height:1.45;">
+        De app verdeelt de afbeelding in een raster en berekent per cel de <span class="smallmono">variantie</span> (textuurrijkheid),
+        <span class="smallmono">randenergie</span> (structuurdiepte) en <span class="smallmono">kleurverzadiging</span>.
+        De 22 meest interessante, gespreide zones worden uitgeknipd en elk gekoppeld aan één van de 22 Grote Arcana (0 De Dwaas t/m XXI De Wereld).
+        <ul style="margin:10px 0 0 18px; font-size:13px; line-height:1.5; color:#b9c2d3;">
+          <li><b>Getal bovenaan</b> — Romeins getal van de arcana</li>
+          <li><b>Hover</b> over de afbeelding — volledige tarot-lezing</li>
+          <li><b>Titel onderaan</b> — naam, kernwoorden en element</li>
+          <li><b>Reshuffle</b> — herkoppelt de 22 details willekeurig aan nieuwe arcana</li>
+          <li><b>Export ZIP</b> — alle 22 afbeeldingen als losse PNG's in één ZIP</li>
+        </ul>
+      </div>
+    </details>
   </div>
-  <div class="controls">
-    <button class="btn btn-primary btn-sm" id="reanalyse-btn">🔄 Opnieuw analyseren</button>
-    <button class="btn btn-dl btn-sm" id="upload-new-btn">📂 Andere afbeelding</button>
+
+  <!-- ── Grid card ── -->
+  <div class="card" id="grid-section" style="display:none;">
+    <h2 id="grid-title">De 22 Grote Arcana</h2>
+    <div id="grid"></div>
   </div>
-</div>
 
-<div id="status"></div>
+</div><!-- /wrap -->
 
-<div id="grid-section">
-  <h2 id="grid-title">22 Gevonden details</h2>
-  <div id="grid"></div>
+<!-- Export overlay -->
+<div id="export-overlay">
+  <div class="ex-title">Arcana exporteren…</div>
+  <div id="exp-track"><div id="exp-fill"></div></div>
+  <div id="exp-msg">Bezig…</div>
 </div>
 
 <canvas id="work-canvas" style="display:none"></canvas>
 
 <script>
-const DETAIL_COUNT = 22;
-const REGION_LABELS = ["Textuur","Kleuraccent","Lichtval","Schaduwpatroon","Detailvlek","Hoekpunt","Contrast","Vormrand","Kleurovergang","Dieptelaag","Reflexie","Micro-detail","Structuurveld","Toonzone","Scherptegebied","Rand","Patroon","Focuspunt","Achtergrond","Hoogtepunt","Donkerveld","Midtoon"];
+/* ───────── Arcana data ───────── */
+const ARCANA=[
+  {num:"0",roman:"0",sym:"🃏",name:"De Dwaas",en:"The Fool",kw:"Onbevangenheid · Begin · Vertrouwen",el:"Lucht · Uranus",short:"Het pure beginpunt. Vol vertrouwen stapt hij van de rand, onbezorgd en vol mogelijkheden.",full:"De Dwaas staat aan het begin van alle dingen. Hij draagt alles in een klein bundeltje en kijkt omhoog — niet naar het ravijn. Zijn getal is 0: alles en niets tegelijk. Hij vertegenwoordigt kinderlijke onbevangenheid, vrijheid van conditionering en het onbegrensde potentieel van de ziel die haar reis begint."},
+  {num:"I",roman:"I",sym:"🪄",name:"De Magiër",en:"The Magician",kw:"Wil · Vaardigheid · Manifestatie",el:"Lucht · Mercurius",short:"Alle gereedschappen liggen op tafel. Hij kanaalt hogere energie naar de aarde.",full:"De Magiër heeft de vier symbolen van de Minor Arcana voor zich en wijst tegelijk omhoog én omlaag: 'Zo boven, zo beneden.' Hij is de meester van concentratie en intentie, die ideeën omzet in werkelijkheid. Zijn lemniscaat-hoed duidt op oneindige energie en meesterschap."},
+  {num:"II",roman:"II",sym:"🌙",name:"De Hogepriesteres",en:"The High Priestess",kw:"Intuïtie · Mysterie · Innerlijke kennis",el:"Water · Maan",short:"Zij die zwijgt, weet het meest. Ze bewaart de sluier tussen werelden.",full:"Tussen twee zuilen zit zij stil. Achter haar hangt een sluier van granaatappels. Ze houdt de Torah op haar schoot en draagt een maankroon. Ze is het onderbewuste, de droom, de stille stem die je hoort als je ophoudt met praten."},
+  {num:"III",roman:"III",sym:"🌾",name:"De Keizerin",en:"The Empress",kw:"Vruchtbaarheid · Natuur · Overvloed",el:"Aarde · Venus",short:"Moeder Natuur op haar troon. Groei, sensualiteit en creatieve kracht.",full:"Ze zit in een weelderig veld omringd door rijpe tarwe, haar kroon telt twaalf sterren. Ze is de godin van vruchtbaarheid, schoonheid en overvloed. Ze herinnert eraan dat het lichaam heilig is, dat de aarde ons voedt en dat creatie altijd een daad van liefde is."},
+  {num:"IV",roman:"IV",sym:"♛",name:"De Keizer",en:"The Emperor",kw:"Structuur · Autoriteit · Stabiliteit",el:"Vuur · Aries",short:"De bouwer van orde. Zijn troon staat op rots; hij geeft vorm aan het chaotische.",full:"Hij zit op een stenen troon met rammenhoofden. In zijn rechterhand de ankh, teken van leven; in zijn linker de rijksbol. Hij is de vader-energie: structuur, wetten, bescherming en discipline. Waar De Keizerin vloeit, bouwt hij muren."},
+  {num:"V",roman:"V",sym:"✝",name:"De Hogepriester",en:"The Hierophant",kw:"Traditie · Geloof · Spirituele leiding",el:"Aarde · Stier",short:"Bewaker van het heilige. Hij verbindt het aardse met het goddelijke.",full:"Tussen twee zuilen van een tempel zit hij op een verhoogde troon, zijn hand geheven in zegen. De Hogepriester vertegenwoordigt georganiseerde spiritualiteit, traditie en het doorgeven van wijsheid. Hij is de leraar — en de vraag: geloof je uit gewoonte of uit innerlijke overtuiging?"},
+  {num:"VI",roman:"VI",sym:"💞",name:"De Geliefden",en:"The Lovers",kw:"Keuze · Verbinding · Waarden",el:"Lucht · Tweelingen",short:"Niet alleen romantiek — een bewuste keuze vanuit het hart en de ziel.",full:"Een man en vrouw staan naakt onder de zegen van aartsengel Rafaël. De kaart gaat over meer dan liefde: het is de keuze tussen twee paden, twee waarden. De engel brengt ze samen, maar de keuze en verantwoordelijkheid blijven bij henzelf."},
+  {num:"VII",roman:"VII",sym:"⚔",name:"De Strijdwagen",en:"The Chariot",kw:"Wilskracht · Controle · Overwinning",el:"Water · Kreeft",short:"Twee tegengestelde sfingen worden door pure wilskracht vooruit gedreven.",full:"Een gepantserde krijger bestuurt zijn wagen zonder teugels — de sfingen worden door concentratie alleen geleid. De Strijdwagen vraagt discipline: niet het onderdrukken van tegenstellingen, maar ze balanceren zodat ze samen vooruitgaan."},
+  {num:"VIII",roman:"VIII",sym:"♾",name:"Kracht",en:"Strength",kw:"Moed · Zachtheid · Innerlijke kracht",el:"Vuur · Leeuw",short:"Een vrouw temmt een leeuw — niet met geweld, maar met zachte, onwankelbare liefde.",full:"Boven haar hoofd zweeft een lemniscaat. Ze opent kalm de muil van de leeuw, die niet vecht. Dit is niet de kracht van spieren maar van karakter: moed die niet brult, vertrouwen dat niet wankelt."},
+  {num:"IX",roman:"IX",sym:"🏮",name:"De Kluizenaar",en:"The Hermit",kw:"Terugtrekking · Wijsheid · Innerlijk licht",el:"Aarde · Maagd",short:"Hoog op een berg verlicht hij zijn eigen pad — en toont anderen de weg terug.",full:"In grijs gewaad staat hij op een besneeuwde bergtop, een lantaarn geheven met de zespuntige ster erin. Hij heeft zich teruggetrokken om zichzelf te vinden. Zijn licht is voor jou — als je bereid bent de tocht omhoog te maken."},
+  {num:"X",roman:"X",sym:"🎡",name:"Het Rad van Fortuin",en:"Wheel of Fortune",kw:"Cyclus · Lot · Wending",el:"Vuur · Jupiter",short:"Het rad draait altijd. Wat omlaag gaat, komt omhoog — en omgekeerd.",full:"Op het rad staan T-A-R-O en alchemistische symbolen. Vier figuren aan de hoeken lezen rustig hun boeken terwijl het rad draait. Het staat voor de onvermijdelijke cycli van het leven. Niemand blijft op dezelfde positie."},
+  {num:"XI",roman:"XI",sym:"⚖",name:"Gerechtigheid",en:"Justice",kw:"Waarheid · Balans · Consequentie",el:"Lucht · Weegschaal",short:"Het zwaard snijdt door illusie. De weegschaal meet wat echt is, niet wat we willen.",full:"Ze zit met een zwaard omhoog en een weegschaal in evenwicht. Gerechtigheid in tarot gaat niet over menselijke rechtssystemen maar over kosmische oorzaak en gevolg. Elke actie heeft een consequentie."},
+  {num:"XII",roman:"XII",sym:"🙃",name:"De Gehangene",en:"The Hanged Man",kw:"Opoffering · Overgave · Nieuw perspectief",el:"Water · Neptunus",short:"Vrijwillig ondersteboven — hij koos voor stilstand om te zien wat recht staan hem ontnam.",full:"Hij hangt aan zijn enkel, zijn vrije been gekruist, zijn gezicht vredig met een aureool. Hij is niet gestraft; hij koos dit. De Gehangene vertegenwoordigt vrijwillige overgave: loslaten van controle om iets diepers te begrijpen."},
+  {num:"XIII",roman:"XIII",sym:"🌅",name:"De Dood",en:"Death",kw:"Transformatie · Einde · Doorgang",el:"Water · Schorpioen",short:"Niet het einde van het leven — maar het einde van een tijdperk. Ruimte voor wedergeboorte.",full:"Een skelet in zwart harnas rijdt op een wit paard; in de achtergrond gaat de zon op tussen twee torens. De Dood vraagt niet om fysieke dood maar om afscheid: van een identiteit, een relatie, een fase."},
+  {num:"XIV",roman:"XIV",sym:"🏹",name:"Matigheid",en:"Temperance",kw:"Balans · Geduld · Alchemie",el:"Vuur · Boogschutter",short:"Een engel mengt water tussen twee kelken — de kunst van het harmoniëren van tegenstellingen.",full:"De engel giet vloeistof van de ene kelk in de andere — omhoog, tegen de zwaartekracht in. Matigheid is de alchemist die tegengestelde krachten combineert tot iets nieuws. Het is niet onthouding maar meesterlijk doseren."},
+  {num:"XV",roman:"XV",sym:"🐐",name:"De Duivel",en:"The Devil",kw:"Schaduw · Verslaving · Materialisme",el:"Aarde · Steenbok",short:"De kettingen zijn los genoeg om af te doen — maar ze worden vrijwillig gedragen.",full:"Twee geketende figuren — maar hun kettingen zijn wijd genoeg om over hun hoofd te tillen. Ze blijven uit gewoonte, angst of comfort. De Duivel is de spiegel van onze eigen schaduw. Erkenning is de eerste stap naar bevrijding."},
+  {num:"XVI",roman:"XVI",sym:"⚡",name:"De Toren",en:"The Tower",kw:"Omwenteling · Openbaring · Catharsis",el:"Vuur · Mars",short:"De bliksem treft wat op valse fundamenten gebouwd is. De val is pijnlijk — maar de grond is echt.",full:"Een hoge toren wordt getroffen; figuren vallen terwijl vlammen uitbarsten. De Toren is de plotselinge instorting van wat niet klopte. Wat valt mócht vallen. Op de lege plek kan nu iets waarachtigs worden gebouwd."},
+  {num:"XVII",roman:"XVII",sym:"✦",name:"De Ster",en:"The Star",kw:"Hoop · Genezing · Inspiratie",el:"Lucht · Waterman",short:"Na de storm: een naakte vrouw onder een sterrenhemel die rustig water giet.",full:"Ze knielt bij een poel en giet water met twee kruiken. Boven haar schittert een grote gele ster. Ze is volledig ontspannen en open. De Ster volgt De Toren: na vernietiging komt hoop. Vertrouw op het proces. Genees. Droom."},
+  {num:"XVIII",roman:"XVIII",sym:"🐺",name:"De Maan",en:"The Moon",kw:"Illusie · Angst · Onderbewuste",el:"Water · Vissen",short:"In het maanlicht ziet alles er anders uit. Welk pad is echt — en welke angst is projectie?",full:"Een volle maan schijnt op een pad tussen twee torens. Een kreeft kruipt uit het water; wolf en hond huilen. De Maan is het onderbewuste, dromen en angsten. Ze waarschuwt voor illusie — maar nodigt ook uit om door de duisternis te lopen."},
+  {num:"XIX",roman:"XIX",sym:"☀",name:"De Zon",en:"The Sun",kw:"Vreugde · Vitaliteit · Succes",el:"Vuur · Zon",short:"Een kind rijdt lachend op een paard onder de stralende zon — leven in zijn meest directe vorm.",full:"Een naald kind, triomfantelijk op een wit paard, rijdt onder een stralende zon. De Zon is de meest welwillende kaart. Helderheid, vitaliteit, succes en authenticiteit. Je mag er zijn, precies zoals je bent."},
+  {num:"XX",roman:"XX",sym:"🎺",name:"Het Oordeel",en:"Judgement",kw:"Roeping · Opstanding · Vergeving",el:"Vuur · Pluto",short:"De aartsengel blaast zijn bazuin. Wie opstaat, antwoordt op een hogere roeping.",full:"Gabriël blaast de bazuin; mensen stijgen op uit hun graven, armen gespreid. Het Oordeel is geen straf maar een uitnodiging: word wie je werkelijk bent. Het vraagt om zelfonderzoek en vergeving — van anderen, maar vooral van jezelf."},
+  {num:"XXI",roman:"XXI",sym:"🌍",name:"De Wereld",en:"The World",kw:"Voltooiing · Integratie · Dans",el:"Aarde · Saturnus",short:"De dans in de krans: de reis is compleet. Alle tegenstellingen zijn geïntegreerd.",full:"Een dansende figuur in een laurierkrans. De vier hoekfiguren zijn terug: stier, leeuw, adelaar, engel. De Wereld is het einde van de Grote Arcana-reis. De Dwaas is thuisgekomen. Nu danst hij — vrij, heel, aanwezig in het eeuwige nu."}
+];
 
-function buildDescription(stats, label) {
-  const d = {
-    "Textuur":        `Rijk gestructureerd vlak met variantie ${stats.variance.toFixed(0)}. Fijne patronen versterken de diepte van het beeld.`,
-    "Kleuraccent":    `Opvallende kleurverzadiging (gem. ${stats.saturation.toFixed(0)}%). Dit accent trekt de blik naar de compositie.`,
-    "Lichtval":       `Helderheidswaarde ${stats.brightness.toFixed(0)}/255. Zachte lichtval creëert volume en driedimensionaliteit.`,
-    "Schaduwpatroon": `Donker vlak (helderheid ${stats.brightness.toFixed(0)}) met subtiele toonverschillen die schaduwstructuur onthullen.`,
-    "Detailvlek":     `Kleine zone met hoge lokale activiteit — variantie ${stats.variance.toFixed(0)} — verbergt subtiele informatie.`,
-    "Hoekpunt":       `Geometrisch significant punt met rand-energie ${stats.edges.toFixed(0)}. Structureel anker van de compositie.`,
-    "Contrast":       `Hoog contrastveld (bereik: ${stats.range}). Sterke toon-overgang definieert volume en diepte.`,
-    "Vormrand":       `Rand-energie ${stats.edges.toFixed(0)} — hier ontmoeten twee zones en vormen een visuele grens.`,
-    "Kleurovergang":  `Vloeiende kleur- en toon-transitie. Variantie ${stats.variance.toFixed(0)} toont de geleidelijke verandering.`,
-    "Dieptelaag":     `Ruimtelijke laag met helderheid ${stats.brightness.toFixed(0)} — onderdeel van de compositie-diepte.`,
-    "Reflexie":       `Lichtreflectie (helderheid ${stats.brightness.toFixed(0)}). Materiaalkarakter wordt zichtbaar.`,
-    "Micro-detail":   `Fijnste detailniveau — variantie ${stats.variance.toFixed(0)} onthult kleine structuren.`,
-    "Structuurveld":  `Repeterend of organisch patroon met rand-energie ${stats.edges.toFixed(0)}.`,
-    "Toonzone":       `Brede toonschaal (bereik ${stats.range}) — rijke grijswaardeverdeling.`,
-    "Scherptegebied": `Focus-zone: rand-energie ${stats.edges.toFixed(0)} wijst op scherpe overgang — het oog landt hier.`,
-    "Rand":           `Visuele grens — rand-energie ${stats.edges.toFixed(0)} — scheidt subject van omgeving.`,
-    "Patroon":        `Herhalend element met variantie ${stats.variance.toFixed(0)} en regelmatige structuur.`,
-    "Focuspunt":      `Optisch zwaartepunt — hoge activiteit (${stats.variance.toFixed(0)}) maakt dit tot aandachtspunt.`,
-    "Achtergrond":    `Laag-actieve zone (variantie ${stats.variance.toFixed(0)}) vormt de rustige basis van de compositie.`,
-    "Hoogtepunt":     `Lichtste deel (helderheid ${stats.brightness.toFixed(0)}) — speculair hoogtepunt of directe lichtbron.`,
-    "Donkerveld":     `Diepe schaduwzone (helderheid ${stats.brightness.toFixed(0)}) met verborgen detaillagen.`,
-    "Midtoon":        `Neutrale midtoonzone (helderheid ${stats.brightness.toFixed(0)}) — de balans van het beeld.`,
-  };
-  return d[label] || `Interessant segment met variantie ${stats.variance.toFixed(0)}.`;
-}
+/* ───────── State ───────── */
+let images=[], activeId=null, regions=[], arcanaOrder=[...Array(22).keys()];
 
-const dropZone   = document.getElementById('drop-zone');
-const fileInput  = document.getElementById('file-input');
-const previewSec = document.getElementById('preview-section');
-const previewImg = document.getElementById('preview-img');
-const overlayCvs = document.getElementById('overlay-canvas');
-const overlayCtx = overlayCvs.getContext('2d');
-const workCvs    = document.getElementById('work-canvas');
-const workCtx    = workCvs.getContext('2d');
-const statusEl   = document.getElementById('status');
-const gridSec    = document.getElementById('grid-section');
-const gridEl     = document.getElementById('grid');
-const gridTitle  = document.getElementById('grid-title');
-let currentImg   = null;
+/* ───────── DOM ───────── */
+const uploadBtn   = document.getElementById('upload-btn');
+const fileInput   = document.getElementById('file-input');
+const reshuffleBtn= document.getElementById('reshuffle-btn');
+const exportBtn   = document.getElementById('export-btn');
+const dropZone    = document.getElementById('drop-zone');
+const libWrap     = document.getElementById('library-wrap');
+const thumbsRow   = document.getElementById('thumbs-row');
+const statusEl    = document.getElementById('status');
+const gridSec     = document.getElementById('grid-section');
+const gridEl      = document.getElementById('grid');
+const gridTitle   = document.getElementById('grid-title');
+const workCvs     = document.getElementById('work-canvas');
+const workCtx     = workCvs.getContext('2d');
 
-dropZone.addEventListener('dragover', e=>{e.preventDefault();dropZone.classList.add('drag-over');});
-dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
-dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadFile(f);});
-dropZone.addEventListener('click',()=>fileInput.click());
-fileInput.addEventListener('change',e=>{if(e.target.files[0])loadFile(e.target.files[0]);});
-document.getElementById('reanalyse-btn').addEventListener('click',()=>{if(currentImg)analyse(currentImg);});
-document.getElementById('upload-new-btn').addEventListener('click',()=>fileInput.click());
+/* ───────── Events ───────── */
+uploadBtn.addEventListener('click', ()=>fileInput.click());
+fileInput.addEventListener('change', e=>{ [...e.target.files].forEach(loadFile); fileInput.value=''; });
+dropZone.addEventListener('click', ()=>fileInput.click());
+dropZone.addEventListener('dragover', e=>{ e.preventDefault(); dropZone.style.borderColor='#4a7aff'; });
+dropZone.addEventListener('dragleave', ()=>{ dropZone.style.borderColor=''; });
+dropZone.addEventListener('drop', e=>{
+  e.preventDefault(); dropZone.style.borderColor='';
+  [...e.dataTransfer.files].filter(f=>f.type.startsWith('image/')).forEach(loadFile);
+});
+reshuffleBtn.addEventListener('click', reshuffle);
+exportBtn.addEventListener('click', exportAll);
 
+/* ───────── Load file ───────── */
 function loadFile(file){
   const url=URL.createObjectURL(file);
   const img=new Image();
   img.onload=()=>{
-    currentImg=img;
-    previewImg.src=url;
-    previewSec.style.display='block';
-    dropZone.style.display='none';
-    analyse(img);
+    const id=Date.now()+Math.random();
+    images.push({id,name:file.name,img,url});
+    if(images.length===1){
+      dropZone.style.display='none';
+      libWrap.style.display='block';
+    }
+    renderThumbs();
+    selectImage(id);
   };
   img.src=url;
 }
 
-function analyse(img){
-  setStatus('Afbeelding analyseren…','working');
-  gridSec.style.display='none';
+/* ───────── Thumbnails ───────── */
+function renderThumbs(){
+  thumbsRow.innerHTML='';
+  images.forEach(im=>{
+    const wrap=document.createElement('div');
+    wrap.className='thumb'+(im.id===activeId?' active':'');
+
+    const img=document.createElement('img');
+    img.src=im.url; wrap.appendChild(img);
+
+    const xb=document.createElement('button');
+    xb.className='thumb-x'; xb.textContent='✕'; xb.title='Verwijder';
+    xb.addEventListener('click',e=>{ e.stopPropagation(); removeImage(im.id); });
+    wrap.appendChild(xb);
+
+    wrap.addEventListener('click',()=>selectImage(im.id));
+    thumbsRow.appendChild(wrap);
+  });
+
+  const addBtn=document.createElement('div');
+  addBtn.className='thumb-add';
+  addBtn.innerHTML='<span class="thumb-add-icon">+</span><span>Toevoegen</span>';
+  addBtn.addEventListener('click',()=>fileInput.click());
+  thumbsRow.appendChild(addBtn);
+}
+
+function selectImage(id){
+  if(activeId===id) return;
+  activeId=id; renderThumbs();
+  const found=images.find(i=>i.id===id);
+  if(found) analyse(found.img);
+}
+
+function removeImage(id){
+  images=images.filter(i=>i.id!==id);
+  if(images.length===0){ clearAll(); return; }
+  if(activeId===id){ activeId=null; selectImage(images[0].id); }
+  else renderThumbs();
+}
+
+function clearAll(){
+  images=[];activeId=null;regions=[];
   gridEl.innerHTML='';
-  const MAX=1200;
-  const scale=Math.min(1,MAX/img.width,MAX/img.height);
+  gridSec.style.display='none';
+  libWrap.style.display='none';
+  dropZone.style.display='block';
+  reshuffleBtn.disabled=true;
+  exportBtn.disabled=true;
+  setStatus('');
+}
+
+/* ───────── Analyse ───────── */
+function analyse(img){
+  setStatus('Details analyseren…','working');
+  gridSec.style.display='none'; gridEl.innerHTML='';
+
+  const MAX=1200, scale=Math.min(1,MAX/img.width,MAX/img.height);
   const W=Math.round(img.width*scale), H=Math.round(img.height*scale);
   workCvs.width=W; workCvs.height=H;
   workCtx.drawImage(img,0,0,W,H);
   const imgData=workCtx.getImageData(0,0,W,H);
 
-  const COLS=8, ROWS=8;
-  const cw=W/COLS, ch=H/ROWS;
+  const COLS=8,ROWS=8,cw=W/COLS,ch=H/ROWS;
   const cells=[];
-
   for(let row=0;row<ROWS;row++){
     for(let col=0;col<COLS;col++){
-      const x=Math.round(col*cw),y=Math.round(row*ch);
-      const w=Math.round(cw),h=Math.round(ch);
-      const stats=calcStats(imgData,x,y,w,h,W);
-      const interest=stats.variance*0.45+stats.edges*0.4+stats.saturation*0.15;
-      cells.push({col,row,x,y,w,h,stats,interest});
+      const x=Math.round(col*cw),y=Math.round(row*ch),w=Math.round(cw),h=Math.round(ch);
+      const s=calcStats(imgData,x,y,w,h,W);
+      cells.push({col,row,x,y,w,h,interest:s.variance*.45+s.edges*.4+s.saturation*.15});
     }
   }
   cells.sort((a,b)=>b.interest-a.interest);
-
   const chosen=[];
   for(const c of cells){
-    if(chosen.length>=DETAIL_COUNT) break;
-    const tooClose=chosen.some(o=>Math.abs(o.col-c.col)<2&&Math.abs(o.row-c.row)<2);
-    if(!tooClose) chosen.push(c);
+    if(chosen.length>=22) break;
+    if(!chosen.some(o=>Math.abs(o.col-c.col)<2&&Math.abs(o.row-c.row)<2)) chosen.push(c);
   }
-  for(const c of cells){
-    if(chosen.length>=DETAIL_COUNT) break;
-    if(!chosen.includes(c)) chosen.push(c);
-  }
+  for(const c of cells){ if(chosen.length>=22) break; if(!chosen.includes(c)) chosen.push(c); }
 
   const sx=img.width/W, sy=img.height/H;
-  const regions=chosen.slice(0,DETAIL_COUNT).map((c,i)=>({
-    id:i+1, label:REGION_LABELS[i],
-    orig:{x:Math.round(c.x*sx),y:Math.round(c.y*sy),w:Math.round(c.w*sx),h:Math.round(c.h*sy)},
-    scaled:{x:c.x,y:c.y,w:c.w,h:c.h},
-    stats:c.stats
-  }));
+  regions=chosen.slice(0,22).map((c,i)=>{
+    const orig={x:Math.round(c.x*sx),y:Math.round(c.y*sy),w:Math.round(c.w*sx),h:Math.round(c.h*sy)};
+    const cvs=document.createElement('canvas');
+    cvs.width=400; cvs.height=400;
+    const sq=Math.min(orig.w,orig.h);
+    cvs.getContext('2d').drawImage(img,orig.x+(orig.w-sq)/2,orig.y+(orig.h-sq)/2,sq,sq,0,0,400,400);
+    return{regionIdx:i,hiResCvs:cvs};
+  });
 
-  drawOverlay(regions,W,H);
-  renderGrid(img,regions);
-  setStatus(`✓ ${DETAIL_COUNT} details gevonden`,'done');
-  gridTitle.textContent=`${DETAIL_COUNT} Gevonden details`;
+  arcanaOrder=[...Array(22).keys()];
+  renderGrid();
+  reshuffleBtn.disabled=false;
+  exportBtn.disabled=false;
+  setStatus('22 details gevonden','done');
+  gridTitle.textContent='De 22 Grote Arcana';
   gridSec.style.display='block';
   setTimeout(()=>gridSec.scrollIntoView({behavior:'smooth',block:'start'}),100);
 }
 
-function calcStats(imgData,x,y,w,h,imgW){
-  const d=imgData.data;
-  let sumR=0,sumG=0,sumB=0,count=0;
-  const vals=[];
-  for(let py=y;py<y+h;py++){
-    for(let px=x;px<x+w;px++){
-      const i=(py*imgW+px)*4;
-      const r=d[i],g=d[i+1],b=d[i+2];
-      const lum=0.299*r+0.587*g+0.114*b;
-      vals.push(lum);
-      sumR+=r;sumG+=g;sumB+=b;count++;
+/* ───────── Reshuffle ───────── */
+function reshuffle(){
+  [...document.querySelectorAll('.tcard')].forEach((c,i)=>{
+    c.style.animationDelay=(i*.015)+'s';
+    c.classList.add('exiting');
+  });
+  setTimeout(()=>{
+    for(let i=arcanaOrder.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [arcanaOrder[i],arcanaOrder[j]]=[arcanaOrder[j],arcanaOrder[i]];
     }
-  }
-  if(!count) return{variance:0,edges:0,saturation:0,brightness:0,range:0};
-  const brightness=(sumR+sumG+sumB)/(3*count);
-  const mean=vals.reduce((a,b)=>a+b,0)/vals.length;
-  const variance=vals.reduce((s,v)=>s+(v-mean)**2,0)/vals.length;
-  const min=Math.min(...vals),max=Math.max(...vals);
-  let edgeSum=0,edgeCount=0;
-  for(let py=y+1;py<y+h-1;py++){
-    for(let px=x+1;px<x+w-1;px++){
-      const i=(py*imgW+px)*4,ih=(py*imgW+px+1)*4,iv=((py+1)*imgW+px)*4;
-      const lC=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
-      const lH=0.299*d[ih]+0.587*d[ih+1]+0.114*d[ih+2];
-      const lV=0.299*d[iv]+0.587*d[iv+1]+0.114*d[iv+2];
-      edgeSum+=Math.abs(lC-lH)+Math.abs(lC-lV);edgeCount++;
-    }
-  }
-  const edges=edgeCount?edgeSum/edgeCount:0;
-  const avgR=sumR/count,avgG=sumG/count,avgB=sumB/count;
-  const cmax=Math.max(avgR,avgG,avgB)/255,cmin=Math.min(avgR,avgG,avgB)/255;
-  const saturation=cmax?((cmax-cmin)/cmax)*100:0;
-  return{variance,edges,saturation,brightness,range:Math.round(max-min)};
+    renderGrid();
+    setStatus('Arcana herschud','done');
+  },240);
 }
 
-function drawOverlay(regions,W,H){
-  function draw(){
-    const dw=previewImg.offsetWidth,dh=previewImg.offsetHeight;
-    overlayCvs.width=dw;overlayCvs.height=dh;
-    overlayCvs.style.width=dw+'px';overlayCvs.style.height=dh+'px';
-    const sx=dw/W,sy=dh/H;
-    overlayCtx.clearRect(0,0,dw,dh);
-    regions.forEach((r,i)=>{
-      const{x,y,w,h}=r.scaled;
-      const hue=(i/DETAIL_COUNT)*280;
-      overlayCtx.strokeStyle=`hsla(${hue},90%,65%,.85)`;
-      overlayCtx.lineWidth=1.5;
-      overlayCtx.strokeRect(x*sx,y*sy,w*sx,h*sy);
-      overlayCtx.fillStyle=`hsla(${hue},90%,65%,.9)`;
-      overlayCtx.font='bold 9px monospace';
-      overlayCtx.fillText(r.id,x*sx+3,y*sy+10);
-    });
-  }
-  if(previewImg.complete) draw();
-  else previewImg.addEventListener('load',draw,{once:true});
-}
-
-function renderGrid(img,regions){
+/* ───────── Render grid ───────── */
+function renderGrid(){
   gridEl.innerHTML='';
-  regions.forEach((r,i)=>{
-    const hue=(i/DETAIL_COUNT)*280;
-    const cvs=document.createElement('canvas');
-    const size=400;cvs.width=size;cvs.height=size;
-    const ctx=cvs.getContext('2d');
-    const{x,y,w,h}=r.orig;
-    const sq=Math.min(w,h);
-    ctx.drawImage(img,x+(w-sq)/2,y+(h-sq)/2,sq,sq,0,0,size,size);
+  regions.forEach((reg,i)=>{
+    const a=ARCANA[arcanaOrder[i]];
+
     const dispCvs=document.createElement('canvas');
-    dispCvs.width=220;dispCvs.height=220;
-    dispCvs.getContext('2d').drawImage(cvs,0,0,220,220);
-    const desc=buildDescription(r.stats,r.label);
+    dispCvs.width=220; dispCvs.height=220;
+    dispCvs.getContext('2d').drawImage(reg.hiResCvs,0,0,220,220);
 
     const card=document.createElement('div');
-    card.className='card';
-    card.style.animationDelay=(i*0.045)+'s';
+    card.className='tcard';
+    card.style.animationDelay=(i*.035)+'s';
 
+    // Number top
+    const numEl=document.createElement('div');
+    numEl.className='tcard-num';
+    numEl.innerHTML=`<span class="roman">${a.roman}</span><span class="sym">${a.sym}</span>`;
+    card.appendChild(numEl);
+
+    // Image + tooltip
     const imgWrap=document.createElement('div');
-    imgWrap.className='card-img-wrap';
+    imgWrap.className='tcard-img';
     imgWrap.appendChild(dispCvs);
+    const tip=document.createElement('div');
+    tip.className='tcard-tip';
+    tip.innerHTML=`<div class="tip-name">${a.name} · ${a.en}</div><p>${a.full}</p>`;
+    imgWrap.appendChild(tip);
+    card.appendChild(imgWrap);
 
-    const badge=document.createElement('span');
-    badge.className='badge';
-    badge.textContent='#'+r.id;
-    badge.style.borderColor=`hsla(${hue},80%,65%,.4)`;
-    imgWrap.appendChild(badge);
-
-    const overlay=document.createElement('div');
-    overlay.className='card-overlay';
-    overlay.innerHTML=`<p>${desc}</p>`;
-    imgWrap.appendChild(overlay);
-
+    // Title below
     const body=document.createElement('div');
-    body.className='card-body';
-    body.innerHTML=`<div class="card-title">${r.label}</div><div class="card-desc">${desc}</div>`;
+    body.className='tcard-body';
+    body.innerHTML=`
+      <div class="tcard-title">${a.name}</div>
+      <div class="tcard-kw">${a.kw}</div>
+      <div class="tcard-el mono">${a.el}</div>`;
+    card.appendChild(body);
 
+    // Download
     const footer=document.createElement('div');
-    footer.className='card-footer';
-    const coords=document.createElement('span');
-    coords.className='card-coords';
-    coords.textContent=`${r.orig.x},${r.orig.y} · ${r.orig.w}×${r.orig.h}`;
+    footer.className='tcard-footer';
     const dlBtn=document.createElement('button');
-    dlBtn.className='btn btn-dl btn-sm';
-    dlBtn.innerHTML='⬇ Download';
-    dlBtn.addEventListener('click',()=>downloadCanvas(cvs,`detail-${r.id}-${r.label}.png`));
-    footer.appendChild(coords);footer.appendChild(dlBtn);
+    dlBtn.className='btn-dl-small';
+    dlBtn.textContent='⬇ Bewaar';
+    dlBtn.addEventListener('click',()=>dlCanvas(reg.hiResCvs,`${a.roman}-${a.name.replace(/\s/g,'-')}.png`));
+    footer.appendChild(dlBtn);
+    card.appendChild(footer);
 
-    card.appendChild(imgWrap);card.appendChild(body);card.appendChild(footer);
     gridEl.appendChild(card);
   });
 }
 
-function downloadCanvas(cvs,filename){
+/* ───────── Stats ───────── */
+function calcStats(imgData,x,y,w,h,imgW){
+  const d=imgData.data;let sumR=0,sumG=0,sumB=0,count=0;const vals=[];
+  for(let py=y;py<y+h;py++) for(let px=x;px<x+w;px++){const i=(py*imgW+px)*4;vals.push(0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]);sumR+=d[i];sumG+=d[i+1];sumB+=d[i+2];count++;}
+  if(!count) return{variance:0,edges:0,saturation:0};
+  const mean=vals.reduce((a,b)=>a+b,0)/vals.length;
+  const variance=vals.reduce((s,v)=>s+(v-mean)**2,0)/vals.length;
+  let es=0,ec=0;
+  for(let py=y+1;py<y+h-1;py++) for(let px=x+1;px<x+w-1;px++){
+    const i=(py*imgW+px)*4,ih=(py*imgW+px+1)*4,iv=((py+1)*imgW+px)*4;
+    const lC=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+    const lH=0.299*d[ih]+0.587*d[ih+1]+0.114*d[ih+2];
+    const lV=0.299*d[iv]+0.587*d[iv+1]+0.114*d[iv+2];
+    es+=Math.abs(lC-lH)+Math.abs(lC-lV);ec++;
+  }
+  const avgR=sumR/count,avgG=sumG/count,avgB=sumB/count;
+  const cmax=Math.max(avgR,avgG,avgB)/255,cmin=Math.min(avgR,avgG,avgB)/255;
+  return{variance,edges:ec?es/ec:0,saturation:cmax?((cmax-cmin)/cmax)*100:0};
+}
+
+/* ───────── Download ───────── */
+function dlCanvas(cvs,filename){
   cvs.toBlob(blob=>{
     const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download=filename;
-    a.click();
+    a.href=URL.createObjectURL(blob);a.download=filename;a.click();
     setTimeout(()=>URL.revokeObjectURL(a.href),5000);
   },'image/png');
+}
+
+/* ───────── Export ZIP ───────── */
+async function exportAll(){
+  if(!regions.length) return;
+  const overlay=document.getElementById('export-overlay');
+  const fill=document.getElementById('exp-fill');
+  const msg=document.getElementById('exp-msg');
+  overlay.classList.add('visible');
+  fill.style.width='0%';
+
+  const files=[];
+  for(let i=0;i<regions.length;i++){
+    const a=ARCANA[arcanaOrder[i]];
+    const fname=`${String(arcanaOrder[i]).padStart(2,'0')}-${a.roman}-${a.name.replace(/\s+/g,'-')}.png`;
+    msg.textContent=`Verwerken: ${a.name} (${i+1}/22)`;
+    fill.style.width=((i/22)*82)+'%';
+    const blob=await new Promise(res=>regions[i].hiResCvs.toBlob(res,'image/png'));
+    files.push({name:fname,data:new Uint8Array(await blob.arrayBuffer())});
+    await new Promise(r=>setTimeout(r,0));
+  }
+  msg.textContent='ZIP samenstellen…'; fill.style.width='92%';
+  await new Promise(r=>setTimeout(r,20));
+  const zip=buildZip(files);
+  fill.style.width='100%'; msg.textContent='Gereed!';
+  await new Promise(r=>setTimeout(r,300));
+  const zb=new Blob([zip],{type:'application/zip'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(zb);a.download='tarot-arcana.zip';a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+  overlay.classList.remove('visible');
+}
+
+/* ───────── ZIP builder (STORE, no deps) ───────── */
+function buildZip(files){
+  const enc=new TextEncoder(),parts=[],cds=[];let off=0;
+  for(const f of files){
+    const nb=enc.encode(f.name),crc=crc32(f.data),sz=f.data.length;
+    const lh=new Uint8Array(30+nb.length),lv=new DataView(lh.buffer);
+    lv.setUint32(0,0x04034b50,true);lv.setUint16(4,20,true);lv.setUint16(6,0,true);lv.setUint16(8,0,true);
+    lv.setUint16(10,0,true);lv.setUint16(12,0,true);lv.setUint32(14,crc,true);
+    lv.setUint32(18,sz,true);lv.setUint32(22,sz,true);lv.setUint16(26,nb.length,true);lv.setUint16(28,0,true);
+    lh.set(nb,30);
+    const cd=new Uint8Array(46+nb.length),cv=new DataView(cd.buffer);
+    cv.setUint32(0,0x02014b50,true);cv.setUint16(4,20,true);cv.setUint16(6,20,true);cv.setUint16(8,0,true);
+    cv.setUint16(10,0,true);cv.setUint16(12,0,true);cv.setUint16(14,0,true);cv.setUint32(16,crc,true);
+    cv.setUint32(20,sz,true);cv.setUint32(24,sz,true);cv.setUint16(28,nb.length,true);
+    cv.setUint16(30,0,true);cv.setUint16(32,0,true);cv.setUint16(34,0,true);cv.setUint16(36,0,true);
+    cv.setUint32(38,0,true);cv.setUint32(42,off,true);cd.set(nb,46);
+    parts.push(lh,f.data);cds.push(cd);off+=lh.length+f.data.length;
+  }
+  const cdSz=cds.reduce((s,b)=>s+b.length,0);
+  const eocd=new Uint8Array(22),ev=new DataView(eocd.buffer);
+  ev.setUint32(0,0x06054b50,true);ev.setUint16(4,0,true);ev.setUint16(6,0,true);
+  ev.setUint16(8,files.length,true);ev.setUint16(10,files.length,true);
+  ev.setUint32(12,cdSz,true);ev.setUint32(16,off,true);ev.setUint16(20,0,true);
+  const all=[...parts,...cds,eocd];
+  const total=all.reduce((s,b)=>s+b.length,0);
+  const out=new Uint8Array(total);let pos=0;
+  for(const b of all){out.set(b,pos);pos+=b.length;}
+  return out;
+}
+function crc32(data){
+  const t=new Uint32Array(256);
+  for(let i=0;i<256;i++){let c=i;for(let j=0;j<8;j++)c=c&1?(0xedb88320^(c>>>1)):c>>>1;t[i]=c;}
+  let c=0xffffffff;
+  for(let i=0;i<data.length;i++)c=(c>>>8)^t[(c^data[i])&0xff];
+  return(c^0xffffffff)>>>0;
 }
 
 function setStatus(msg,cls=''){statusEl.textContent=msg;statusEl.className=cls;}
