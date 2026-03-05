@@ -193,6 +193,28 @@
   .sidebar-entry-text { font-size:12.5px; font-family:'Cormorant Garamond',serif; color:#b9c2d3; line-height:1.65; }
   .sidebar-empty { font-size:14px; font-family:'Cormorant Garamond',serif; font-style:italic; color:#3a4a6a; text-align:center; margin-top:32px; }
 
+  /* Summary block */
+  .sidebar-summary {
+    margin-top:16px; padding-top:14px;
+    border-top:1px solid #1f2a3d;
+  }
+  .sidebar-summary-title {
+    font-family:'Cinzel',serif; font-size:11px; letter-spacing:.1em;
+    color:#c8d0ff; margin-bottom:10px; text-transform:uppercase;
+  }
+  .sidebar-summary-text {
+    font-family:'Cormorant Garamond',serif; font-size:13px;
+    color:#c0cce0; line-height:1.7;
+  }
+  .sidebar-summary-text p { margin:0 0 8px; }
+  .sidebar-summary-text em { color:#d6dcff; font-style:italic; }
+
+  /* Version badge */
+  .version-badge {
+    text-align:center; padding:10px; font-size:10px;
+    color:#2a3a55; font-family:ui-monospace,monospace; letter-spacing:.06em;
+  }
+
   /* Deck pill */
   .deck-pill { display:inline-flex; align-items:center; gap:6px; background:#0d1628; border:1px solid #27344d; border-radius:20px; padding:4px 12px 4px 8px; font-size:11px; color:#8fa0bf; margin-bottom:12px; }
   .deck-pill .dp-count { font-weight:700; color:#d6dcff; font-family:'Cinzel',serif; }
@@ -734,6 +756,16 @@ function renderSpreadArea(animate){
       `;
       sidebar.appendChild(entry);
     });
+    // Summary for multi-card spreads
+    if(activeSpread==='deeper'||activeSpread==='choices'){
+      const summDiv=document.createElement('div'); summDiv.className='sidebar-summary';
+      const summText=document.createElement('div'); summText.className='sidebar-summary-text';
+      summText.innerHTML='<em style="color:#3a4a6a;font-size:12px;">Synthesising…</em>';
+      summDiv.innerHTML='<div class="sidebar-summary-title">✦ Reading as a Whole</div>';
+      summDiv.appendChild(summText);
+      sidebar.appendChild(summDiv);
+      generateSummary(drawnCards, spread.slots, summText);
+    }
   } else {
     const empty = document.createElement('div');
     empty.className = 'sidebar-empty';
@@ -753,29 +785,12 @@ function makeSpreadSlot(slot, card, animate, idx){
   frame.className = 'spread-card-frame' + (card?' filled':'');
 
   if(card){
-    const cvs = document.createElement('canvas');
-    cvs.width=200; cvs.height=300;
-    const ctx=cvs.getContext('2d');
-    // Draw image in top 2/3
-    ctx.drawImage(card.hiResCvs,0,0,200,200);
-    // Gradient overlay for text
-    const grad=ctx.createLinearGradient(0,130,0,300);
-    grad.addColorStop(0,'rgba(11,14,20,0)');
-    grad.addColorStop(0.45,'rgba(11,14,20,0.92)');
-    grad.addColorStop(1,'rgba(11,14,20,1)');
-    ctx.fillStyle=grad; ctx.fillRect(0,130,200,170);
-    // Number — IM Fell English style (simulate with serif)
-    ctx.textAlign='center';
-    ctx.fillStyle='rgba(200,208,255,0.9)';
-    ctx.font='italic 15px Georgia,serif';
-    ctx.fillText(card.numLabel,100,226);
-    // Title
-    ctx.font='bold 12px "Cormorant Garamond",Georgia,serif';
-    ctx.fillStyle='#f0f2ff';
-    ctx.shadowColor='rgba(0,0,0,0.9)'; ctx.shadowBlur=6;
-    wrapTextSimple(ctx, card.name, 100, 252, 178, 14);
-    ctx.shadowBlur=0;
+    const cvs = makeDispCanvas(card.hiResCvs, card.numLabel, card.name, card.kw);
     frame.appendChild(cvs);
+
+    const ov=document.createElement('div'); ov.className='spread-card-overlay';
+    ov.innerHTML=`<div class="ov-name">${esc(card.name)}</div><div class="ov-kw">${esc(card.kw)}</div>`;
+    frame.appendChild(ov);
 
     const ov=document.createElement('div'); ov.className='spread-card-overlay';
     ov.innerHTML=`<div class="ov-name">${esc(card.name)}</div><div class="ov-kw">${esc(card.kw)}</div>`;
@@ -805,40 +820,68 @@ function wrapTextSimple(ctx,text,x,y,maxW,lineH){
 }
 
 /* ══════════════════════════════════════════════
+   SPREAD SUMMARY — narrative synthesis
+══════════════════════════════════════════════ */
+function generateSummary(cards, slots, targetEl){
+  if(!cards||cards.length===0||!targetEl) return;
+  targetEl.innerHTML = buildNarrative(cards, slots);
+}
+
+function buildNarrative(cards, slots){
+  function eName(c){ return c ? `<em>${esc(c.name)}</em>` : ''; }
+  function eTheme(c){
+    if(!c||!c.kw) return '';
+    return c.kw.split(/[·,]/).map(s=>s.trim()).filter(Boolean)[0]||'';
+  }
+  const n=cards.map(eName), t=cards.map(eTheme);
+
+  if(slots.length===4){
+    return `<p>The reading opens with ${n[0]} shaping your past — carrying the quality of <em>${esc(t[0])}</em>. This foundation has led into the present, where ${n[1]} stands: an energy of <em>${esc(t[1])}</em>.</p>
+<p>Moving forward, ${n[2]} appears as a genuine possibility — an invitation toward <em>${esc(t[2])}</em>. These three form a line from origin to horizon.</p>
+<p>Hovering above it all, ${n[3]} is the deeper current — its theme of <em>${esc(t[3])}</em> points to what most deserves your conscious attention right now. This card is not about what happens, but about how you hold it.</p>`;
+  }
+  if(slots.length===2){
+    return `<p>Path A brings ${n[0]}: the essence of <em>${esc(t[0])}</em>. Path B offers ${n[1]}: a quality of <em>${esc(t[1])}</em>.</p>
+<p>Consider which energy feels most honest to where you actually are — not where you think you should be.</p>`;
+  }
+  return '';
+}
+
+/* ══════════════════════════════════════════════
    CARD FACTORY
 ══════════════════════════════════════════════ */
 function makeDispCanvas(hiRes, numLabel, title, kw){
+  // Pure image — stroke text only, zero fillRect, zero gradient
   const W=240, H=320;
   const cvs=document.createElement('canvas'); cvs.width=W; cvs.height=H;
   const ctx=cvs.getContext('2d');
-
-  // Full image — no border, no gradient, no background
   ctx.drawImage(hiRes, 0, 0, W, H);
 
-  // ── Number: top center, shadow only for legibility ──
-  ctx.textAlign='center';
-  ctx.font='italic 17px Georgia,serif';
-  ctx.shadowColor='rgba(0,0,0,1)'; ctx.shadowBlur=12; ctx.shadowOffsetY=0;
-  ctx.fillStyle='rgba(218,224,255,0.97)';
-  ctx.fillText(numLabel||'', W/2, 26);
-
-  // ── Title: lower portion, strong multi-shadow, no box ──
-  ctx.shadowColor='rgba(0,0,0,1)'; ctx.shadowBlur=18; ctx.shadowOffsetY=1;
-  ctx.font='600 14px Georgia,serif';
-  ctx.fillStyle='#ffffff';
-  // draw shadow multiple times for extra punch on light images
-  for(let i=0;i<3;i++) wrapTextCanvas(ctx, title||'', W/2, H - 44, W - 20, 18);
-  ctx.shadowBlur=0; ctx.shadowOffsetY=0;
-
-  // ── Hint: first 2 kw below title ──
-  const hint = getHint(kw);
-  if(hint){
-    ctx.shadowColor='rgba(0,0,0,1)'; ctx.shadowBlur=12;
-    ctx.font='italic 11px Georgia,serif';
-    ctx.fillStyle='rgba(190,205,240,0.95)';
-    for(let i=0;i<2;i++) ctx.fillText(hint, W/2, H - 16);
-    ctx.shadowBlur=0;
+  // strokeText: dark outline + bright fill = legible on any background
+  function st(text, x, y, font, color, lw){
+    ctx.save(); ctx.font=font; ctx.textAlign='center'; ctx.lineJoin='round';
+    ctx.lineWidth=lw; ctx.strokeStyle='rgba(0,0,0,0.8)';
+    ctx.strokeText(text,x,y); ctx.fillStyle=color; ctx.fillText(text,x,y); ctx.restore();
   }
+
+  // Number — top center
+  st(numLabel||'', W/2, 22, 'italic 15px Georgia,serif', 'rgba(220,228,255,0.96)', 5);
+
+  // Title lines — computed, drawn from very bottom upward
+  const hint = getHint(kw);
+  ctx.font='600 12px Georgia,serif';
+  const tWords=(title||'').split(' ');
+  const tLines=[]; let tLn='';
+  for(const w of tWords){
+    const t=tLn?tLn+' '+w:w;
+    if(ctx.measureText(t).width>W-20 && tLn){tLines.push(tLn);tLn=w;}else tLn=t;
+  }
+  if(tLn) tLines.push(tLn);
+  const lH=15, hH=hint?14:0, pad=6;
+  // first line y: stack upward from bottom
+  let ty = H - pad - hH - (tLines.length-1)*lH;
+  tLines.forEach(l => { st(l, W/2, ty, '600 12px Georgia,serif', '#ffffff', 4.5); ty+=lH; });
+  if(hint) st(hint, W/2, H-pad, 'italic 10px Georgia,serif', 'rgba(190,210,248,0.92)', 3.5);
 
   return cvs;
 }
@@ -928,37 +971,32 @@ function extractRegions(img,count){
    COMPOSE CARD — bake title + number into PNG
 ══════════════════════════════════════════════ */
 function composeCard(hiResCvs, numLabel, title, kw){
-  // 3:4 portrait — pure image with text overlay only
   const W=400, H=533;
   renderCvs.width=W; renderCvs.height=H;
   const ctx=renderCtx;
-
-  // Full image, no border, no background
   ctx.drawImage(hiResCvs, 0, 0, W, H);
 
-  // ── Number: top center, shadow only ──
-  ctx.textAlign='center';
-  ctx.font='italic 22px Georgia,serif';
-  ctx.shadowColor='rgba(0,0,0,1)'; ctx.shadowBlur=16; ctx.shadowOffsetY=0;
-  ctx.fillStyle='rgba(218,224,255,0.97)';
-  ctx.fillText(numLabel||'', W/2, 38);
-
-  // ── Title: lower area, heavy shadow, no background ──
-  ctx.shadowColor='rgba(0,0,0,1)'; ctx.shadowBlur=22; ctx.shadowOffsetY=1;
-  ctx.font='600 20px Georgia,serif';
-  ctx.fillStyle='#ffffff';
-  for(let i=0;i<3;i++) wrapText(ctx, title||'', W/2, H - 56, W - 48, 24);
-  ctx.shadowBlur=0; ctx.shadowOffsetY=0;
-
-  // ── Hint: italic below title ──
-  const hint = getHint(kw);
-  if(hint){
-    ctx.shadowColor='rgba(0,0,0,1)'; ctx.shadowBlur=16;
-    ctx.font='italic 13px Georgia,serif';
-    ctx.fillStyle='rgba(190,210,245,0.93)';
-    for(let i=0;i<2;i++) ctx.fillText(hint, W/2, H - 20);
-    ctx.shadowBlur=0;
+  function st(text, x, y, font, color, lw){
+    ctx.save(); ctx.font=font; ctx.textAlign='center'; ctx.lineJoin='round';
+    ctx.lineWidth=lw; ctx.strokeStyle='rgba(0,0,0,0.8)';
+    ctx.strokeText(text,x,y); ctx.fillStyle=color; ctx.fillText(text,x,y); ctx.restore();
   }
+
+  st(numLabel||'', W/2, 36, 'italic 20px Georgia,serif', 'rgba(220,228,255,0.96)', 7);
+
+  const hint = getHint(kw);
+  ctx.font='600 18px Georgia,serif';
+  const tWords=(title||'').split(' ');
+  const tLines=[]; let tLn='';
+  for(const w of tWords){
+    const t=tLn?tLn+' '+w:w;
+    if(ctx.measureText(t).width>W-48 && tLn){tLines.push(tLn);tLn=w;}else tLn=t;
+  }
+  if(tLn) tLines.push(tLn);
+  const lH=22, hH=hint?18:0, pad=10;
+  let ty=H-pad-hH-(tLines.length-1)*lH;
+  tLines.forEach(l => { st(l, W/2, ty, '600 18px Georgia,serif', '#ffffff', 6.5); ty+=lH; });
+  if(hint) st(hint, W/2, H-pad+4, 'italic 13px Georgia,serif', 'rgba(188,210,248,0.92)', 5);
 
   return renderCvs;
 }
@@ -1146,5 +1184,6 @@ function crc32(data){
   return(c^0xffffffff)>>>0;
 }
 </script>
+<div class="version-badge">Tarot Extractor · v2.3 · 2026-03-05</div>
 </body>
 </html>
