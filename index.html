@@ -5,328 +5,163 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tarot Extractor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-  :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+  :root { font-family: 'Cormorant Garamond', Georgia, serif; }
   body { margin: 0; background: #0b0e14; color: #e7eaf0; }
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
-
-  .card {
-    background: #121826; border: 1px solid #1f2a3d;
-    border-radius: 16px; padding: 18px;
-    box-shadow: 0 10px 30px rgba(0,0,0,.25); margin-bottom: 14px;
-  }
-  h1 { font-size: 22px; margin: 0 0 6px; }
-  h2 { font-size: 15px; margin: 0 0 10px; color: #d6dcff; }
+  .wrap { max-width: 1140px; margin: 0 auto; padding: 24px; }
+  .card { background: #121826; border: 1px solid #1f2a3d; border-radius: 16px; padding: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.25); margin-bottom: 14px; }
+  h1 { font-size: 26px; margin: 0 0 6px; font-family:'Cinzel',serif; font-weight:700; letter-spacing:.08em; }
+  h2 { font-size: 15px; margin: 0 0 10px; color: #d6dcff; font-family:'Cinzel',serif; }
   h3 { font-size: 13px; margin: 0 0 8px; color: #b9c2d3; font-weight: 600; letter-spacing: .03em; }
-  p  { margin: 6px 0; color: #b9c2d3; font-size: 13px; }
-
+  p  { margin: 6px 0; color: #b9c2d3; font-size: 14px; font-family:'Cormorant Garamond',serif; }
   label { display: block; font-size: 12px; color: #b9c2d3; margin-bottom: 6px; }
-  input, select, button {
-    width: 100%; box-sizing: border-box;
-    border-radius: 12px; border: 1px solid #27344d;
-    background: #0f1420; color: #e7eaf0;
-    padding: 10px 12px; font-size: 14px;
-  }
+  input, select, button { width: 100%; box-sizing: border-box; border-radius: 12px; border: 1px solid #27344d; background: #0f1420; color: #e7eaf0; padding: 10px 12px; font-size: 14px; }
   button { cursor: pointer; background: #1a2540; border-color: #2b3a59; transition: filter .15s; }
   button:hover { filter: brightness(1.1); }
   button:disabled { opacity: .35; cursor: not-allowed; filter: none; }
-
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
   @media(max-width:520px){ .row2,.row3 { grid-template-columns:1fr; } }
-
-  .out {
-    margin-top: 12px; padding: 14px;
-    border-radius: 14px; background: #0f1420; border: 1px solid #27344d;
-  }
+  .out { margin-top: 12px; padding: 14px; border-radius: 14px; background: #0f1420; border: 1px solid #27344d; }
   .hint { font-size: 12px; color: #8fa0bf; margin-top: 8px; line-height: 1.4; }
-  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
-
   details { margin-top: 10px; border: 1px solid #27344d; border-radius: 12px; padding: 10px 12px; background: #0b1020; }
   summary { cursor: pointer; font-size: 13px; color: #d6dcff; user-select: none; list-style: none; }
   summary::-webkit-details-marker { display:none; }
-  summary::before { content: '▸ '; font-size: 10px; }
-  details[open] summary::before { content: '▾ '; }
-
-  /* ── Section divider ── */
-  .section-title {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 12px; color: #8fa0bf; letter-spacing: .08em;
-    text-transform: uppercase; margin: 18px 0 12px;
-  }
+  summary::before { content: "\25B8 "; font-size: 10px; }
+  details[open] summary::before { content: "\25BE "; }
+  .section-title { display: flex; align-items: center; gap: 10px; font-size: 11px; color: #8fa0bf; letter-spacing: .1em; text-transform: uppercase; margin: 18px 0 12px; font-family:'Cinzel',serif; }
   .section-title::after { content:''; flex:1; height:1px; background: linear-gradient(90deg,#1f2a3d,transparent); }
-
-  /* ── Thumb library ── */
   .thumbs-row { display:flex; gap:8px; flex-wrap:wrap; align-items:flex-start; margin-top:8px; }
-  .thumb {
-    position:relative; width:60px; height:60px; border-radius:9px; overflow:hidden;
-    border:2px solid #27344d; cursor:pointer; flex-shrink:0; transition:border-color .15s;
-  }
+  .thumb { position:relative; width:60px; height:60px; border-radius:9px; overflow:hidden; border:2px solid #27344d; cursor:pointer; flex-shrink:0; transition:border-color .15s; }
   .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
   .thumb.active { border-color:#4a7aff; }
-  .thumb:not(.active):hover { border-color:#3a5080; }
-  .thumb-x {
-    position:absolute; top:2px; right:2px; background:rgba(11,14,20,.88);
-    border:none; color:#ff6a7a; font-size:.6rem; cursor:pointer;
-    border-radius:50%; width:15px; height:15px; display:flex; align-items:center;
-    justify-content:center; opacity:0; transition:opacity .12s; padding:0; line-height:1;
-  }
+  .thumb-x { position:absolute; top:2px; right:2px; background:rgba(11,14,20,.88); border:none; color:#ff6a7a; font-size:.6rem; cursor:pointer; border-radius:50%; width:15px; height:15px; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .12s; padding:0; line-height:1; }
   .thumb:hover .thumb-x { opacity:1; }
-  .thumb-add {
-    width:60px; height:60px; border-radius:9px; flex-shrink:0;
-    border:1px dashed #27344d; background:#0b1020;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    cursor:pointer; color:#8fa0bf; font-size:10px; gap:2px;
-    transition:border-color .15s, color .15s;
-  }
+  .thumb-add { width:60px; height:60px; border-radius:9px; flex-shrink:0; border:1px dashed #27344d; background:#0b1020; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; color:#8fa0bf; font-size:10px; gap:2px; transition:border-color .15s,color .15s; }
   .thumb-add:hover { border-color:#4a7aff; color:#7fa8ff; }
   .thumb-add-plus { font-size:1.3rem; line-height:1; }
 
   /* ── Grid ── */
-  .tgrid {
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(155px, 1fr));
-    gap:10px; margin-top:12px;
-  }
+  .tgrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:12px; margin-top:12px; }
 
-  /* ── Tarot card ── */
-  .tcard {
-    background:#121826; border:1px solid #1f2a3d; border-radius:12px;
-    overflow:hidden; display:flex; flex-direction:column;
-    animation:fadeUp .3s ease both; transition:border-color .2s, box-shadow .2s;
-  }
-  .tcard:hover { border-color:#2b3a59; box-shadow:0 6px 20px rgba(0,0,0,.4); }
+  /* ── Tarot card in grid ── */
+  .tcard { background:#0d1220; border:1px solid #1f2a3d; border-radius:14px; overflow:hidden; display:flex; flex-direction:column; animation:fadeUp .3s ease both; transition:border-color .2s,box-shadow .2s; }
+  .tcard:hover { border-color:#2b3a59; box-shadow:0 8px 24px rgba(0,0,0,.5); }
   @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
   .tcard.exiting { animation:cardOut .2s ease forwards; }
   @keyframes cardOut { to{opacity:0;transform:translateY(-8px) scale(.97)} }
-
-  /* Number — centered, styled font */
-  .tcard-num {
-    text-align:center; padding:7px 6px 3px;
-    font-family:'Cinzel', Georgia, serif;
-    font-size:13px; font-weight:600; letter-spacing:.12em;
-    color:#d6dcff;
-  }
-
-  /* Image area */
-  .tcard-img {
-    position:relative; overflow:hidden;
-    margin:0 7px; border-radius:7px;
-    aspect-ratio:1; background:#0f1420;
-  }
-  .tcard-img canvas {
-    width:100%; height:100%; object-fit:cover; display:block;
-    transition:transform .3s ease;
-  }
+  .tcard-num { text-align:center; padding:8px 6px 2px; font-family:'IM Fell English',Georgia,serif; font-size:16px; font-weight:400; letter-spacing:.06em; color:#c8d0ff; text-shadow:0 0 14px rgba(100,120,255,.5); }
+  .tcard-img { position:relative; overflow:hidden; margin:0 8px; border-radius:8px; aspect-ratio:1; background:#0f1420; }
+  .tcard-img canvas { width:100%; height:100%; object-fit:cover; display:block; transition:transform .3s ease; }
   .tcard:hover .tcard-img canvas { transform:scale(1.05); }
-
-  /* Hover tooltip */
-  .tcard-tip {
-    position:absolute; inset:0; border-radius:7px;
-    background:linear-gradient(to top, rgba(11,14,20,.97) 52%, rgba(11,14,20,.6) 82%, transparent);
-    padding:.7rem .65rem .6rem;
-    display:flex; flex-direction:column; justify-content:flex-end;
-    opacity:0; transition:opacity .25s; pointer-events:none;
-  }
+  .tcard-tip { position:absolute; inset:0; border-radius:8px; background:linear-gradient(to top,rgba(11,14,20,.97) 52%,rgba(11,14,20,.6) 82%,transparent); padding:.7rem .65rem .6rem; display:flex; flex-direction:column; justify-content:flex-end; opacity:0; transition:opacity .25s; pointer-events:none; }
   .tcard:hover .tcard-tip { opacity:1; }
   .tcard-tip .tip-name { font-size:10px; font-weight:600; color:#d6dcff; margin-bottom:3px; font-family:'Cinzel',serif; letter-spacing:.05em; }
-  .tcard-tip p { font-size:10.5px; color:#b9c2d3; line-height:1.4; margin:0; }
-
-  /* Title block */
-  .tcard-body { padding:6px 8px 3px; text-align:center; }
-  .tcard-title { font-size:12px; font-weight:600; color:#e7eaf0; line-height:1.3; }
-  .tcard-kw { font-size:10px; color:#8fa0bf; margin-top:2px; line-height:1.3; }
+  .tcard-tip p { font-size:11px; color:#b9c2d3; line-height:1.5; margin:0; font-family:'Cormorant Garamond',serif; }
+  .tcard-body { padding:7px 8px 4px; text-align:center; background:transparent; }
+  .tcard-title { font-family:'Cormorant Garamond',serif; font-size:14px; font-weight:600; color:#f0f2ff; line-height:1.3; text-shadow:0 1px 8px rgba(0,0,0,1),0 2px 16px rgba(0,0,0,.8); }
+  .tcard-kw { font-size:11px; color:#8fa0bf; margin-top:2px; line-height:1.3; font-family:'Cormorant Garamond',serif; font-style:italic; }
   .tcard-el { font-size:9px; color:#3a4a6a; margin-top:1px; font-family:ui-monospace,monospace; }
-
   .tcard-footer { padding:4px 8px 8px; display:flex; justify-content:center; }
-  .btn-dl-sm {
-    font-size:10px; padding:3px 10px; border-radius:7px;
-    background:#0f1420; border:1px solid #27344d; color:#b9c2d3;
-    cursor:pointer; transition:filter .15s; width:auto;
-  }
+  .btn-dl-sm { font-size:10px; padding:3px 10px; border-radius:7px; background:#0f1420; border:1px solid #27344d; color:#b9c2d3; cursor:pointer; transition:filter .15s; width:auto; }
   .btn-dl-sm:hover { filter:brightness(1.15); }
 
-  /* Suit upload sections */
   .suit-section { margin-top:10px; }
-  .suit-header {
-    display:flex; align-items:center; gap:10px;
-    padding:10px 12px; border-radius:10px;
-    background:#0f1420; border:1px solid #27344d; margin-bottom:8px;
-  }
-  .suit-icon { font-size:1.3rem; }
-  .suit-name { font-size:13px; font-weight:600; color:#d6dcff; flex:1; }
-  .suit-sub  { font-size:11px; color:#8fa0bf; }
-  .suit-status { font-size:11px; color:#8fa0bf; }
-  .suit-status.done { color:#6fcf97; }
-  .suit-upload-btn { width:auto; padding:6px 14px; font-size:12px; white-space:nowrap; flex-shrink:0; }
-
-  /* Status */
   #main-status { font-size:12px; color:#8fa0bf; margin-top:8px; min-height:16px; }
   #main-status.working { color:#7fa8ff; }
   #main-status.done    { color:#6fcf97; }
-
-  /* Export overlay */
-  #export-overlay {
-    display:none; position:fixed; inset:0; z-index:100;
-    background:rgba(11,14,20,.93); backdrop-filter:blur(8px);
-    align-items:center; justify-content:center; flex-direction:column; gap:12px;
-  }
+  #export-overlay { display:none; position:fixed; inset:0; z-index:100; background:rgba(11,14,20,.93); backdrop-filter:blur(8px); align-items:center; justify-content:center; flex-direction:column; gap:12px; }
   #export-overlay.visible { display:flex; }
-  .ex-title { font-size:15px; font-weight:600; color:#d6dcff; }
+  .ex-title { font-size:15px; font-weight:600; color:#d6dcff; font-family:'Cinzel',serif; }
   #exp-track { width:260px; height:4px; background:#1f2a3d; border-radius:2px; overflow:hidden; }
   #exp-fill  { height:100%; background:#4a7aff; border-radius:2px; width:0%; transition:width .1s; }
   #exp-msg   { font-size:12px; color:#8fa0bf; }
 
   /* Suit accent colors */
-  .suit-vuur   .tcard-el, .suit-vuur   .tcard-num { color:#d97a4a; }
-  .suit-water  .tcard-el, .suit-water  .tcard-num { color:#4a8fd9; }
-  .suit-aarde  .tcard-el, .suit-aarde  .tcard-num { color:#6ab06a; }
-  .suit-lucht  .tcard-el, .suit-lucht  .tcard-num { color:#b0a0d0; }
-  .suit-groot  .tcard-num { color:#d6dcff; }
+  .suit-vuur   .tcard-el,.suit-vuur   .tcard-num { color:#d97a4a; }
+  .suit-water  .tcard-el,.suit-water  .tcard-num { color:#4a8fd9; }
+  .suit-aarde  .tcard-el,.suit-aarde  .tcard-num { color:#6ab06a; }
+  .suit-lucht  .tcard-el,.suit-lucht  .tcard-num { color:#b0a0d0; }
+  .suit-groot  .tcard-num { color:#c8d0ff; }
 
-  /* ── Upload zones row ── */
-  .upload-zones-row {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  @media(max-width:860px){ .upload-zones-row { grid-template-columns: repeat(3,1fr); } }
-  @media(max-width:540px){ .upload-zones-row { grid-template-columns: repeat(2,1fr); } }
+  /* ── Upload zones: 1 large Major Arcana + 2x2 minor ── */
+  .upload-zones-wrap { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+  .upload-zone-groot-wrap { grid-column:1; }
+  .upload-zone-minor-wrap { grid-column:2; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:10px; }
+  @media(max-width:600px){ .upload-zones-wrap{grid-template-columns:1fr;} .upload-zone-groot-wrap,.upload-zone-minor-wrap{grid-column:1;} }
+  .upload-zone { border:1.5px dashed #27344d; border-radius:14px; background:#0b1020; padding:14px 8px 12px; display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer; transition:border-color .18s,background .18s,box-shadow .18s; justify-content:center; text-align:center; min-height:110px; }
+  .upload-zone-groot-wrap .upload-zone { min-height:230px; height:100%; box-sizing:border-box; }
+  .upload-zone:hover,.upload-zone.dragover { border-color:#4a7aff; background:#0d1428; box-shadow:0 0 0 3px rgba(74,122,255,.1); }
+  .upload-zone.loaded { border-style:solid; border-color:#2b3a59; }
+  .upload-zone.loaded.groot { border-color:#4a5a8a; }
+  .upload-zone.loaded.vuur  { border-color:#8a5030; }
+  .upload-zone.loaded.water { border-color:#306090; }
+  .upload-zone.loaded.aarde { border-color:#3a6a3a; }
+  .upload-zone.loaded.lucht { border-color:#6050a0; }
+  .uz-icon { font-size:1.8rem; line-height:1; }
+  .upload-zone-groot-wrap .uz-icon { font-size:3rem; }
+  .uz-label { font-family:'Cinzel',Georgia,serif; font-size:11px; font-weight:600; color:#d6dcff; letter-spacing:.06em; }
+  .upload-zone-groot-wrap .uz-label { font-size:14px; letter-spacing:.1em; }
+  .uz-sub   { font-size:10px; color:#8fa0bf; line-height:1.3; }
+  .uz-status { font-size:10px; font-weight:600; color:#8fa0bf; margin-top:2px; }
+  .uz-status.done    { color:#6fcf97; }
+  .uz-status.working { color:#7fa8ff; }
+  .uz-preview { width:56px; height:56px; border-radius:8px; overflow:hidden; border:1px solid #27344d; flex-shrink:0; }
+  .upload-zone-groot-wrap .uz-preview { width:96px; height:96px; border-radius:10px; }
+  .uz-preview img { width:100%; height:100%; object-fit:cover; display:block; }
 
-  .upload-zone {
-    border: 1.5px dashed #27344d;
-    border-radius: 14px;
-    background: #0b1020;
-    padding: 14px 8px 12px;
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    cursor: pointer;
-    transition: border-color .18s, background .18s, box-shadow .18s;
-    position: relative;
-    min-height: 130px;
-    justify-content: center;
-    text-align: center;
-  }
-  .upload-zone:hover, .upload-zone.dragover {
-    border-color: #4a7aff;
-    background: #0d1428;
-    box-shadow: 0 0 0 3px rgba(74,122,255,.1);
-  }
-  .upload-zone.loaded {
-    border-style: solid;
-    border-color: #2b3a59;
-  }
-  .upload-zone.loaded.groot { border-color: #4a5a8a; }
-  .upload-zone.loaded.vuur  { border-color: #8a5030; }
-  .upload-zone.loaded.water { border-color: #306090; }
-  .upload-zone.loaded.aarde { border-color: #3a6a3a; }
-  .upload-zone.loaded.lucht { border-color: #6050a0; }
-
-  .uz-icon { font-size: 1.6rem; line-height: 1; }
-  .uz-label { font-family: 'Cinzel', Georgia, serif; font-size: 11px; font-weight: 600; color: #d6dcff; letter-spacing: .06em; }
-  .uz-sub   { font-size: 10px; color: #8fa0bf; line-height: 1.3; }
-  .uz-status { font-size: 10px; font-weight: 600; color: #8fa0bf; margin-top: 2px; }
-  .uz-status.done  { color: #6fcf97; }
-  .uz-status.working { color: #7fa8ff; }
-
-  .uz-preview {
-    width: 56px; height: 56px; border-radius: 8px; overflow: hidden;
-    border: 1px solid #27344d; flex-shrink: 0;
-  }
-  .uz-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-  /* ── Download deck button ── */
-  .btn-deck-dl {
-    width: 100%;
-    padding: 14px;
-    font-size: 15px;
-    font-weight: 600;
-    font-family: 'Cinzel', Georgia, serif;
-    letter-spacing: .06em;
-    background: linear-gradient(135deg, #1a2d5a 0%, #0f1c3d 100%);
-    border: 1px solid #3a5080;
-    color: #d6dcff;
-    border-radius: 14px;
-    cursor: pointer;
-    transition: filter .15s, box-shadow .15s;
-    box-shadow: 0 4px 16px rgba(74,122,255,.12);
-    margin-bottom: 18px;
-  }
-  .btn-deck-dl:hover:not(:disabled) {
-    filter: brightness(1.15);
-    box-shadow: 0 6px 24px rgba(74,122,255,.22);
-  }
-  .btn-deck-dl:disabled { opacity: .3; cursor: not-allowed; filter: none; box-shadow: none; }
-  /* ── Send to deck button ── */
-  .btn-send-deck {
-    width: 100%; padding: 11px; font-size: 13px; font-weight: 600;
-    font-family: 'Cinzel', Georgia, serif; letter-spacing: .05em;
-    background: #101828; border: 1px dashed #3a5080; color: #8fa0bf;
-    border-radius: 12px; cursor: pointer; margin-top: 8px;
-    transition: all .2s;
-  }
+  /* ── Buttons ── */
+  .btn-deck-dl { width:100%; padding:14px; font-size:15px; font-weight:600; font-family:'Cinzel',Georgia,serif; letter-spacing:.06em; background:linear-gradient(135deg,#1a2d5a 0%,#0f1c3d 100%); border:1px solid #3a5080; color:#d6dcff; border-radius:14px; cursor:pointer; transition:filter .15s,box-shadow .15s; box-shadow:0 4px 16px rgba(74,122,255,.12); margin-bottom:8px; }
+  .btn-deck-dl:hover:not(:disabled) { filter:brightness(1.15); box-shadow:0 6px 24px rgba(74,122,255,.22); }
+  .btn-deck-dl:disabled { opacity:.3; cursor:not-allowed; filter:none; box-shadow:none; }
+  .btn-send-deck { width:100%; padding:11px; font-size:13px; font-weight:600; font-family:'Cinzel',Georgia,serif; letter-spacing:.05em; background:#101828; border:1px dashed #3a5080; color:#8fa0bf; border-radius:12px; cursor:pointer; margin-top:8px; transition:all .2s; }
   .btn-send-deck:hover:not(:disabled) { border-color:#4a7aff; color:#d6dcff; background:#121e38; }
   .btn-send-deck:disabled { opacity:.3; cursor:not-allowed; }
   .btn-send-deck.loaded { border-style:solid; border-color:#4a7aff; color:#d6dcff; background:#0d1830; }
 
   /* ── Spread tabs ── */
   .spread-tabs { display:flex; gap:8px; margin-bottom:16px; }
-  .spread-tab {
-    flex:1; padding:10px 8px; font-size:12px; font-weight:600;
-    font-family:'Cinzel',serif; letter-spacing:.04em;
-    background:#0b1020; border:1px solid #27344d; color:#8fa0bf;
-    border-radius:10px; cursor:pointer; transition:all .2s;
-  }
+  .spread-tab { flex:1; padding:10px 8px; font-size:12px; font-weight:600; font-family:'Cinzel',serif; letter-spacing:.04em; background:#0b1020; border:1px solid #27344d; color:#8fa0bf; border-radius:10px; cursor:pointer; transition:all .2s; }
   .spread-tab:hover { border-color:#4a7aff; color:#d6dcff; }
   .spread-tab.active { background:#121e38; border-color:#4a7aff; color:#d6dcff; box-shadow:0 0 0 2px rgba(74,122,255,.15); }
 
-  /* ── Spread layout ── */
-  .spread-layout {
-    display:flex; justify-content:center; align-items:flex-end;
-    gap:14px; flex-wrap:wrap; padding:10px 0;
-  }
-  .spread-slot {
-    display:flex; flex-direction:column; align-items:center; gap:8px;
-  }
-  .spread-card-frame {
-    width:110px; border-radius:12px; overflow:hidden;
-    background:#0b1020; border:1.5px dashed #27344d;
-    aspect-ratio:2/3; display:flex; align-items:center; justify-content:center;
-    transition:border-color .2s, box-shadow .2s; position:relative;
-  }
+  /* ── Spread with sidebar ── */
+  .spread-with-sidebar { display:grid; grid-template-columns:1fr 290px; gap:20px; align-items:start; }
+  @media(max-width:720px){ .spread-with-sidebar{grid-template-columns:1fr;} }
+  .spread-cards-area { display:flex; flex-direction:column; align-items:center; gap:10px; padding:8px 0; }
+  .spread-layout { display:flex; justify-content:center; align-items:flex-end; gap:16px; flex-wrap:wrap; }
+  .spread-slot { display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .spread-card-frame { width:140px; border-radius:14px; overflow:hidden; background:#0b1020; border:1.5px dashed #27344d; aspect-ratio:2/3; display:flex; align-items:center; justify-content:center; transition:border-color .2s,box-shadow .2s; position:relative; }
   .spread-card-frame.filled { border-style:solid; border-color:#2b3a59; }
   .spread-card-frame canvas { width:100%; height:100%; object-fit:cover; display:block; }
-  .spread-card-frame .spread-card-overlay {
-    position:absolute; inset:0; border-radius:11px;
-    background:linear-gradient(to top, rgba(11,14,20,.95) 38%, transparent);
-    display:flex; flex-direction:column; justify-content:flex-end;
-    padding:8px 6px; opacity:0; transition:opacity .25s; pointer-events:none;
-  }
+  .spread-card-frame .spread-card-overlay { position:absolute; inset:0; border-radius:13px; background:linear-gradient(to top,rgba(11,14,20,.95) 38%,transparent); display:flex; flex-direction:column; justify-content:flex-end; padding:10px 8px; opacity:0; transition:opacity .25s; pointer-events:none; }
   .spread-card-frame:hover .spread-card-overlay { opacity:1; }
-  .spread-card-overlay .ov-name { font-size:9px; font-family:'Cinzel',serif; color:#d6dcff; font-weight:600; text-align:center; line-height:1.3; }
-  .spread-card-overlay .ov-kw { font-size:8.5px; color:#8fa0bf; text-align:center; margin-top:2px; line-height:1.3; }
+  .spread-card-overlay .ov-name { font-size:10px; font-family:'Cinzel',serif; color:#d6dcff; font-weight:600; text-align:center; line-height:1.3; }
+  .spread-card-overlay .ov-kw  { font-size:9px; color:#8fa0bf; text-align:center; margin-top:3px; line-height:1.3; font-style:italic; }
+  .spread-slot-label { font-size:10px; color:#8fa0bf; text-align:center; max-width:140px; line-height:1.4; font-family:'Cinzel',serif; letter-spacing:.03em; }
+  .spread-slot-num   { font-size:13px; color:#4a5a8a; text-align:center; font-family:'IM Fell English',serif; }
 
-  .spread-slot-label {
-    font-size:10px; color:#8fa0bf; text-align:center; max-width:110px;
-    line-height:1.4; font-family:'Cinzel',serif; letter-spacing:.03em;
-  }
-  .spread-slot-num {
-    font-size:9px; color:#3a4a6a; text-align:center; font-family:'Cinzel',serif;
-  }
+  /* Deeper insight grid layout */
+  .spread-deeper-grid { display:grid; grid-template-columns:repeat(3,140px); grid-template-rows:auto auto; gap:16px 16px; justify-content:center; }
+  .slot-past     { grid-column:1; grid-row:2; }
+  .slot-present  { grid-column:2; grid-row:2; }
+  .slot-possible { grid-column:3; grid-row:2; }
+  .slot-insight  { grid-column:3; grid-row:1; }
 
-  /* Deeper insight: card 4 floats above */
-  .spread-deeper { display:flex; flex-direction:column; align-items:center; gap:14px; padding:10px 0; }
-  .spread-deeper-top { display:flex; justify-content:center; }
-  .spread-deeper-bottom { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+  /* Sidebar */
+  .spread-sidebar { background:#0b1020; border:1px solid #1f2a3d; border-radius:14px; padding:16px; min-height:240px; }
+  .spread-sidebar h3 { font-family:'Cinzel',serif; font-size:11px; letter-spacing:.1em; color:#d6dcff; margin:0 0 14px; text-transform:uppercase; }
+  .sidebar-card-entry { margin-bottom:16px; border-bottom:1px solid #1a2438; padding-bottom:14px; }
+  .sidebar-card-entry:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+  .sidebar-entry-slot { font-size:9px; color:#4a5a8a; font-family:'Cinzel',serif; letter-spacing:.1em; text-transform:uppercase; margin-bottom:3px; }
+  .sidebar-entry-name { font-size:16px; font-family:'Cormorant Garamond',serif; font-weight:600; color:#e7eaf0; margin-bottom:3px; line-height:1.2; }
+  .sidebar-entry-kw   { font-size:13px; font-family:'Cormorant Garamond',serif; font-style:italic; color:#8fa0bf; margin-bottom:6px; }
+  .sidebar-entry-text { font-size:12.5px; font-family:'Cormorant Garamond',serif; color:#b9c2d3; line-height:1.65; }
+  .sidebar-empty { font-size:14px; font-family:'Cormorant Garamond',serif; font-style:italic; color:#3a4a6a; text-align:center; margin-top:32px; }
 
   /* Deck pill */
-  .deck-pill {
-    display:inline-flex; align-items:center; gap:6px;
-    background:#0d1628; border:1px solid #27344d; border-radius:20px;
-    padding:4px 12px 4px 8px; font-size:11px; color:#8fa0bf;
-    margin-bottom:12px;
-  }
+  .deck-pill { display:inline-flex; align-items:center; gap:6px; background:#0d1628; border:1px solid #27344d; border-radius:20px; padding:4px 12px 4px 8px; font-size:11px; color:#8fa0bf; margin-bottom:12px; }
   .deck-pill .dp-count { font-weight:700; color:#d6dcff; font-family:'Cinzel',serif; }
 </style>
 </head>
@@ -336,111 +171,99 @@
 <!-- ══ HEADER CARD ══ -->
 <div class="card">
   <h1>Tarot Extractor</h1>
-  <p>Sleep of klik op een vakje om een afbeelding te laden. De app extraheert automatisch alle kaarten. Werkt volledig offline.</p>
+  <p>Drop or click a zone to load an image. The app automatically extracts all cards. Works fully offline.</p>
 
-  <!-- ── 5 Upload zones in één rij ── -->
-  <div class="section-title">Sleep afbeeldingen in de vakjes</div>
+  <div class="section-title">Drop images into the zones</div>
 
-  <div class="upload-zones-row">
-
-    <!-- Grote Arcana -->
-    <div class="upload-zone groot" id="uz-groot" title="Grote Arcana — 22 kaarten">
-      <div class="uz-icon">🌟</div>
-      <div class="uz-label">Grote Arcana</div>
-      <div class="uz-sub">22 kaarten</div>
-      <div class="uz-status" id="uz-status-groot">Geen afbeelding</div>
-      <div class="uz-preview" id="uz-prev-groot" style="display:none;"></div>
+  <!-- 1 large Major Arcana + 2x2 minor suits -->
+  <div class="upload-zones-wrap">
+    <div class="upload-zone-groot-wrap">
+      <div class="upload-zone groot" id="uz-groot" title="Major Arcana — 22 cards">
+        <div class="uz-icon">🌟</div>
+        <div class="uz-label">Major Arcana</div>
+        <div class="uz-sub">22 cards</div>
+        <div class="uz-status" id="uz-status-groot">No image</div>
+        <div class="uz-preview" id="uz-prev-groot" style="display:none;"></div>
+      </div>
     </div>
-
-    <!-- Vuur -->
-    <div class="upload-zone vuur" id="uz-vuur" title="Staven — Vuur">
-      <div class="uz-icon">🔥</div>
-      <div class="uz-label">Staven</div>
-      <div class="uz-sub">Vuur · 14 kaarten</div>
-      <div class="uz-status" id="uz-status-vuur">Geen afbeelding</div>
-      <div class="uz-preview" id="uz-prev-vuur" style="display:none;"></div>
+    <div class="upload-zone-minor-wrap">
+      <div class="upload-zone vuur" id="uz-vuur" title="Wands — Fire">
+        <div class="uz-icon">🔥</div>
+        <div class="uz-label">Wands</div>
+        <div class="uz-sub">Fire · 14 cards</div>
+        <div class="uz-status" id="uz-status-vuur">No image</div>
+        <div class="uz-preview" id="uz-prev-vuur" style="display:none;"></div>
+      </div>
+      <div class="upload-zone water" id="uz-water" title="Cups — Water">
+        <div class="uz-icon">🌊</div>
+        <div class="uz-label">Cups</div>
+        <div class="uz-sub">Water · 14 cards</div>
+        <div class="uz-status" id="uz-status-water">No image</div>
+        <div class="uz-preview" id="uz-prev-water" style="display:none;"></div>
+      </div>
+      <div class="upload-zone aarde" id="uz-aarde" title="Pentacles — Earth">
+        <div class="uz-icon">🌿</div>
+        <div class="uz-label">Pentacles</div>
+        <div class="uz-sub">Earth · 14 cards</div>
+        <div class="uz-status" id="uz-status-aarde">No image</div>
+        <div class="uz-preview" id="uz-prev-aarde" style="display:none;"></div>
+      </div>
+      <div class="upload-zone lucht" id="uz-lucht" title="Swords — Air">
+        <div class="uz-icon">💨</div>
+        <div class="uz-label">Swords</div>
+        <div class="uz-sub">Air · 14 cards</div>
+        <div class="uz-status" id="uz-status-lucht">No image</div>
+        <div class="uz-preview" id="uz-prev-lucht" style="display:none;"></div>
+      </div>
     </div>
-
-    <!-- Water -->
-    <div class="upload-zone water" id="uz-water" title="Bekers — Water">
-      <div class="uz-icon">🌊</div>
-      <div class="uz-label">Bekers</div>
-      <div class="uz-sub">Water · 14 kaarten</div>
-      <div class="uz-status" id="uz-status-water">Geen afbeelding</div>
-      <div class="uz-preview" id="uz-prev-water" style="display:none;"></div>
-    </div>
-
-    <!-- Aarde -->
-    <div class="upload-zone aarde" id="uz-aarde" title="Schijven — Aarde">
-      <div class="uz-icon">🌿</div>
-      <div class="uz-label">Schijven</div>
-      <div class="uz-sub">Aarde · 14 kaarten</div>
-      <div class="uz-status" id="uz-status-aarde">Geen afbeelding</div>
-      <div class="uz-preview" id="uz-prev-aarde" style="display:none;"></div>
-    </div>
-
-    <!-- Lucht -->
-    <div class="upload-zone lucht" id="uz-lucht" title="Zwaarden — Lucht">
-      <div class="uz-icon">💨</div>
-      <div class="uz-label">Zwaarden</div>
-      <div class="uz-sub">Lucht · 14 kaarten</div>
-      <div class="uz-status" id="uz-status-lucht">Geen afbeelding</div>
-      <div class="uz-preview" id="uz-prev-lucht" style="display:none;"></div>
-    </div>
-
   </div>
 
   <!-- hidden file inputs -->
-  <input type="file" id="ga-file-input"    accept="image/*" multiple style="display:none">
+  <input type="file" id="ga-file-input" accept="image/*" multiple style="display:none">
   <input type="file" id="file-vuur"  accept="image/*" style="display:none" onchange="loadSuit('vuur',this)">
   <input type="file" id="file-water" accept="image/*" style="display:none" onchange="loadSuit('water',this)">
   <input type="file" id="file-aarde" accept="image/*" style="display:none" onchange="loadSuit('aarde',this)">
   <input type="file" id="file-lucht" accept="image/*" style="display:none" onchange="loadSuit('lucht',this)">
 
-  <!-- ── Download deck knop ── -->
-  <button id="all-export-btn" class="btn-deck-dl" disabled>⬇ Download volledig deck als ZIP</button>
-
-  <!-- ── Send all to deck ── -->
-  <button id="send-to-deck-btn" class="btn-send-deck" disabled>🃏 Stuur alle kaarten naar deck</button>
+  <button id="all-export-btn" class="btn-deck-dl" disabled>⬇ Download Full Deck as ZIP</button>
+  <button id="send-to-deck-btn" class="btn-send-deck" disabled>🃏 Send All Cards to Deck</button>
   <div id="deck-count-label" style="font-size:11px;color:#8fa0bf;text-align:center;margin-top:6px;min-height:16px;"></div>
 
   <div id="main-status"></div>
 
   <details>
-    <summary>Uitleg werkwijze</summary>
-    <div style="font-size:13px;color:#b9c2d3;margin-top:8px;line-height:1.5;">
-      De app analyseert de afbeelding op variantie, randenergie en kleurverzadiging en kiest de meest interessante zones.
-      Grote Arcana: 22 kaarten. Kleine Arcana per suit: 14 kaarten (Aas t/m 10, Knave, Ridder, Koningin, Koning).
-      <br><br>Elke download-PNG heeft het nummer en de titel <b>in de afbeelding gebakken</b>.
-      De ZIP bevat alle kaarten in submappen per suit, plus een <code>uitleg.txt</code> per kaart.
+    <summary>How it works</summary>
+    <div style="font-size:13px;color:#b9c2d3;margin-top:8px;line-height:1.6;font-family:'Cormorant Garamond',serif;">
+      The app analyses the image for variance, edge energy and colour saturation, then selects the most visually interesting regions.
+      Major Arcana: 22 cards. Minor Arcana per suit: 14 cards (Ace through 10, Page, Knight, Queen, King).
+      <br><br>Each downloaded PNG has the number and title <b>baked into the image</b>.
+      The ZIP contains all cards in subfolders per suit, plus a description file per card.
     </div>
   </details>
 </div>
 
 <!-- ══ SPREAD SECTION ══ -->
 <div class="card" id="spread-card" style="display:none;">
-  <h2 style="margin:0 0 14px;font-family:'Cinzel',serif;letter-spacing:.06em;">✦ Tarot Legpatronen</h2>
+  <h2 style="margin:0 0 14px;">✦ Tarot Spreads</h2>
 
-  <!-- Spread picker -->
   <div class="spread-tabs" id="spread-tabs">
-    <button class="spread-tab active" data-spread="daycard">☀ Dagkaart</button>
-    <button class="spread-tab" data-spread="choices">⚖ Keuzes</button>
-    <button class="spread-tab" data-spread="deeper">🔮 Dieper Inzicht</button>
+    <button class="spread-tab active" data-spread="daycard">☀ Card of the Day</button>
+    <button class="spread-tab" data-spread="choices">⚖ Choices</button>
+    <button class="spread-tab" data-spread="deeper">🔮 Deeper Insight</button>
   </div>
 
-  <!-- Spread display area -->
   <div id="spread-area"></div>
 
   <div style="display:flex;gap:10px;margin-top:14px;">
-    <button id="draw-spread-btn" style="flex:1;font-family:'Cinzel',serif;font-size:13px;letter-spacing:.04em;padding:12px;">🔀 Trek kaarten</button>
-    <button id="clear-spread-btn" style="width:auto;padding:12px 16px;font-size:12px;color:#8fa0bf;" disabled>✕ Wis</button>
+    <button id="draw-spread-btn" style="flex:1;font-family:'Cinzel',serif;font-size:13px;letter-spacing:.04em;padding:12px;">🔀 Draw Cards</button>
+    <button id="clear-spread-btn" style="width:auto;padding:12px 16px;font-size:12px;color:#8fa0bf;" disabled>✕ Clear</button>
   </div>
 </div>
 
-<!-- ══ GROTE ARCANA GRID ══ -->
+<!-- ══ MAJOR ARCANA GRID ══ -->
 <div class="card" id="ga-grid-card" style="display:none;">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-    <h2 style="margin:0;">De 22 Grote Arcana</h2>
+    <h2 style="margin:0;">The 22 Major Arcana</h2>
     <button id="reshuffle-btn" style="width:auto;padding:6px 14px;font-size:12px;" disabled>🔀 Reshuffle</button>
   </div>
   <div class="tgrid suit-groot" id="ga-grid"></div>
@@ -481,7 +304,7 @@
 
 const ARCANA = [
   {num:"0",  roman:"0",    sym:"🃏", name:"De Dwaas",           en:"The Fool",          kw:"Onbevangenheid · Begin · Vertrouwen",       el:"Lucht · Uranus",     full:"De Dwaas staat aan het begin van alle dingen. Hij draagt alles in een klein bundeltje en kijkt omhoog — niet naar het ravijn. Zijn getal is 0: alles en niets tegelijk. Hij vertegenwoordigt kinderlijke onbevangenheid, vrijheid van conditionering en het onbegrensde potentieel van de ziel die haar reis begint."},
-  {num:"I",  roman:"I",    sym:"🪄", name:"De Magiër",           en:"The Magician",      kw:"Wil · Vaardigheid · Manifestatie",          el:"Lucht · Mercurius",  full:"De Magiër heeft de vier symbolen van de Minor Arcana voor zich en wijst tegelijk omhoog én omlaag: 'Zo boven, zo beneden.' Hij is de meester van concentratie en intentie, die ideeën omzet in werkelijkheid. Zijn lemniscaat-hoed duidt op oneindige energie en meesterschap."},
+  {num:"I",  roman:"I",    sym:"🪄", name:"De Magiër",           en:"The Magician",      kw:"Wil · Vaardigheid · Manifestatie",          el:"Lucht · Mercurius",  full:"De Magiër heeft de vier symbolen van de Minor Arcana voor zich en wijst tegelijk omhoog én omlaag: 'Zo boven, zo beneden.' Hij is the master of concentratie en intentie, die ideeën omzet in werkelijkheid. Zijn lemniscaat-hoed duidt op oneindige energie en meesterschap."},
   {num:"II", roman:"II",   sym:"🌙", name:"De Hogepriesteres",   en:"The High Priestess",kw:"Intuïtie · Mysterie · Innerlijke kennis",  el:"Water · Maan",       full:"Tussen twee zuilen zit zij stil. Achter haar hangt een sluier van granaatappels. Ze houdt de Torah op haar schoot en draagt een maankroon. Ze is het onderbewuste, de droom, de stille stem die je hoort als je ophoudt met praten."},
   {num:"III",roman:"III",  sym:"🌾", name:"De Keizerin",         en:"The Empress",       kw:"Vruchtbaarheid · Natuur · Overvloed",       el:"Aarde · Venus",      full:"Ze zit in een weelderig veld omringd door rijpe tarwe, haar kroon telt twaalf sterren. Ze is de godin van vruchtbaarheid, schoonheid en overvloed. Ze herinnert eraan dat het lichaam heilig is, dat de aarde ons voedt en dat creatie altijd een daad van liefde is."},
   {num:"IV", roman:"IV",   sym:"♛",  name:"De Keizer",           en:"The Emperor",       kw:"Structuur · Autoriteit · Stabiliteit",      el:"Vuur · Aries",       full:"Hij zit op een stenen troon met rammenhoofden. In zijn rechterhand de ankh, teken van leven; in zijn linker de rijksbol. Hij is de vader-energie: structuur, wetten, bescherming en discipline. Waar De Keizerin vloeit, bouwt hij muren."},
@@ -506,34 +329,34 @@ const ARCANA = [
 
 /* Minor Arcana suits */
 const SUITS = {
-  vuur:  { name:"Staven",  element:"Vuur",   icon:"🔥", color:"#d97a4a" },
-  water: { name:"Bekers",  element:"Water",  icon:"🌊", color:"#4a8fd9" },
-  aarde: { name:"Schijven",element:"Aarde",  icon:"🌿", color:"#6ab06a" },
-  lucht: { name:"Zwaarden",element:"Lucht",  icon:"💨", color:"#b0a0d0" }
+  vuur:  { name:"Wands",      element:"Fire",    icon:"🔥", color:"#d97a4a" },
+  water: { name:"Cups",       element:"Water",  icon:"🌊", color:"#4a8fd9" },
+  aarde: { name:"Pentacles",  element:"Earth",  icon:"🌿", color:"#6ab06a" },
+  lucht: { name:"Swords",     element:"Air",    icon:"💨", color:"#b0a0d0" }
 };
 
 function buildMinorCards(suitKey) {
   const s = SUITS[suitKey];
   const cards = [];
-  const nums = ["Aas","2","3","4","5","6","7","8","9","10","Knave","Ridder","Koningin","Koning"];
+  const nums = ["Ace","2","3","4","5","6","7","8","9","10","Page","Knight","Queen","King"];
   const descs = {
-    "Aas":     `Het zuivere begin van ${s.element.toLowerCase()}. De Aas van ${s.name} brengt een nieuw zaad van ${s.element === 'Vuur' ? 'inspiratie en passie' : s.element === 'Water' ? 'emotie en gevoel' : s.element === 'Aarde' ? 'mogelijkheid en overvloed' : 'gedachte en helderheid'}. Het is een uitnodiging — pak je hem aan?`,
-    "2":       `Twee van ${s.name}: een eerste keuze of balans binnen het veld van ${s.element.toLowerCase()}. Twee krachten staan tegenover elkaar; jij bepaalt hoe je ermee omgaat.`,
-    "3":       `Drie van ${s.name}: eerste groei en expansie. Er is vooruitgang; de energie van ${s.element.toLowerCase()} begint concreet te worden. Samenwerking of eerste vrucht.`,
-    "4":       `Vier van ${s.name}: consolidatie en rust. Een periode van stabilisering binnen ${s.element.toLowerCase()}. Bouw op wat je hebt; vier het behaalde.`,
-    "5":       `Vijf van ${s.name}: conflict of verlies. De energie van ${s.element.toLowerCase()} raakt verstoord. Er is wrijving of verlies — maar ook een kans om te groeien door tegenstand.`,
-    "6":       `Zes van ${s.name}: harmonie en stroom. De middenweg in ${s.element.toLowerCase()} is gevonden. Geven en ontvangen, terugkeer of beloning na inspanning.`,
-    "7":       `Zeven van ${s.name}: uitdaging en moed. Verdedig wat je hebt opgebouwd in het veld van ${s.element.toLowerCase()}. Volharding is nu de sleutel.`,
-    "8":       `Acht van ${s.name}: snelheid en focus. De energie van ${s.element.toLowerCase()} beweegt snel. Verander van koers of ga er vol voor — stilstand is geen optie.`,
-    "9":       `Negen van ${s.name}: bijna voltooid. Na alle uitdagingen in ${s.element.toLowerCase()} is de finish nabij. Houd stand; de kracht is bijeengebracht.`,
-    "10":      `Tien van ${s.name}: voltooiing en overdracht. De cyclus van ${s.element.toLowerCase()} is compleet. Zowel de pracht als de last van het eindresultaat.`,
-    "Knave":   `Knave van ${s.name}: de leerling van ${s.element.toLowerCase()}. Enthousiast, nieuwsgierig en onervaren. Staat aan het begin van het pad; vol potentieel maar nog in ontwikkeling.`,
-    "Ridder":  `Ridder van ${s.name}: de actieve kracht van ${s.element.toLowerCase()}. In volle beweging — soms impulsief, altijd gedreven. Brengt de energie van de suit in de wereld.`,
-    "Koningin":`Koningin van ${s.name}: de rijpe vrouwelijke kracht van ${s.element.toLowerCase()}. Meesterlijk in het integreren van deze energie. Intuïtief, zeker en uitnodigend.`,
-    "Koning":  `Koning van ${s.name}: de meester van ${s.element.toLowerCase()}. Heeft volledige controle over en inzicht in deze energie. Leidt anderen met de kracht van ervaring en visie.`
+    "Ace":     `The pure beginning van ${s.element.toLowerCase()}. The Ace of ${s.name} brings a new seed of ${s.element === 'Vuur' ? 'inspiration and passion' : s.element === 'Water' ? 'emotion and feeling' : s.element === 'Aarde' ? 'possibility and abundance' : 'thought and clarity'}. It is an invitation — will you take it?`,
+    "2":       `Two of ${s.name}: a first choice or balance in the realm of ${s.element.toLowerCase()}. Two forces face each other; you decide how to navigate them.`,
+    "3":       `Three of ${s.name}: first growth and expansion. Progress is made; the energy of ${s.element.toLowerCase()} begins to take form. Collaboration or first fruit.`,
+    "4":       `Four of ${s.name}: consolidation and rest. A period of stabilisation in ${s.element.toLowerCase()}. Build on what you have; celebrate what is achieved.`,
+    "5":       `Five of ${s.name}: conflict or loss. The energy of ${s.element.toLowerCase()} is disturbed. There is friction or loss — but also an opportunity to grow through resistance.`,
+    "6":       `Six of ${s.name}: harmony and flow. The middle way in ${s.element.toLowerCase()} is found. Giving and receiving, return or reward after effort.`,
+    "7":       `Seven of ${s.name}: challenge and courage. Defend what you have built in the realm of ${s.element.toLowerCase()}. Perseverance is the key now.`,
+    "8":       `Eight of ${s.name}: speed and focus. The energy of ${s.element.toLowerCase()} moves fast. Change course or commit fully — standing still is not an option.`,
+    "9":       `Nine of ${s.name}: almost complete. After all the challenges in ${s.element.toLowerCase()} the finish is near. Hold firm; your strength has been gathered.`,
+    "10":      `Ten of ${s.name}: completion and release. The cycle of ${s.element.toLowerCase()} is complete. Both the beauty and the weight of the final result.`,
+    "Page":   `Page of ${s.name}: the student of ${s.element.toLowerCase()}. Enthusiastic, curious and inexperienced. Standing at the start of the path; full of potential but still developing.`,
+    "Knight":  `Knight of ${s.name}: the active force of ${s.element.toLowerCase()}. In full motion — sometimes impulsive, always driven. Brings the energy of the suit into the world.`,
+    "Queen":   `Queen of ${s.name}: the mature feminine power of ${s.element.toLowerCase()}. Meesterlijk in het integreren van deze energie. Intuïtief, zeker en uitnodigend.`,
+    "King":    `King of ${s.name}: the master of ${s.element.toLowerCase()}. Has full command of and insight into this energy. Leads others with the power of experience and vision.`
   };
   nums.forEach((n,i) => {
-    const label = `${n} van ${s.name}`;
+    const label = `${n} of ${s.name}`;
     cards.push({
       num: n, index: i+1,
       name: label,
@@ -574,7 +397,7 @@ const allExportBtn = document.getElementById('all-export-btn');
 const statusEl     = document.getElementById('main-status');
 
 /* ══════════════════════════════════════════════
-   UPLOAD ZONE SETUP — alle 5 vakjes
+   UPLOAD ZONE SETUP — all 5 zones
 ══════════════════════════════════════════════ */
 function setupUploadZone(zoneId, onFiles){
   const zone = document.getElementById(zoneId);
@@ -617,7 +440,7 @@ function loadGAFile(file){
   img.onload=()=>{
     const id=Date.now()+Math.random();
     gaImages.push({id,name:file.name,img,url});
-    updateUploadZone('groot', url, 'Analyseren…', false);
+    updateUploadZone('groot', url, 'Analysing…', false);
     selectGAImage(id);
   };
   img.src=url;
@@ -635,7 +458,7 @@ function selectGAImage(id){
 }
 
 function analyseGA(img){
-  setStatus('Grote Arcana analyseren…','working');
+  setStatus('Analysing Major Arcana…','working');
   gaGrid.innerHTML=''; gaGridCard.style.display='none';
   const regions=extractRegions(img,22);
   gaRegions=regions;
@@ -643,9 +466,9 @@ function analyseGA(img){
   renderGAGrid();
   reshuffleBtn.disabled=false;
   checkAllExport();
-  setStatus('22 details gevonden','done');
+  setStatus('22 regions found','done');
   const activeImg = gaImages.find(i=>i.id===gaActiveId);
-  if(activeImg) updateUploadZone('groot', activeImg.url, '✓ 22 kaarten', true);
+  if(activeImg) updateUploadZone('groot', activeImg.url, '✓ 22 cards', true);
   gaGridCard.style.display='block';
   setTimeout(()=>gaGridCard.scrollIntoView({behavior:'smooth',block:'start'}),80);
 }
@@ -654,7 +477,7 @@ function reshuffle(){
   [...document.querySelectorAll('#ga-grid .tcard')].forEach((c,i)=>{c.style.animationDelay=(i*.012)+'s';c.classList.add('exiting');});
   setTimeout(()=>{
     for(let i=arcanaOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arcanaOrder[i],arcanaOrder[j]]=[arcanaOrder[j],arcanaOrder[i]];}
-    renderGAGrid(); setStatus('Arcana herschud','done');
+    renderGAGrid(); setStatus('Arcana reshuffled','done');
   },220);
 }
 
@@ -684,13 +507,13 @@ function loadSuit(suit,input){
 function loadSuitFromUrl(suit, url){
   const img=new Image();
   img.onload=()=>{
-    updateUploadZone(suit, url, 'Analyseren…', false);
+    updateUploadZone(suit, url, 'Analysing…', false);
     const regions=extractRegions(img,14);
     const cards=buildMinorCards(suit);
     suitState[suit]={img,regions,cards};
 
     renderSuitGrid(suit);
-    updateUploadZone(suit, url, '✓ 14 kaarten', true);
+    updateUploadZone(suit, url, '✓ 14 cards', true);
     checkAllExport();
   };
   img.src=url;
@@ -758,8 +581,8 @@ function buildMasterDeck(){
 
   const btn = document.getElementById('send-to-deck-btn');
   btn.classList.add('loaded');
-  btn.textContent = `🃏 Deck bijgewerkt (${masterDeck.length} kaarten)`;
-  document.getElementById('deck-count-label').textContent = `${masterDeck.length} kaarten geschud en klaar om te trekken`;
+  btn.textContent = `🃏 Deck updated (${masterDeck.length} cards)`;
+  document.getElementById('deck-count-label').textContent = `${masterDeck.length} cards shuffled and ready to draw`;
   document.getElementById('spread-card').style.display='block';
   document.getElementById('spread-card').scrollIntoView({behavior:'smooth',block:'start'});
   renderSpreadArea();
@@ -773,23 +596,20 @@ let drawnCards = [];
 
 const SPREADS = {
   daycard: {
-    label: 'Dagkaart',
-    slots: [{ num:'I', label:'Dagkaart', sub:'Jouw boodschap voor vandaag' }]
+    slots: [{ num:'I', label:'Card of the Day', sub:'Your message for today', key:'daycard' }]
   },
   choices: {
-    label: 'Keuzes',
     slots: [
-      { num:'I', label:'Situatie A', sub:'Eerste pad of keuze' },
-      { num:'II', label:'Situatie B', sub:'Tweede pad of keuze' }
+      { num:'I',  label:'Situation A', sub:'First path or choice', key:'choiceA' },
+      { num:'II', label:'Situation B', sub:'Second path or choice', key:'choiceB' }
     ]
   },
   deeper: {
-    label: 'Dieper Inzicht',
     slots: [
-      { num:'I',  label:'De Situatie',   sub:'Waar je nu staat',        top: false },
-      { num:'II', label:'Het Verleden',  sub:'Wat je hierheen bracht',  top: false },
-      { num:'III',label:'De Mogelijkheid',sub:'Wat open ligt',          top: false },
-      { num:'IV', label:'Wat Bewustzijn Vraagt', sub:'Verborgen laag',  top: true  }
+      { num:'II',  label:'The Past',        sub:'What brought you here',        key:'past',     cls:'slot-past'     },
+      { num:'I',   label:'The Present',     sub:'Where you stand now',          key:'present',  cls:'slot-present'  },
+      { num:'III', label:'The Possibility', sub:'What lies open before you',    key:'possible', cls:'slot-possible' },
+      { num:'IV',  label:'The Insight',     sub:'What calls for awareness',     key:'insight',  cls:'slot-insight'  }
     ]
   }
 };
@@ -806,10 +626,9 @@ document.querySelectorAll('.spread-tab').forEach(tab => {
 });
 
 document.getElementById('draw-spread-btn').addEventListener('click', () => {
-  if(masterDeck.length === 0){ alert('Stuur eerst kaarten naar het deck!'); return; }
+  if(masterDeck.length === 0){ alert('Send cards to the deck first!'); return; }
   const spread = SPREADS[activeSpread];
   const needed = spread.slots.length;
-  // Pick random unique cards
   const pool = [...masterDeck];
   drawnCards = [];
   for(let i=0;i<needed&&pool.length>0;i++){
@@ -835,31 +654,61 @@ function renderSpreadArea(animate){
   if(masterDeck.length>0){
     const pill=document.createElement('div');
     pill.className='deck-pill';
-    pill.innerHTML=`<span>🃏</span><span class="dp-count">${masterDeck.length}</span><span>kaarten in deck</span>`;
+    pill.innerHTML=`<span>🃏</span><span class="dp-count">${masterDeck.length}</span><span> cards in deck</span>`;
     area.appendChild(pill);
   }
 
+  const wrapper = document.createElement('div');
+  wrapper.className = 'spread-with-sidebar';
+
+  // Left: cards
+  const cardsArea = document.createElement('div');
+  cardsArea.className = 'spread-cards-area';
+
   if(activeSpread === 'deeper'){
-    const container = document.createElement('div');
-    container.className = 'spread-deeper';
-
-    // Top card (slot index 3)
-    const topRow = document.createElement('div'); topRow.className='spread-deeper-top';
-    topRow.appendChild(makeSpreadSlot(spread.slots[3], drawnCards[3], animate, 3));
-    container.appendChild(topRow);
-
-    // Bottom 3 cards (slots 0,1,2)
-    const botRow = document.createElement('div'); botRow.className='spread-deeper-bottom';
-    [0,1,2].forEach(i => botRow.appendChild(makeSpreadSlot(spread.slots[i], drawnCards[i], animate, i)));
-    container.appendChild(botRow);
-
-    area.appendChild(container);
+    const grid = document.createElement('div');
+    grid.className = 'spread-deeper-grid';
+    spread.slots.forEach((slot,i) => {
+      const slotEl = makeSpreadSlot(slot, drawnCards[i], animate, i);
+      slotEl.classList.add(slot.cls);
+      grid.appendChild(slotEl);
+    });
+    cardsArea.appendChild(grid);
   } else {
     const layout = document.createElement('div');
     layout.className = 'spread-layout';
     spread.slots.forEach((slot,i) => layout.appendChild(makeSpreadSlot(slot, drawnCards[i], animate, i)));
-    area.appendChild(layout);
+    cardsArea.appendChild(layout);
   }
+  wrapper.appendChild(cardsArea);
+
+  // Right: sidebar readings
+  const sidebar = document.createElement('div');
+  sidebar.className = 'spread-sidebar';
+  sidebar.innerHTML = '<h3>Card Readings</h3>';
+
+  if(drawnCards.length > 0){
+    spread.slots.forEach((slot,i) => {
+      const card = drawnCards[i];
+      if(!card) return;
+      const entry = document.createElement('div');
+      entry.className = 'sidebar-card-entry';
+      entry.innerHTML = `
+        <div class="sidebar-entry-slot">${esc(slot.label)}</div>
+        <div class="sidebar-entry-name">${esc(card.name)}</div>
+        <div class="sidebar-entry-kw">${esc(card.kw)}</div>
+        <div class="sidebar-entry-text">${esc(card.full)}</div>
+      `;
+      sidebar.appendChild(entry);
+    });
+  } else {
+    const empty = document.createElement('div');
+    empty.className = 'sidebar-empty';
+    empty.textContent = 'Draw cards to see their readings here.';
+    sidebar.appendChild(empty);
+  }
+  wrapper.appendChild(sidebar);
+  area.appendChild(wrapper);
 }
 
 function makeSpreadSlot(slot, card, animate, idx){
@@ -874,32 +723,37 @@ function makeSpreadSlot(slot, card, animate, idx){
     const cvs = document.createElement('canvas');
     cvs.width=200; cvs.height=300;
     const ctx=cvs.getContext('2d');
+    // Draw image in top 2/3
     ctx.drawImage(card.hiResCvs,0,0,200,200);
-    // Dark gradient for bottom text area
-    const grad=ctx.createLinearGradient(0,140,0,300);
+    // Gradient overlay for text
+    const grad=ctx.createLinearGradient(0,130,0,300);
     grad.addColorStop(0,'rgba(11,14,20,0)');
-    grad.addColorStop(0.5,'rgba(11,14,20,0.95)');
+    grad.addColorStop(0.45,'rgba(11,14,20,0.92)');
     grad.addColorStop(1,'rgba(11,14,20,1)');
-    ctx.fillStyle=grad; ctx.fillRect(0,140,200,160);
+    ctx.fillStyle=grad; ctx.fillRect(0,130,200,170);
+    // Number — IM Fell English style (simulate with serif)
     ctx.textAlign='center';
-    ctx.fillStyle='#d6dcff';
-    ctx.font='bold 13px "Cinzel",serif';
-    ctx.fillText(card.numLabel,100,230);
-    ctx.font='bold 11px system-ui,sans-serif';
-    ctx.fillStyle='#e7eaf0';
-    wrapTextSimple(ctx, card.name, 100, 252, 180, 13);
+    ctx.fillStyle='rgba(200,208,255,0.9)';
+    ctx.font='italic 15px Georgia,serif';
+    ctx.fillText(card.numLabel,100,226);
+    // Title
+    ctx.font='bold 12px "Cormorant Garamond",Georgia,serif';
+    ctx.fillStyle='#f0f2ff';
+    ctx.shadowColor='rgba(0,0,0,0.9)'; ctx.shadowBlur=6;
+    wrapTextSimple(ctx, card.name, 100, 252, 178, 14);
+    ctx.shadowBlur=0;
     frame.appendChild(cvs);
 
     const ov=document.createElement('div'); ov.className='spread-card-overlay';
     ov.innerHTML=`<div class="ov-name">${esc(card.name)}</div><div class="ov-kw">${esc(card.kw)}</div>`;
     frame.appendChild(ov);
   } else {
-    frame.innerHTML=`<span style="font-size:1.4rem;opacity:.3">🂠</span>`;
+    frame.innerHTML=`<span style="font-size:1.6rem;opacity:.2">🂠</span>`;
   }
 
   const numEl=document.createElement('div'); numEl.className='spread-slot-num'; numEl.textContent=slot.num;
   const labelEl=document.createElement('div'); labelEl.className='spread-slot-label';
-  labelEl.innerHTML=`<strong>${esc(slot.label)}</strong><br><span style="font-size:9px;font-family:system-ui;">${esc(slot.sub)}</span>`;
+  labelEl.innerHTML=`<strong>${esc(slot.label)}</strong><br><span style="font-size:9px;font-family:system-ui,sans-serif;font-style:normal;">${esc(slot.sub)}</span>`;
 
   slotEl.appendChild(numEl);
   slotEl.appendChild(frame);
