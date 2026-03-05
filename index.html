@@ -200,7 +200,7 @@
   }
   .sidebar-summary-title {
     font-family:'Cinzel',serif; font-size:11px; letter-spacing:.1em;
-    color:#c8d0ff; margin-bottom:10px; text-transform:uppercase;
+    color:#c8d0ff; margin-bottom:12px; text-transform:uppercase;
   }
   .sidebar-summary-text {
     font-family:'Cormorant Garamond',serif; font-size:13px;
@@ -208,6 +208,20 @@
   }
   .sidebar-summary-text p { margin:0 0 8px; }
   .sidebar-summary-text em { color:#d6dcff; font-style:italic; }
+
+  /* 4-question synthesis */
+  .synthesis-block { display:flex; flex-direction:column; gap:14px; }
+  .synth-q { display:flex; flex-direction:column; gap:4px; }
+  .synth-label {
+    font-family:'Cinzel',serif; font-size:10px; letter-spacing:.08em;
+    text-transform:uppercase; color:#7a8aaa;
+  }
+  .synth-text {
+    font-family:'Cormorant Garamond',serif; font-size:13.5px;
+    color:#c8d4e8; line-height:1.65;
+  }
+  .synth-text em { color:#d6dcff; font-style:italic; }
+  .synth-text strong { color:#e8ecff; font-weight:600; font-style:normal; }
 
   /* Version badge */
   .version-badge {
@@ -358,28 +372,28 @@
 ══════════════════════════════════════════════ */
 
 const ARCANA = [
-  {num:"0",  roman:"0",    sym:"🃏", name:"De Dwaas",           en:"The Fool",          kw:"Onbevangenheid · Begin · Vertrouwen",       el:"Lucht · Uranus",     full:"De Dwaas staat aan het begin van alle dingen. Hij draagt alles in een klein bundeltje en kijkt omhoog — niet naar het ravijn. Zijn getal is 0: alles en niets tegelijk. Hij vertegenwoordigt kinderlijke onbevangenheid, vrijheid van conditionering en het onbegrensde potentieel van de ziel die haar reis begint."},
-  {num:"I",  roman:"I",    sym:"🪄", name:"De Magiër",           en:"The Magician",      kw:"Wil · Vaardigheid · Manifestatie",          el:"Lucht · Mercurius",  full:"De Magiër heeft de vier symbolen van de Minor Arcana voor zich en wijst tegelijk omhoog én omlaag: 'Zo boven, zo beneden.' Hij is the master of concentratie en intentie, die ideeën omzet in werkelijkheid. Zijn lemniscaat-hoed duidt op oneindige energie en meesterschap."},
-  {num:"II", roman:"II",   sym:"🌙", name:"De Hogepriesteres",   en:"The High Priestess",kw:"Intuïtie · Mysterie · Innerlijke kennis",  el:"Water · Maan",       full:"Tussen twee zuilen zit zij stil. Achter haar hangt een sluier van granaatappels. Ze houdt de Torah op haar schoot en draagt een maankroon. Ze is het onderbewuste, de droom, de stille stem die je hoort als je ophoudt met praten."},
-  {num:"III",roman:"III",  sym:"🌾", name:"De Keizerin",         en:"The Empress",       kw:"Vruchtbaarheid · Natuur · Overvloed",       el:"Aarde · Venus",      full:"Ze zit in een weelderig veld omringd door rijpe tarwe, haar kroon telt twaalf sterren. Ze is de godin van vruchtbaarheid, schoonheid en overvloed. Ze herinnert eraan dat het lichaam heilig is, dat de aarde ons voedt en dat creatie altijd een daad van liefde is."},
-  {num:"IV", roman:"IV",   sym:"♛",  name:"De Keizer",           en:"The Emperor",       kw:"Structuur · Autoriteit · Stabiliteit",      el:"Vuur · Aries",       full:"Hij zit op een stenen troon met rammenhoofden. In zijn rechterhand de ankh, teken van leven; in zijn linker de rijksbol. Hij is de vader-energie: structuur, wetten, bescherming en discipline. Waar De Keizerin vloeit, bouwt hij muren."},
-  {num:"V",  roman:"V",    sym:"✝",  name:"De Hogepriester",     en:"The Hierophant",    kw:"Traditie · Geloof · Spirituele leiding",    el:"Aarde · Stier",      full:"Tussen twee zuilen van een tempel zit hij op een verhoogde troon, zijn hand geheven in zegen. De Hogepriester vertegenwoordigt georganiseerde spiritualiteit, traditie en het doorgeven van wijsheid. De vraag: geloof je uit gewoonte of uit innerlijke overtuiging?"},
-  {num:"VI", roman:"VI",   sym:"💞", name:"De Geliefden",        en:"The Lovers",        kw:"Keuze · Verbinding · Waarden",              el:"Lucht · Tweelingen", full:"Een man en vrouw staan naakt onder de zegen van aartsengel Rafaël. De kaart gaat over meer dan liefde: het is de keuze tussen twee paden, twee waarden. De engel brengt ze samen, maar de keuze en verantwoordelijkheid blijven bij henzelf."},
-  {num:"VII",roman:"VII",  sym:"⚔",  name:"De Strijdwagen",      en:"The Chariot",       kw:"Wilskracht · Controle · Overwinning",       el:"Water · Kreeft",     full:"Een gepantserde krijger bestuurt zijn wagen zonder teugels — de sfingen worden door concentratie alleen geleid. De Strijdwagen vraagt discipline: niet het onderdrukken van tegenstellingen, maar ze balanceren zodat ze samen vooruitgaan."},
-  {num:"VIII",roman:"VIII",sym:"♾",  name:"Kracht",              en:"Strength",          kw:"Moed · Zachtheid · Innerlijke kracht",      el:"Vuur · Leeuw",       full:"Boven haar hoofd zweeft een lemniscaat. Ze opent kalm de muil van de leeuw, die niet vecht. Dit is niet de kracht van spieren maar van karakter: moed die niet brult, vertrouwen dat niet wankelt."},
-  {num:"IX", roman:"IX",   sym:"🏮", name:"De Kluizenaar",       en:"The Hermit",        kw:"Terugtrekking · Wijsheid · Innerlijk licht", el:"Aarde · Maagd",     full:"In grijs gewaad staat hij op een besneeuwde bergtop, een lantaarn geheven met de zespuntige ster erin. Hij heeft zich teruggetrokken om zichzelf te vinden. Zijn licht is voor jou — als je bereid bent de tocht omhoog te maken."},
-  {num:"X",  roman:"X",    sym:"🎡", name:"Het Rad van Fortuin", en:"Wheel of Fortune",  kw:"Cyclus · Lot · Wending",                    el:"Vuur · Jupiter",     full:"Op het rad staan T-A-R-O en alchemistische symbolen. Vier figuren aan de hoeken lezen rustig hun boeken terwijl het rad draait. Het staat voor de onvermijdelijke cycli van het leven. Niemand blijft op dezelfde positie."},
-  {num:"XI", roman:"XI",   sym:"⚖",  name:"Gerechtigheid",       en:"Justice",           kw:"Waarheid · Balans · Consequentie",          el:"Lucht · Weegschaal", full:"Ze zit met een zwaard omhoog en een weegschaal in evenwicht. Gerechtigheid in tarot gaat niet over menselijke rechtssystemen maar over kosmische oorzaak en gevolg. Elke actie heeft een consequentie."},
-  {num:"XII",roman:"XII",  sym:"🙃", name:"De Gehangene",        en:"The Hanged Man",    kw:"Opoffering · Overgave · Nieuw perspectief", el:"Water · Neptunus",  full:"Hij hangt aan zijn enkel, zijn vrije been gekruist, zijn gezicht vredig met een aureool. Hij is niet gestraft; hij koos dit. De Gehangene vertegenwoordigt vrijwillige overgave: loslaten van controle om iets diepers te begrijpen."},
-  {num:"XIII",roman:"XIII",sym:"🌅", name:"De Dood",             en:"Death",             kw:"Transformatie · Einde · Doorgang",          el:"Water · Schorpioen", full:"Een skelet in zwart harnas rijdt op een wit paard; in de achtergrond gaat de zon op tussen twee torens. De Dood vraagt niet om fysieke dood maar om afscheid: van een identiteit, een relatie, een fase."},
-  {num:"XIV",roman:"XIV",  sym:"🏹", name:"Matigheid",           en:"Temperance",        kw:"Balans · Geduld · Alchemie",                el:"Vuur · Boogschutter",full:"De engel giet vloeistof van de ene kelk in de andere — omhoog, tegen de zwaartekracht in. Matigheid is de alchemist die tegengestelde krachten combineert tot iets nieuws. Niet onthouding maar meesterlijk doseren."},
-  {num:"XV", roman:"XV",   sym:"🐐", name:"De Duivel",           en:"The Devil",         kw:"Schaduw · Verslaving · Materialisme",       el:"Aarde · Steenbok",   full:"Twee geketende figuren — maar hun kettingen zijn wijd genoeg om over hun hoofd te tillen. Ze blijven uit gewoonte, angst of comfort. De Duivel is de spiegel van onze eigen schaduw. Erkenning is de eerste stap naar bevrijding."},
-  {num:"XVI",roman:"XVI",  sym:"⚡",  name:"De Toren",            en:"The Tower",         kw:"Omwenteling · Openbaring · Catharsis",      el:"Vuur · Mars",        full:"Een hoge toren wordt getroffen; figuren vallen terwijl vlammen uitbarsten. De Toren is de plotselinge instorting van wat niet klopte. Wat valt mócht vallen. Op de lege plek kan nu iets waarachtigs worden gebouwd."},
-  {num:"XVII",roman:"XVII",sym:"✦",  name:"De Ster",             en:"The Star",          kw:"Hoop · Genezing · Inspiratie",              el:"Lucht · Waterman",   full:"Ze knielt bij een poel en giet water met twee kruiken. Boven haar schittert een grote gele ster. De Ster volgt De Toren: na vernietiging komt hoop. Vertrouw op het proces. Genees. Droom."},
-  {num:"XVIII",roman:"XVIII",sym:"🐺",name:"De Maan",            en:"The Moon",          kw:"Illusie · Angst · Onderbewuste",            el:"Water · Vissen",     full:"Een volle maan schijnt op een pad tussen twee torens. Een kreeft kruipt uit het water; wolf en hond huilen. De Maan is het onderbewuste, dromen en angsten. Ze nodigt uit om door de duisternis te lopen."},
-  {num:"XIX",roman:"XIX",  sym:"☀",  name:"De Zon",              en:"The Sun",           kw:"Vreugde · Vitaliteit · Succes",             el:"Vuur · Zon",         full:"Een triomfantelijk kind rijdt op een wit paard onder een stralende zon. De Zon is de meest welwillende kaart. Helderheid, vitaliteit, succes en authenticiteit. Je mag er zijn, precies zoals je bent."},
-  {num:"XX", roman:"XX",   sym:"🎺", name:"Het Oordeel",         en:"Judgement",         kw:"Roeping · Opstanding · Vergeving",          el:"Vuur · Pluto",       full:"Gabriël blaast de bazuin; mensen stijgen op uit hun graven. Het Oordeel is geen straf maar een uitnodiging: word wie je werkelijk bent. Het vraagt om zelfonderzoek en vergeving — van anderen, maar vooral van jezelf."},
-  {num:"XXI",roman:"XXI",  sym:"🌍", name:"De Wereld",           en:"The World",         kw:"Voltooiing · Integratie · Dans",            el:"Aarde · Saturnus",   full:"Een dansende figuur in een laurierkrans met de vier hoekfiguren: stier, leeuw, adelaar, engel. De Wereld is het einde van de Grote Arcana-reis. De Dwaas is thuisgekomen. Nu danst hij — vrij, heel, aanwezig."}
+  {num:"0",  roman:"0",    sym:"🃏", name:"The Fool",          kw:"Innocence · Beginning · Trust",              el:"Air · Uranus",      full:"The Fool stands at the beginning of all things. He carries everything in a small bundle and looks upward — not toward the ravine. His number is 0: everything and nothing at once. He represents childlike openness, freedom from conditioning, and the boundless potential of a soul beginning its journey."},
+  {num:"I",  roman:"I",    sym:"🪄", name:"The Magician",      kw:"Will · Skill · Manifestation",               el:"Air · Mercury",     full:"The Magician has all four symbols of the Minor Arcana before him and points simultaneously upward and downward: 'As above, so below.' He is the master of concentration and intention, turning ideas into reality. His lemniscate hat signals infinite energy and mastery."},
+  {num:"II", roman:"II",   sym:"🌙", name:"The High Priestess",kw:"Intuition · Mystery · Inner knowledge",      el:"Water · Moon",      full:"Between two pillars she sits in stillness. Behind her hangs a veil of pomegranates. She holds the Torah on her lap and wears a moon crown. She is the unconscious, the dream, the quiet voice you hear when you stop talking."},
+  {num:"III",roman:"III",  sym:"🌾", name:"The Empress",       kw:"Fertility · Nature · Abundance",             el:"Earth · Venus",     full:"She sits in a lush field surrounded by ripe wheat, her crown bearing twelve stars. She is the goddess of fertility, beauty, and abundance. She reminds us that the body is sacred, that the earth nourishes us, and that all creation is an act of love."},
+  {num:"IV", roman:"IV",   sym:"♛",  name:"The Emperor",       kw:"Structure · Authority · Stability",          el:"Fire · Aries",      full:"He sits on a stone throne adorned with ram heads. In his right hand the ankh, sign of life; in his left the orb. He is father-energy: structure, laws, protection, and discipline. Where the Empress flows, he builds walls."},
+  {num:"V",  roman:"V",    sym:"⛪", name:"The Hierophant",    kw:"Tradition · Belief · Guidance",              el:"Earth · Taurus",    full:"Between two pillars he sits on his throne, hand raised in blessing, two monks at his feet. The Hierophant is the bridge between human and divine — guardian of tradition, ritual, and shared belief. He asks: what wisdom have you received, and what will you do with it?"},
+  {num:"VI", roman:"VI",   sym:"💞", name:"The Lovers",        kw:"Choice · Connection · Values",               el:"Air · Gemini",      full:"Two figures stand naked beneath an angel who blesses them. Behind the man stands the tree of life; behind the woman the tree of knowledge. The Lovers are not only about romance — they are about a fundamental choice: what values do you carry, and are they truly compatible with another's? Real connection begins with self-knowledge."},
+  {num:"VII",roman:"VII",  sym:"🏆", name:"The Chariot",       kw:"Willpower · Direction · Victory",            el:"Water · Cancer",    full:"On a star-draped stone chariot he rides, two sphinxes before him — one black, one white. They pull in opposite directions, but he steers them by will alone, without reins. The Chariot asks not for external control but for inner discipline: directing conflicting impulses toward a single purpose."},
+  {num:"VIII",roman:"VIII",sym:"🦁", name:"Strength",          kw:"Courage · Gentleness · Inner power",         el:"Fire · Leo",        full:"A woman gently closes the mouth of a lion. No force, no violence — only quiet courage. Above her head the figure eight on its side: the infinite. Strength in tarot is not dominance but the capacity to be with your own fear, anger, or instinct without suppressing or being overwhelmed by them."},
+  {num:"IX", roman:"IX",   sym:"🏮", name:"The Hermit",        kw:"Withdrawal · Wisdom · Inner light",          el:"Earth · Virgo",     full:"Cloaked in grey he stands on a snow-covered mountaintop, lantern raised with a six-pointed star inside. He has withdrawn to find himself. His light is for you — if you are willing to make the journey upward."},
+  {num:"X",  roman:"X",    sym:"🎡", name:"Wheel of Fortune",  kw:"Cycle · Fate · Turning point",               el:"Fire · Jupiter",    full:"On the wheel appear T-A-R-O and alchemical symbols. Four figures at the corners read calmly while the wheel turns. It represents the inevitable cycles of life. No one stays in the same position."},
+  {num:"XI", roman:"XI",   sym:"⚖",  name:"Justice",           kw:"Truth · Balance · Consequence",              el:"Air · Libra",       full:"She sits with sword raised and scales in balance. Justice in tarot is not about human legal systems but about cosmic cause and effect. Every action carries a consequence. This card asks you to weigh honestly — not harshly, but clearly."},
+  {num:"XII",roman:"XII",  sym:"🙃", name:"The Hanged Man",    kw:"Surrender · Sacrifice · New perspective",   el:"Water · Neptune",   full:"He hangs by his ankle, free leg crossed, face peaceful with a halo of light. He was not punished; he chose this. The Hanged Man represents voluntary surrender: releasing control to understand something deeper. The pause is not weakness — it is wisdom."},
+  {num:"XIII",roman:"XIII",sym:"🌅", name:"Death",             kw:"Transformation · Ending · Passage",          el:"Water · Scorpio",   full:"A skeleton in black armour rides a white horse; in the background the sun rises between two towers. Death does not ask for physical dying but for farewell: from an identity, a relationship, a phase. What ends makes space for what is true."},
+  {num:"XIV",roman:"XIV",  sym:"🏹", name:"Temperance",        kw:"Balance · Patience · Alchemy",               el:"Fire · Sagittarius",full:"The angel pours liquid from one cup into the other — upward, against gravity. Temperance is the alchemist who combines opposing forces into something new. Not abstinence but masterful calibration. Flow without forcing."},
+  {num:"XV", roman:"XV",   sym:"🐐", name:"The Devil",         kw:"Shadow · Addiction · Materialism",           el:"Earth · Capricorn", full:"Two chained figures — but their chains are wide enough to lift over their heads. They stay out of habit, fear, or comfort. The Devil is the mirror of our own shadow. Recognition is the first step toward liberation. You are not as trapped as you feel."},
+  {num:"XVI",roman:"XVI",  sym:"⚡",  name:"The Tower",         kw:"Upheaval · Revelation · Catharsis",          el:"Fire · Mars",       full:"A tall tower is struck; figures fall as flames burst outward. The Tower is the sudden collapse of what was not true. What falls was meant to fall. On the empty ground something genuine can now be built. This is not destruction — it is clearing."},
+  {num:"XVII",roman:"XVII",sym:"✦",  name:"The Star",          kw:"Hope · Healing · Inspiration",               el:"Air · Aquarius",    full:"She kneels at a pool and pours water from two jugs. Above her a large yellow star shines. The Star follows The Tower: after destruction comes hope. Trust the process. Heal. Dream again. You are being renewed."},
+  {num:"XVIII",roman:"XVIII",sym:"🐺",name:"The Moon",         kw:"Illusion · Fear · The unconscious",          el:"Water · Pisces",    full:"A full moon shines on a path between two towers. A crayfish crawls from the water; wolf and dog howl. The Moon is the unconscious, dreams, and fears. She invites you to walk through the darkness — not around it. What you face loses its power over you."},
+  {num:"XIX",roman:"XIX",  sym:"☀",  name:"The Sun",           kw:"Joy · Vitality · Success",                   el:"Fire · Sun",        full:"A triumphant child rides a white horse beneath a radiant sun. The Sun is the most benevolent card. Clarity, vitality, success, and authenticity. You are allowed to be here, exactly as you are. Let yourself shine."},
+  {num:"XX", roman:"XX",   sym:"🎺", name:"Judgement",         kw:"Calling · Resurrection · Forgiveness",       el:"Fire · Pluto",      full:"Gabriel blows the trumpet; people rise from their graves. Judgement is not punishment but an invitation: become who you truly are. It asks for self-examination and forgiveness — of others, but above all of yourself. Answer the call."},
+  {num:"XXI",roman:"XXI",  sym:"🌍", name:"The World",         kw:"Completion · Integration · Dance",           el:"Earth · Saturn",    full:"A dancing figure in a laurel wreath with the four corner figures: bull, lion, eagle, angel. The World is the end of the Major Arcana journey. The Fool has come home. Now he dances — free, whole, present. The cycle is complete."}
 ];
 
 /* Minor Arcana suits */
@@ -395,7 +409,7 @@ function buildMinorCards(suitKey) {
   const cards = [];
   const nums = ["Ace","2","3","4","5","6","7","8","9","10","Page","Knight","Queen","King"];
   const descs = {
-    "Ace":     `The pure beginning van ${s.element.toLowerCase()}. The Ace of ${s.name} brings a new seed of ${s.element === 'Vuur' ? 'inspiration and passion' : s.element === 'Water' ? 'emotion and feeling' : s.element === 'Aarde' ? 'possibility and abundance' : 'thought and clarity'}. It is an invitation — will you take it?`,
+    "Ace":     `The pure beginning of ${s.element.toLowerCase()}. The Ace of ${s.name} brings a new seed of ${s.element === 'Vuur' ? 'inspiration and passion' : s.element === 'Water' ? 'emotion and feeling' : s.element === 'Aarde' ? 'possibility and abundance' : 'thought and clarity'}. It is an invitation — will you take it?`,
     "2":       `Two of ${s.name}: a first choice or balance in the realm of ${s.element.toLowerCase()}. Two forces face each other; you decide how to navigate them.`,
     "3":       `Three of ${s.name}: first growth and expansion. Progress is made; the energy of ${s.element.toLowerCase()} begins to take form. Collaboration or first fruit.`,
     "4":       `Four of ${s.name}: consolidation and rest. A period of stabilisation in ${s.element.toLowerCase()}. Build on what you have; celebrate what is achieved.`,
@@ -407,7 +421,7 @@ function buildMinorCards(suitKey) {
     "10":      `Ten of ${s.name}: completion and release. The cycle of ${s.element.toLowerCase()} is complete. Both the beauty and the weight of the final result.`,
     "Page":   `Page of ${s.name}: the student of ${s.element.toLowerCase()}. Enthusiastic, curious and inexperienced. Standing at the start of the path; full of potential but still developing.`,
     "Knight":  `Knight of ${s.name}: the active force of ${s.element.toLowerCase()}. In full motion — sometimes impulsive, always driven. Brings the energy of the suit into the world.`,
-    "Queen":   `Queen of ${s.name}: the mature feminine power of ${s.element.toLowerCase()}. Meesterlijk in het integreren van deze energie. Intuïtief, zeker en uitnodigend.`,
+    "Queen":   `Queen of ${s.name}: the mature feminine power of ${s.element.toLowerCase()}. Masterful in integrating this energy. Intuitive, assured, and inviting.`,
     "King":    `King of ${s.name}: the master of ${s.element.toLowerCase()}. Has full command of and insight into this energy. Leads others with the power of experience and vision.`
   };
   nums.forEach((n,i) => {
@@ -761,7 +775,7 @@ function renderSpreadArea(animate){
       const summDiv=document.createElement('div'); summDiv.className='sidebar-summary';
       const summText=document.createElement('div'); summText.className='sidebar-summary-text';
       summText.innerHTML='<em style="color:#3a4a6a;font-size:12px;">Synthesising…</em>';
-      summDiv.innerHTML='<div class="sidebar-summary-title">✦ Reading as a Whole</div>';
+      summDiv.innerHTML='<div class="sidebar-summary-title">✦ Combined Reading</div>';
       summDiv.appendChild(summText);
       sidebar.appendChild(summDiv);
       generateSummary(drawnCards, spread.slots, summText);
@@ -824,23 +838,86 @@ function generateSummary(cards, slots, targetEl){
 }
 
 function buildNarrative(cards, slots){
-  function eName(c){ return c ? `<em>${esc(c.name)}</em>` : ''; }
-  function eTheme(c){
-    if(!c||!c.kw) return '';
-    return c.kw.split(/[·,]/).map(s=>s.trim()).filter(Boolean)[0]||'';
-  }
-  const n=cards.map(eName), t=cards.map(eTheme);
+  // cards order for 'deeper': [past(II), present(I), possible(III), insight(IV)]
+  if(slots.length !== 4) return buildChoicesNarrative(cards, slots);
 
-  if(slots.length===4){
-    return `<p>The reading opens with ${n[0]} shaping your past — carrying the quality of <em>${esc(t[0])}</em>. This foundation has led into the present, where ${n[1]} stands: an energy of <em>${esc(t[1])}</em>.</p>
-<p>Moving forward, ${n[2]} appears as a genuine possibility — an invitation toward <em>${esc(t[2])}</em>. These three form a line from origin to horizon.</p>
-<p>Hovering above it all, ${n[3]} is the deeper current — its theme of <em>${esc(t[3])}</em> points to what most deserves your conscious attention right now. This card is not about what happens, but about how you hold it.</p>`;
+  const [past, present, possible, insight] = cards;
+
+  function cardRef(c){
+    if(!c) return 'the card';
+    return `<strong>${esc(c.name)}</strong>`;
   }
-  if(slots.length===2){
-    return `<p>Path A brings ${n[0]}: the essence of <em>${esc(t[0])}</em>. Path B offers ${n[1]}: a quality of <em>${esc(t[1])}</em>.</p>
-<p>Consider which energy feels most honest to where you actually are — not where you think you should be.</p>`;
+
+  function firstKw(c){
+    if(!c || !c.kw) return '';
+    return c.kw.split(/[·,·]/).map(s=>s.trim()).filter(Boolean)[0] || '';
   }
-  return '';
+
+  function firstSentence(c){
+    if(!c || !c.full) return '';
+    return c.full.split('.')[0].trim();
+  }
+
+  const pastKw     = firstKw(past);
+  const presentKw  = firstKw(present);
+  const possibleKw = firstKw(possible);
+  const insightKw  = firstKw(insight);
+
+  return `
+<div class="synthesis-block">
+  <div class="synth-q">
+    <span class="synth-label">The issue is…</span>
+    <span class="synth-text">
+      ${cardRef(present)} stands at the centre of this moment.
+      ${present ? esc(firstSentence(present)) + '.' : ''}
+      The quality at play here is <em>${esc(presentKw)}</em> — this is what the situation is actually asking of you right now.
+    </span>
+  </div>
+  <div class="synth-q">
+    <span class="synth-label">You come from…</span>
+    <span class="synth-text">
+      ${cardRef(past)} has shaped the ground beneath your feet.
+      ${past ? esc(firstSentence(past)) + '.' : ''}
+      The energy of <em>${esc(pastKw)}</em> is the soil this moment grew from — whether you have moved through it or are still carrying it.
+    </span>
+  </div>
+  <div class="synth-q">
+    <span class="synth-label">A possibility presenting itself…</span>
+    <span class="synth-text">
+      ${cardRef(possible)} points toward what could open up.
+      ${possible ? esc(firstSentence(possible)) + '.' : ''}
+      This is not a promise but an invitation: the energy of <em>${esc(possibleKw)}</em> is available to you if you are willing to move toward it.
+    </span>
+  </div>
+  <div class="synth-q">
+    <span class="synth-label">What to pay attention to…</span>
+    <span class="synth-text">
+      ${cardRef(insight)} rises above the other three as the deeper current.
+      ${insight ? esc(firstSentence(insight)) + '.' : ''}
+      <em>${esc(insightKw)}</em> is not about what happens but about how you hold it — the quality of awareness that will make the difference.
+    </span>
+  </div>
+</div>`;
+}
+
+function buildChoicesNarrative(cards, slots){
+  const [a, b] = cards;
+  function cardRef(c){ return c ? `<strong>${esc(c.name)}</strong>` : 'this path'; }
+  function firstKw(c){ return c&&c.kw ? c.kw.split(/[·,·]/).map(s=>s.trim()).filter(Boolean)[0]||'' : ''; }
+  return `<div class="synthesis-block">
+  <div class="synth-q">
+    <span class="synth-label">Path A — ${cardRef(a)}</span>
+    <span class="synth-text">This path carries the energy of <em>${esc(firstKw(a))}</em>. ${a ? esc(a.full.split('.')[0]) + '.' : ''}</span>
+  </div>
+  <div class="synth-q">
+    <span class="synth-label">Path B — ${cardRef(b)}</span>
+    <span class="synth-text">This path carries the energy of <em>${esc(firstKw(b))}</em>. ${b ? esc(b.full.split('.')[0]) + '.' : ''}</span>
+  </div>
+  <div class="synth-q">
+    <span class="synth-label">What to consider…</span>
+    <span class="synth-text">Neither path is simply right or wrong. Consider which quality feels most honest to where you actually are — not where you think you should be.</span>
+  </div>
+</div>`;
 }
 
 /* ══════════════════════════════════════════════
@@ -1180,6 +1257,6 @@ function crc32(data){
   return(c^0xffffffff)>>>0;
 }
 </script>
-<div class="version-badge">Tarot Extractor · v2.3.02 · 2026-03-05</div>
+<div class="version-badge">Tarot Extractor · v2.4 · 2026-03-05</div>
 </body>
 </html>
