@@ -258,6 +258,76 @@
     box-shadow: 0 6px 24px rgba(74,122,255,.22);
   }
   .btn-deck-dl:disabled { opacity: .3; cursor: not-allowed; filter: none; box-shadow: none; }
+  /* ── Send to deck button ── */
+  .btn-send-deck {
+    width: 100%; padding: 11px; font-size: 13px; font-weight: 600;
+    font-family: 'Cinzel', Georgia, serif; letter-spacing: .05em;
+    background: #101828; border: 1px dashed #3a5080; color: #8fa0bf;
+    border-radius: 12px; cursor: pointer; margin-top: 8px;
+    transition: all .2s;
+  }
+  .btn-send-deck:hover:not(:disabled) { border-color:#4a7aff; color:#d6dcff; background:#121e38; }
+  .btn-send-deck:disabled { opacity:.3; cursor:not-allowed; }
+  .btn-send-deck.loaded { border-style:solid; border-color:#4a7aff; color:#d6dcff; background:#0d1830; }
+
+  /* ── Spread tabs ── */
+  .spread-tabs { display:flex; gap:8px; margin-bottom:16px; }
+  .spread-tab {
+    flex:1; padding:10px 8px; font-size:12px; font-weight:600;
+    font-family:'Cinzel',serif; letter-spacing:.04em;
+    background:#0b1020; border:1px solid #27344d; color:#8fa0bf;
+    border-radius:10px; cursor:pointer; transition:all .2s;
+  }
+  .spread-tab:hover { border-color:#4a7aff; color:#d6dcff; }
+  .spread-tab.active { background:#121e38; border-color:#4a7aff; color:#d6dcff; box-shadow:0 0 0 2px rgba(74,122,255,.15); }
+
+  /* ── Spread layout ── */
+  .spread-layout {
+    display:flex; justify-content:center; align-items:flex-end;
+    gap:14px; flex-wrap:wrap; padding:10px 0;
+  }
+  .spread-slot {
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+  }
+  .spread-card-frame {
+    width:110px; border-radius:12px; overflow:hidden;
+    background:#0b1020; border:1.5px dashed #27344d;
+    aspect-ratio:2/3; display:flex; align-items:center; justify-content:center;
+    transition:border-color .2s, box-shadow .2s; position:relative;
+  }
+  .spread-card-frame.filled { border-style:solid; border-color:#2b3a59; }
+  .spread-card-frame canvas { width:100%; height:100%; object-fit:cover; display:block; }
+  .spread-card-frame .spread-card-overlay {
+    position:absolute; inset:0; border-radius:11px;
+    background:linear-gradient(to top, rgba(11,14,20,.95) 38%, transparent);
+    display:flex; flex-direction:column; justify-content:flex-end;
+    padding:8px 6px; opacity:0; transition:opacity .25s; pointer-events:none;
+  }
+  .spread-card-frame:hover .spread-card-overlay { opacity:1; }
+  .spread-card-overlay .ov-name { font-size:9px; font-family:'Cinzel',serif; color:#d6dcff; font-weight:600; text-align:center; line-height:1.3; }
+  .spread-card-overlay .ov-kw { font-size:8.5px; color:#8fa0bf; text-align:center; margin-top:2px; line-height:1.3; }
+
+  .spread-slot-label {
+    font-size:10px; color:#8fa0bf; text-align:center; max-width:110px;
+    line-height:1.4; font-family:'Cinzel',serif; letter-spacing:.03em;
+  }
+  .spread-slot-num {
+    font-size:9px; color:#3a4a6a; text-align:center; font-family:'Cinzel',serif;
+  }
+
+  /* Deeper insight: card 4 floats above */
+  .spread-deeper { display:flex; flex-direction:column; align-items:center; gap:14px; padding:10px 0; }
+  .spread-deeper-top { display:flex; justify-content:center; }
+  .spread-deeper-bottom { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+
+  /* Deck pill */
+  .deck-pill {
+    display:inline-flex; align-items:center; gap:6px;
+    background:#0d1628; border:1px solid #27344d; border-radius:20px;
+    padding:4px 12px 4px 8px; font-size:11px; color:#8fa0bf;
+    margin-bottom:12px;
+  }
+  .deck-pill .dp-count { font-weight:700; color:#d6dcff; font-family:'Cinzel',serif; }
 </style>
 </head>
 <body>
@@ -330,6 +400,10 @@
   <!-- ── Download deck knop ── -->
   <button id="all-export-btn" class="btn-deck-dl" disabled>⬇ Download volledig deck als ZIP</button>
 
+  <!-- ── Send all to deck ── -->
+  <button id="send-to-deck-btn" class="btn-send-deck" disabled>🃏 Stuur alle kaarten naar deck</button>
+  <div id="deck-count-label" style="font-size:11px;color:#8fa0bf;text-align:center;margin-top:6px;min-height:16px;"></div>
+
   <div id="main-status"></div>
 
   <details>
@@ -341,6 +415,26 @@
       De ZIP bevat alle kaarten in submappen per suit, plus een <code>uitleg.txt</code> per kaart.
     </div>
   </details>
+</div>
+
+<!-- ══ SPREAD SECTION ══ -->
+<div class="card" id="spread-card" style="display:none;">
+  <h2 style="margin:0 0 14px;font-family:'Cinzel',serif;letter-spacing:.06em;">✦ Tarot Legpatronen</h2>
+
+  <!-- Spread picker -->
+  <div class="spread-tabs" id="spread-tabs">
+    <button class="spread-tab active" data-spread="daycard">☀ Dagkaart</button>
+    <button class="spread-tab" data-spread="choices">⚖ Keuzes</button>
+    <button class="spread-tab" data-spread="deeper">🔮 Dieper Inzicht</button>
+  </div>
+
+  <!-- Spread display area -->
+  <div id="spread-area"></div>
+
+  <div style="display:flex;gap:10px;margin-top:14px;">
+    <button id="draw-spread-btn" style="flex:1;font-family:'Cinzel',serif;font-size:13px;letter-spacing:.04em;padding:12px;">🔀 Trek kaarten</button>
+    <button id="clear-spread-btn" style="width:auto;padding:12px 16px;font-size:12px;color:#8fa0bf;" disabled>✕ Wis</button>
+  </div>
 </div>
 
 <!-- ══ GROTE ARCANA GRID ══ -->
@@ -632,6 +726,195 @@ function renderSuitGrid(suit){
 function checkAllExport(){
   const hasSomething=gaRegions.length>0||Object.values(suitState).some(s=>s);
   allExportBtn.disabled=!hasSomething;
+  document.getElementById('send-to-deck-btn').disabled=!hasSomething;
+}
+
+/* ══════════════════════════════════════════════
+   DECK — collect all extracted cards
+══════════════════════════════════════════════ */
+let masterDeck = []; // [{hiResCvs, numLabel, name, kw, full}]
+
+document.getElementById('send-to-deck-btn').addEventListener('click', () => {
+  buildMasterDeck();
+});
+
+function buildMasterDeck(){
+  masterDeck = [];
+  // Grote Arcana
+  gaRegions.forEach((reg,i) => {
+    const a = ARCANA[arcanaOrder[i]];
+    masterDeck.push({ hiResCvs: reg.hiResCvs, numLabel: a.roman, name: a.name, kw: a.kw, full: a.full });
+  });
+  // Minor Arcana
+  Object.entries(suitState).forEach(([suit, state]) => {
+    if(!state) return;
+    state.regions.forEach((reg,i) => {
+      const c = state.cards[i];
+      masterDeck.push({ hiResCvs: reg.hiResCvs, numLabel: c.num, name: c.name, kw: c.element, full: c.full });
+    });
+  });
+  // Shuffle
+  for(let i=masterDeck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[masterDeck[i],masterDeck[j]]=[masterDeck[j],masterDeck[i]];}
+
+  const btn = document.getElementById('send-to-deck-btn');
+  btn.classList.add('loaded');
+  btn.textContent = `🃏 Deck bijgewerkt (${masterDeck.length} kaarten)`;
+  document.getElementById('deck-count-label').textContent = `${masterDeck.length} kaarten geschud en klaar om te trekken`;
+  document.getElementById('spread-card').style.display='block';
+  document.getElementById('spread-card').scrollIntoView({behavior:'smooth',block:'start'});
+  renderSpreadArea();
+}
+
+/* ══════════════════════════════════════════════
+   SPREADS
+══════════════════════════════════════════════ */
+let activeSpread = 'daycard';
+let drawnCards = [];
+
+const SPREADS = {
+  daycard: {
+    label: 'Dagkaart',
+    slots: [{ num:'I', label:'Dagkaart', sub:'Jouw boodschap voor vandaag' }]
+  },
+  choices: {
+    label: 'Keuzes',
+    slots: [
+      { num:'I', label:'Situatie A', sub:'Eerste pad of keuze' },
+      { num:'II', label:'Situatie B', sub:'Tweede pad of keuze' }
+    ]
+  },
+  deeper: {
+    label: 'Dieper Inzicht',
+    slots: [
+      { num:'I',  label:'De Situatie',   sub:'Waar je nu staat',        top: false },
+      { num:'II', label:'Het Verleden',  sub:'Wat je hierheen bracht',  top: false },
+      { num:'III',label:'De Mogelijkheid',sub:'Wat open ligt',          top: false },
+      { num:'IV', label:'Wat Bewustzijn Vraagt', sub:'Verborgen laag',  top: true  }
+    ]
+  }
+};
+
+// Tab switching
+document.querySelectorAll('.spread-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.spread-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    activeSpread = tab.dataset.spread;
+    drawnCards = [];
+    renderSpreadArea();
+  });
+});
+
+document.getElementById('draw-spread-btn').addEventListener('click', () => {
+  if(masterDeck.length === 0){ alert('Stuur eerst kaarten naar het deck!'); return; }
+  const spread = SPREADS[activeSpread];
+  const needed = spread.slots.length;
+  // Pick random unique cards
+  const pool = [...masterDeck];
+  drawnCards = [];
+  for(let i=0;i<needed&&pool.length>0;i++){
+    const idx=Math.floor(Math.random()*pool.length);
+    drawnCards.push(pool.splice(idx,1)[0]);
+  }
+  renderSpreadArea(true);
+  document.getElementById('clear-spread-btn').disabled=false;
+});
+
+document.getElementById('clear-spread-btn').addEventListener('click', () => {
+  drawnCards=[];
+  renderSpreadArea();
+  document.getElementById('clear-spread-btn').disabled=true;
+});
+
+function renderSpreadArea(animate){
+  const area = document.getElementById('spread-area');
+  const spread = SPREADS[activeSpread];
+  area.innerHTML='';
+
+  // Deck pill
+  if(masterDeck.length>0){
+    const pill=document.createElement('div');
+    pill.className='deck-pill';
+    pill.innerHTML=`<span>🃏</span><span class="dp-count">${masterDeck.length}</span><span>kaarten in deck</span>`;
+    area.appendChild(pill);
+  }
+
+  if(activeSpread === 'deeper'){
+    const container = document.createElement('div');
+    container.className = 'spread-deeper';
+
+    // Top card (slot index 3)
+    const topRow = document.createElement('div'); topRow.className='spread-deeper-top';
+    topRow.appendChild(makeSpreadSlot(spread.slots[3], drawnCards[3], animate, 3));
+    container.appendChild(topRow);
+
+    // Bottom 3 cards (slots 0,1,2)
+    const botRow = document.createElement('div'); botRow.className='spread-deeper-bottom';
+    [0,1,2].forEach(i => botRow.appendChild(makeSpreadSlot(spread.slots[i], drawnCards[i], animate, i)));
+    container.appendChild(botRow);
+
+    area.appendChild(container);
+  } else {
+    const layout = document.createElement('div');
+    layout.className = 'spread-layout';
+    spread.slots.forEach((slot,i) => layout.appendChild(makeSpreadSlot(slot, drawnCards[i], animate, i)));
+    area.appendChild(layout);
+  }
+}
+
+function makeSpreadSlot(slot, card, animate, idx){
+  const slotEl = document.createElement('div');
+  slotEl.className = 'spread-slot';
+  if(animate) slotEl.style.cssText=`animation:fadeUp .4s ease ${idx*.12}s both`;
+
+  const frame = document.createElement('div');
+  frame.className = 'spread-card-frame' + (card?' filled':'');
+
+  if(card){
+    const cvs = document.createElement('canvas');
+    cvs.width=200; cvs.height=300;
+    const ctx=cvs.getContext('2d');
+    ctx.drawImage(card.hiResCvs,0,0,200,200);
+    // Dark gradient for bottom text area
+    const grad=ctx.createLinearGradient(0,140,0,300);
+    grad.addColorStop(0,'rgba(11,14,20,0)');
+    grad.addColorStop(0.5,'rgba(11,14,20,0.95)');
+    grad.addColorStop(1,'rgba(11,14,20,1)');
+    ctx.fillStyle=grad; ctx.fillRect(0,140,200,160);
+    ctx.textAlign='center';
+    ctx.fillStyle='#d6dcff';
+    ctx.font='bold 13px "Cinzel",serif';
+    ctx.fillText(card.numLabel,100,230);
+    ctx.font='bold 11px system-ui,sans-serif';
+    ctx.fillStyle='#e7eaf0';
+    wrapTextSimple(ctx, card.name, 100, 252, 180, 13);
+    frame.appendChild(cvs);
+
+    const ov=document.createElement('div'); ov.className='spread-card-overlay';
+    ov.innerHTML=`<div class="ov-name">${esc(card.name)}</div><div class="ov-kw">${esc(card.kw)}</div>`;
+    frame.appendChild(ov);
+  } else {
+    frame.innerHTML=`<span style="font-size:1.4rem;opacity:.3">🂠</span>`;
+  }
+
+  const numEl=document.createElement('div'); numEl.className='spread-slot-num'; numEl.textContent=slot.num;
+  const labelEl=document.createElement('div'); labelEl.className='spread-slot-label';
+  labelEl.innerHTML=`<strong>${esc(slot.label)}</strong><br><span style="font-size:9px;font-family:system-ui;">${esc(slot.sub)}</span>`;
+
+  slotEl.appendChild(numEl);
+  slotEl.appendChild(frame);
+  slotEl.appendChild(labelEl);
+  return slotEl;
+}
+
+function wrapTextSimple(ctx,text,x,y,maxW,lineH){
+  const words=text.split(' '); let line='';
+  for(const w of words){
+    const test=line?line+' '+w:w;
+    if(ctx.measureText(test).width>maxW&&line){ctx.fillText(line,x,y);line=w;y+=lineH;}
+    else line=test;
+  }
+  ctx.fillText(line,x,y);
 }
 
 /* ══════════════════════════════════════════════
