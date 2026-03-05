@@ -791,10 +791,6 @@ function makeSpreadSlot(slot, card, animate, idx){
     const ov=document.createElement('div'); ov.className='spread-card-overlay';
     ov.innerHTML=`<div class="ov-name">${esc(card.name)}</div><div class="ov-kw">${esc(card.kw)}</div>`;
     frame.appendChild(ov);
-
-    const ov=document.createElement('div'); ov.className='spread-card-overlay';
-    ov.innerHTML=`<div class="ov-name">${esc(card.name)}</div><div class="ov-kw">${esc(card.kw)}</div>`;
-    frame.appendChild(ov);
   } else {
     frame.innerHTML=`<span style="font-size:1.6rem;opacity:.2">🂠</span>`;
   }
