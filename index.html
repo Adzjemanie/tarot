@@ -1,2123 +1,922 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="nl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tarot Detail Cutter — Major + Suits + Deck Builder</title>
-  <style>
-    :root{
-      --bg:#0b0d12;
-      --panel:#121724;
-      --text:#e9ecf2;
-      --muted:#a9b0c2;
-      --line:rgba(255,255,255,.10);
-      --accent:#7aa2ff;
-      --good:#7CFFB2;
-      --warn:#FFD27A;
-      --shadow: 0 14px 40px rgba(0,0,0,.45);
-      --radius: 18px;
-      --cardRadius: 16px;
-      --ratioW: 2;
-      --ratioH: 3;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarot Extractor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+  body { margin: 0; background: #0b0e14; color: #e7eaf0; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      background: var(--bg);
-      color:var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-    }
-    .wrap{
-      max-width:1200px;
-      margin: 0 auto;
-      padding: 24px 18px 40px;
-    }
+  .card {
+    background: #121826; border: 1px solid #1f2a3d;
+    border-radius: 16px; padding: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25); margin-bottom: 14px;
+  }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  h2 { font-size: 15px; margin: 0 0 10px; color: #d6dcff; }
+  h3 { font-size: 13px; margin: 0 0 8px; color: #b9c2d3; font-weight: 600; letter-spacing: .03em; }
+  p  { margin: 6px 0; color: #b9c2d3; font-size: 13px; }
 
-    header{
-      display:flex;
-      gap:16px;
-      align-items:flex-start;
-      justify-content:space-between;
-      flex-wrap:wrap;
-      margin-bottom: 14px;
-    }
-    h1{
-      margin:0;
-      font-size: 22px;
-      letter-spacing:.2px;
-      font-weight: 720;
-    }
-    .sub{
-      margin:6px 0 0;
-      color:var(--muted);
-      font-size: 13px;
-      line-height:1.35;
-      max-width: 95ch;
-    }
+  label { display: block; font-size: 12px; color: #b9c2d3; margin-bottom: 6px; }
+  input, select, button {
+    width: 100%; box-sizing: border-box;
+    border-radius: 12px; border: 1px solid #27344d;
+    background: #0f1420; color: #e7eaf0;
+    padding: 10px 12px; font-size: 14px;
+  }
+  button { cursor: pointer; background: #1a2540; border-color: #2b3a59; transition: filter .15s; }
+  button:hover { filter: brightness(1.1); }
+  button:disabled { opacity: .35; cursor: not-allowed; filter: none; }
 
-    .panel{
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      margin-top: 14px;
-    }
-    .panel .hd{
-      padding: 12px 14px;
-      border-bottom:1px solid var(--line);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-      flex-wrap:wrap;
-      background: rgba(0,0,0,.22);
-    }
-    .panel .hd .label{
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 650;
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .panel .bd{ padding: 14px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  @media(max-width:520px){ .row2,.row3 { grid-template-columns:1fr; } }
 
-    .controls{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:flex-end;
-    }
-    .btn, .file{
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 14px;
-      cursor:pointer;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      transition: transform .12s ease, border-color .12s ease, background .12s ease;
-      user-select:none;
-      font-weight: 650;
-      font-size: 13px;
-      display:inline-flex;
-      gap:10px;
-      align-items:center;
-    }
-    .btn:hover, .file:hover{
-      transform: translateY(-1px);
-      border-color: rgba(122,162,255,.45);
-      background: rgba(122,162,255,.10);
-    }
-    .btn:active, .file:active{ transform: translateY(0px); }
-    .btn[disabled]{
-      opacity:.45;
-      cursor:not-allowed;
-      transform:none;
-    }
+  .out {
+    margin-top: 12px; padding: 14px;
+    border-radius: 14px; background: #0f1420; border: 1px solid #27344d;
+  }
+  .hint { font-size: 12px; color: #8fa0bf; margin-top: 8px; line-height: 1.4; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
 
-    .pill{
-      font-size: 12px;
-      font-weight: 700;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      color: var(--muted);
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-    }
-    .pill b{ color: var(--text); font-weight: 750; }
+  details { margin-top: 10px; border: 1px solid #27344d; border-radius: 12px; padding: 10px 12px; background: #0b1020; }
+  summary { cursor: pointer; font-size: 13px; color: #d6dcff; user-select: none; list-style: none; }
+  summary::-webkit-details-marker { display:none; }
+  summary::before { content: '▸ '; font-size: 10px; }
+  details[open] summary::before { content: '▾ '; }
 
-    .row{
-      display:grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap: 14px;
-      margin: 0 0 12px;
-    }
-    @media (max-width: 980px){ .row{ grid-template-columns: 1fr; } }
+  /* ── Section divider ── */
+  .section-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px; color: #8fa0bf; letter-spacing: .08em;
+    text-transform: uppercase; margin: 18px 0 12px;
+  }
+  .section-title::after { content:''; flex:1; height:1px; background: linear-gradient(90deg,#1f2a3d,transparent); }
 
-    .preview{
-      width:100%;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      overflow:hidden;
-      position:relative;
-      aspect-ratio: 16/10;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-height: 220px;
-    }
-    .preview canvas{ width:100%; height:100%; display:block; }
-    .preview .empty{
-      position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding: 18px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
-      pointer-events:none;
-    }
-    .dropHint{
-      position:absolute;
-      inset:0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding: 18px;
-      color: rgba(233,236,242,.95);
-      font-size: 13px;
-      line-height: 1.45;
-      background: rgba(122,162,255,.12);
-      border: 2px dashed rgba(122,162,255,.45);
-      border-radius: 16px;
-      pointer-events:none;
-    }
-    .preview.dragover .dropHint{ display:flex; }
+  /* ── Thumb library ── */
+  .thumbs-row { display:flex; gap:8px; flex-wrap:wrap; align-items:flex-start; margin-top:8px; }
+  .thumb {
+    position:relative; width:60px; height:60px; border-radius:9px; overflow:hidden;
+    border:2px solid #27344d; cursor:pointer; flex-shrink:0; transition:border-color .15s;
+  }
+  .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+  .thumb.active { border-color:#4a7aff; }
+  .thumb:not(.active):hover { border-color:#3a5080; }
+  .thumb-x {
+    position:absolute; top:2px; right:2px; background:rgba(11,14,20,.88);
+    border:none; color:#ff6a7a; font-size:.6rem; cursor:pointer;
+    border-radius:50%; width:15px; height:15px; display:flex; align-items:center;
+    justify-content:center; opacity:0; transition:opacity .12s; padding:0; line-height:1;
+  }
+  .thumb:hover .thumb-x { opacity:1; }
+  .thumb-add {
+    width:60px; height:60px; border-radius:9px; flex-shrink:0;
+    border:1px dashed #27344d; background:#0b1020;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    cursor:pointer; color:#8fa0bf; font-size:10px; gap:2px;
+    transition:border-color .15s, color .15s;
+  }
+  .thumb-add:hover { border-color:#4a7aff; color:#7fa8ff; }
+  .thumb-add-plus { font-size:1.3rem; line-height:1; }
 
-    .hint{
-      margin:10px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-    .mini{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top: 10px;
-    }
-    .mini .tag{
-      border:1px dashed rgba(255,255,255,.16);
-      background: rgba(0,0,0,.14);
-      padding: 8px 10px;
-      border-radius: 12px;
-      color: var(--muted);
-      font-size: 12px;
-    }
+  /* ── Grid ── */
+  .tgrid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(155px, 1fr));
+    gap:10px; margin-top:12px;
+  }
 
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(6, minmax(0,1fr));
-      gap: 12px;
-    }
-    @media (max-width: 1200px){ .grid{ grid-template-columns: repeat(5, minmax(0,1fr)); } }
-    @media (max-width: 980px){ .grid{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
-    @media (max-width: 700px){ .grid{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
-    @media (max-width: 520px){ .grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  /* ── Tarot card ── */
+  .tcard {
+    background:#121826; border:1px solid #1f2a3d; border-radius:12px;
+    overflow:hidden; display:flex; flex-direction:column;
+    animation:fadeUp .3s ease both; transition:border-color .2s, box-shadow .2s;
+  }
+  .tcard:hover { border-color:#2b3a59; box-shadow:0 6px 20px rgba(0,0,0,.4); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  .tcard.exiting { animation:cardOut .2s ease forwards; }
+  @keyframes cardOut { to{opacity:0;transform:translateY(-8px) scale(.97)} }
 
-    .card{
-      position:relative;
-      border-radius: var(--cardRadius);
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.16);
-      box-shadow: 0 10px 24px rgba(0,0,0,.34);
-      cursor: default;
-      transform: translateZ(0);
-    }
-    .cardInner{
-      position:relative;
-      width:100%;
-      aspect-ratio: calc(var(--ratioW) / var(--ratioH));
-      background: rgba(0,0,0,.2);
-      cursor:pointer; /* click = download zip */
-    }
-    .card canvas{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      display:block;
-    }
+  /* Number — centered, styled font */
+  .tcard-num {
+    text-align:center; padding:7px 6px 3px;
+    font-family:'Cinzel', Georgia, serif;
+    font-size:13px; font-weight:600; letter-spacing:.12em;
+    color:#d6dcff;
+  }
 
-    .tarotFont{
-      font-family: ui-serif, Georgia, "Times New Roman", serif;
-      letter-spacing: .7px;
-      text-transform: uppercase;
-    }
+  /* Image area */
+  .tcard-img {
+    position:relative; overflow:hidden;
+    margin:0 7px; border-radius:7px;
+    aspect-ratio:1; background:#0f1420;
+  }
+  .tcard-img canvas {
+    width:100%; height:100%; object-fit:cover; display:block;
+    transition:transform .3s ease;
+  }
+  .tcard:hover .tcard-img canvas { transform:scale(1.05); }
 
-    .num{
-      position:absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 1.7px;
-      color: rgba(255,255,255,.96);
-      text-shadow: 0 2px 12px rgba(0,0,0,.85), 0 1px 0 rgba(0,0,0,.9);
-      pointer-events:none;
-    }
-    /* title almost touching bottom */
-    .titleUnder{
-      position:absolute;
-      bottom: 5px;
-      left: 10px;
-      right: 10px;
-      font-size: 12px;
-      font-weight: 850;
-      color: rgba(255,255,255,.96);
-      text-shadow: 0 2px 14px rgba(0,0,0,.90), 0 1px 0 rgba(0,0,0,.9);
-      text-align:center;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      pointer-events:none;
-    }
+  /* Hover tooltip */
+  .tcard-tip {
+    position:absolute; inset:0; border-radius:7px;
+    background:linear-gradient(to top, rgba(11,14,20,.97) 52%, rgba(11,14,20,.6) 82%, transparent);
+    padding:.7rem .65rem .6rem;
+    display:flex; flex-direction:column; justify-content:flex-end;
+    opacity:0; transition:opacity .25s; pointer-events:none;
+  }
+  .tcard:hover .tcard-tip { opacity:1; }
+  .tcard-tip .tip-name { font-size:10px; font-weight:600; color:#d6dcff; margin-bottom:3px; font-family:'Cinzel',serif; letter-spacing:.05em; }
+  .tcard-tip p { font-size:10.5px; color:#b9c2d3; line-height:1.4; margin:0; }
 
-    .overlay{
-      position:absolute;
-      inset:0;
-      opacity:0;
-      transition: opacity .18s ease;
-      background: rgba(0,0,0,.40);
-      display:flex;
-      align-items:flex-end;
-      padding: 12px;
-    }
-    .overlay p{
-      margin:0;
-      font-size: 12px;
-      line-height: 1.35;
-      color: rgba(255,255,255,.96);
-      text-shadow: 0 2px 12px rgba(0,0,0,.9);
-    }
-    .card:hover .overlay{ opacity:1; }
+  /* Title block */
+  .tcard-body { padding:6px 8px 3px; text-align:center; }
+  .tcard-title { font-size:12px; font-weight:600; color:#e7eaf0; line-height:1.3; }
+  .tcard-kw { font-size:10px; color:#8fa0bf; margin-top:2px; line-height:1.3; }
+  .tcard-el { font-size:9px; color:#3a4a6a; margin-top:1px; font-family:ui-monospace,monospace; }
 
-    .actions{
-      display:flex;
-      gap:8px;
-      padding: 10px;
-      border-top: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.14);
-    }
-    .smallBtn{
-      flex:1;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.05);
-      color: var(--text);
-      padding: 8px 10px;
-      border-radius: 12px;
-      cursor:pointer;
-      font-weight: 750;
-      font-size: 12px;
-      transition: transform .12s ease, border-color .12s ease, background .12s ease;
-      user-select:none;
-      display:flex;
-      gap:8px;
-      align-items:center;
-      justify-content:center;
-      text-decoration:none;
-      white-space: nowrap;
-    }
-    .smallBtn:hover{
-      transform: translateY(-1px);
-      border-color: rgba(124,255,178,.35);
-      background: rgba(124,255,178,.10);
-    }
-    .smallBtn:active{ transform: translateY(0px); }
-    .smallBtn[disabled]{ opacity:.45; cursor:not-allowed; transform:none; }
+  .tcard-footer { padding:4px 8px 8px; display:flex; justify-content:center; }
+  .btn-dl-sm {
+    font-size:10px; padding:3px 10px; border-radius:7px;
+    background:#0f1420; border:1px solid #27344d; color:#b9c2d3;
+    cursor:pointer; transition:filter .15s; width:auto;
+  }
+  .btn-dl-sm:hover { filter:brightness(1.15); }
 
-    .kbd{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 11px;
-      padding: 3px 6px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.24);
-      color: rgba(233,236,242,.9);
-    }
-    input[type="range"]{ width:100%; }
+  /* Suit upload sections */
+  .suit-section { margin-top:10px; }
+  .suit-header {
+    display:flex; align-items:center; gap:10px;
+    padding:10px 12px; border-radius:10px;
+    background:#0f1420; border:1px solid #27344d; margin-bottom:8px;
+  }
+  .suit-icon { font-size:1.3rem; }
+  .suit-name { font-size:13px; font-weight:600; color:#d6dcff; flex:1; }
+  .suit-sub  { font-size:11px; color:#8fa0bf; }
+  .suit-status { font-size:11px; color:#8fa0bf; }
+  .suit-status.done { color:#6fcf97; }
+  .suit-upload-btn { width:auto; padding:6px 14px; font-size:12px; white-space:nowrap; flex-shrink:0; }
 
-    /* Deck builder */
-    .deckRow{
-      display:grid;
-      grid-template-columns: 1fr 1.2fr;
-      gap: 14px;
-      align-items:start;
-    }
-    @media (max-width: 980px){ .deckRow{ grid-template-columns: 1fr; } }
+  /* Status */
+  #main-status { font-size:12px; color:#8fa0bf; margin-top:8px; min-height:16px; }
+  #main-status.working { color:#7fa8ff; }
+  #main-status.done    { color:#6fcf97; }
 
-    .stackWrap{
-      display:flex;
-      gap: 14px;
-      align-items:flex-start;
-      flex-wrap:wrap;
-    }
-    .stack{
-      width: 180px;
-      aspect-ratio: 2/3;
-      border-radius: 18px;
-      border: 1px dashed rgba(255,255,255,.20);
-      background: rgba(0,0,0,.18);
-      position:relative;
-      overflow:hidden;
-      box-shadow: 0 12px 30px rgba(0,0,0,.35);
-    }
-    .stack.dragover{
-      border-color: rgba(122,162,255,.55);
-      background: rgba(122,162,255,.10);
-    }
-    .stack .stackCard{
-      position:absolute;
-      inset:0;
-      transform-origin: 50% 70%;
-      border-radius: 18px;
-      overflow:hidden;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.18);
-    }
-    .stack .stackCard img{
-      width:100%;
-      height:100%;
-      object-fit: cover;
-      display:block;
-    }
-    .stack .emptyStack{
-      position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color: var(--muted);
-      font-size: 12px;
-      text-align:center;
-      padding: 14px;
-      pointer-events:none;
-    }
+  /* Export overlay */
+  #export-overlay {
+    display:none; position:fixed; inset:0; z-index:100;
+    background:rgba(11,14,20,.93); backdrop-filter:blur(8px);
+    align-items:center; justify-content:center; flex-direction:column; gap:12px;
+  }
+  #export-overlay.visible { display:flex; }
+  .ex-title { font-size:15px; font-weight:600; color:#d6dcff; }
+  #exp-track { width:260px; height:4px; background:#1f2a3d; border-radius:2px; overflow:hidden; }
+  #exp-fill  { height:100%; background:#4a7aff; border-radius:2px; width:0%; transition:width .1s; }
+  #exp-msg   { font-size:12px; color:#8fa0bf; }
 
-    .thumbs{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-    }
-    .thumb{
-      width: 72px;
-      aspect-ratio: 2/3;
-      border-radius: 12px;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      position:relative;
-    }
-    .thumb img{ width:100%; height:100%; object-fit: cover; display:block; }
-    .thumb button{
-      position:absolute;
-      top:6px; right:6px;
-      border:1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.45);
-      color: rgba(255,255,255,.92);
-      border-radius: 10px;
-      padding: 4px 6px;
-      cursor:pointer;
-      font-size: 11px;
-      font-weight: 800;
-    }
-    .thumb .drag{
-      position:absolute;
-      left:6px; top:6px;
-      border:1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.45);
-      color: rgba(255,255,255,.92);
-      border-radius: 10px;
-      padding: 4px 6px;
-      cursor:grab;
-      font-size: 11px;
-      font-weight: 900;
-      user-select:none;
-    }
+  /* Suit accent colors */
+  .suit-vuur   .tcard-el, .suit-vuur   .tcard-num { color:#d97a4a; }
+  .suit-water  .tcard-el, .suit-water  .tcard-num { color:#4a8fd9; }
+  .suit-aarde  .tcard-el, .suit-aarde  .tcard-num { color:#6ab06a; }
+  .suit-lucht  .tcard-el, .suit-lucht  .tcard-num { color:#b0a0d0; }
+  .suit-groot  .tcard-num { color:#d6dcff; }
 
-    /* Spreads */
-    .spreads{ display:grid; gap: 12px; }
-    .spreadTabs{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    .tab{
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.04);
-      color: var(--text);
-      padding: 8px 10px;
-      border-radius: 999px;
-      cursor:pointer;
-      font-weight: 800;
-      font-size: 12px;
-      transition: transform .12s ease, border-color .12s ease, background .12s ease;
-    }
-    .tab:hover{ transform: translateY(-1px); border-color: rgba(122,162,255,.45); background: rgba(122,162,255,.10); }
-    .tab.active{ border-color: rgba(124,255,178,.35); background: rgba(124,255,178,.10); }
+  /* ── Upload grid (5 drop zones on top) ── */
+  .upload-grid{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:10px;
+    margin-top:10px;
+  }
+  @media(max-width:1100px){ .upload-grid{ grid-template-columns:repeat(3,1fr);} }
+  @media(max-width:720px){  .upload-grid{ grid-template-columns:repeat(2,1fr);} }
+  @media(max-width:520px){  .upload-grid{ grid-template-columns:1fr;} }
 
-    .spreadBoard{
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.16);
-      border-radius: 18px;
-      padding: 14px;
-      box-shadow: 0 12px 30px rgba(0,0,0,.30);
-    }
-    .slots{
-      display:grid;
-      gap: 14px;
-      align-items:end;
-      justify-items:center;
-    }
-    .slots.day{ grid-template-columns: 1fr; }
-    .slots.choice{ grid-template-columns: repeat(2, 1fr); }
-    .slots.insight{
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: auto auto;
-    }
+  .upload-tile{
+    background:#0f1420;
+    border:1px solid #27344d;
+    border-radius:14px;
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    min-height:140px;
+  }
+  .upload-tile h3{ margin:0; }
+  .upload-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .upload-status{
+    font-size:11px; color:#8fa0bf;
+    white-space:nowrap;
+  }
+  .upload-status.done{ color:#6fcf97; }
+  .upload-status.working{ color:#7fa8ff; }
+  .dropbox{
+    flex:1;
+    border:1px dashed #27344d;
+    border-radius:12px;
+    padding:14px 10px;
+    text-align:center;
+    cursor:pointer;
+    background:#0b1020;
+    transition:border-color .15s, filter .15s;
+    user-select:none;
+  }
+  .dropbox:hover{ border-color:#4a7aff; filter:brightness(1.05); }
+  .dropbox.drag{ border-color:#4a7aff; }
+  .drop-title{ font-size:13px; font-weight:600; color:#d6dcff; }
+  .drop-hint{ font-size:11px; color:#8fa0bf; margin-top:4px; line-height:1.35; }
 
-    .slot{
-      width: 180px;
-      max-width: 100%;
-      aspect-ratio: 2/3;
-      border-radius: 18px;
-      border: 1px dashed rgba(255,255,255,.22);
-      background: rgba(0,0,0,.12);
-      position:relative;
-      overflow:hidden;
-    }
-    .slot.dragover{
-      border-color: rgba(122,162,255,.55);
-      background: rgba(122,162,255,.10);
-    }
-    .slot img{ width:100%; height:100%; object-fit: cover; display:block; }
-
-    .slot .slotNum{
-      position:absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 1.7px;
-      color: rgba(255,255,255,.96);
-      text-shadow: 0 2px 12px rgba(0,0,0,.85), 0 1px 0 rgba(0,0,0,.9);
-      pointer-events:none;
-    }
-    .slot .slotTitle{
-      position:absolute;
-      bottom: 5px;
-      left: 10px;
-      right: 10px;
-      font-size: 12px;
-      font-weight: 850;
-      color: rgba(255,255,255,.96);
-      text-shadow: 0 2px 14px rgba(0,0,0,.90), 0 1px 0 rgba(0,0,0,.9);
-      text-align:center;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      pointer-events:none;
-    }
-
-    .slotLabel{
-      margin-top:8px;
-      font-size: 12px;
-      color: var(--muted);
-      text-align:center;
-      font-weight: 750;
-      letter-spacing:.3px;
-    }
-
-    .insightTop{  grid-column: 3 / 4; grid-row: 1 / 2; align-self:start; }
-    .insightPast{ grid-column: 1 / 2; grid-row: 2 / 3; }
-    .insightNow{  grid-column: 2 / 3; grid-row: 2 / 3; }
-    .insightPoss{ grid-column: 3 / 4; grid-row: 2 / 3; }
-
-    footer{
-      margin-top: 18px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height:1.4;
-      opacity:.9;
-    }
-  </style>
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>Tarot Detail Cutter — Major + Suits + Deck Builder</h1>
-        <p class="sub">
-          Drag & drop an image onto each section preview (or click Upload). Cards are auto-cropped into tarot format.
-          Hover a card for meaning. Click the card image to download (ZIP includes PNG + meaning).
-          Use <b>Send to Tarotdeck</b> (max 5) and then deal spreads (or drag cards onto spread slots).
-        </p>
-      </div>
-      <div class="pill" title="Selection method"><b>Selector</b> edge+variance</div>
-    </header>
+<div class="wrap">
 
-    <!-- GLOBAL SETTINGS -->
-    <section class="panel">
-      <div class="hd">
-        <div class="label">🧪 Global settings</div>
-        <div class="label">Card aspect: <span class="kbd">2:3</span></div>
-      </div>
-      <div class="bd">
-        <div class="row" style="margin:0;">
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span class="label" style="color:var(--text); font-weight:750">Crop zoom</span>
-              <span class="pill" id="zoomLabel"><b>Medium</b></span>
-            </div>
-            <input id="zoom" type="range" min="0" max="100" value="55" />
-            <p class="hint" style="margin-top:8px">
-              <span class="kbd">Left</span> = tighter details • <span class="kbd">Right</span> = wider context
-            </p>
-          </div>
+<!-- ══ HEADER CARD ══ -->
+<div class="card">
+  <h1>Tarot Extractor</h1>
+  <p>Upload afbeeldingen voor de Grote Arcana en de vier suits van de Kleine Arcana. Elke kaart wordt als PNG gedownload met nummer en titel erin gebakken. Werkt volledig offline.</p>
 
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span class="label" style="color:var(--text); font-weight:750">Non-overlap strength</span>
-              <span class="pill" id="overlapLabel"><b>Balanced</b></span>
-            </div>
-            <input id="overlap" type="range" min="0" max="100" value="55" />
-            <p class="hint" style="margin-top:8px">
-              Higher = spreads crops out more (less overlap).
-            </p>
-          </div>
+  <div class="section-title">Uploads — sleep of klik (5 vakjes)</div>
+
+  <div class="upload-grid">
+    <!-- Grote Arcana -->
+    <div class="upload-tile">
+      <div class="upload-row">
+        <h3>Grote Arcana</h3>
+        <span class="upload-status" id="status-top-ga">Geen afbeeldingen</span>
+      </div>
+      <button id="ga-upload-btn">＋ Bestanden kiezen</button>
+      <input type="file" id="ga-file-input" accept="image/*" multiple style="display:none">
+      <div id="ga-drop-zone" class="dropbox">
+        <div class="drop-title">Sleep afbeeldingen hiernaartoe</div>
+        <div class="drop-hint">JPG · PNG · WEBP · meerdere tegelijk</div>
+      </div>
+    </div>
+
+    <!-- Staven -->
+    <div class="upload-tile">
+      <div class="upload-row">
+        <h3>Staven (Vuur)</h3>
+        <span class="upload-status" id="status-top-vuur">Geen afbeelding</span>
+      </div>
+      <input type="file" id="file-vuur" accept="image/*" style="display:none" onchange="loadSuit('vuur',this)">
+      <div class="dropbox" id="drop-vuur">
+        <div class="drop-title">Sleep afbeelding hiernaartoe</div>
+        <div class="drop-hint">1 afbeelding · maakt 14 kaarten</div>
+      </div>
+</div>
+      <div class="thumbs-row" id="thumb-vuur" style="display:none;"></div>
+      <div class="tgrid suit-vuur" id="grid-vuur" style="display:none;"></div>
+    </div>
+
+    <!-- Water -->
+    <div class="suit-section" data-suit="water">
+      <div class="suit-header">
+        <span class="suit-icon">🌊</span>
+        <div>
+          <div class="suit-name">Bekers — Water</div>
+          <div class="suit-sub">Emotie · Intuïtie · Relaties</div>
         </div>
+        <span class="suit-status" id="status-bottom-water">Geen afbeelding</span>
+</div>
+      <div class="thumbs-row" id="thumb-water" style="display:none;"></div>
+      <div class="tgrid suit-water" id="grid-water" style="display:none;"></div>
+    </div>
 
-        <div class="mini" style="margin-top:12px;">
-          <div class="tag">Drag & drop images onto each preview area</div>
-          <div class="tag">Click a card image = download ZIP</div>
-          <div class="tag">Line-art overlay is drawn per card</div>
+    <!-- Aarde -->
+    <div class="suit-section" data-suit="aarde">
+      <div class="suit-header">
+        <span class="suit-icon">🌿</span>
+        <div>
+          <div class="suit-name">Schijven — Aarde</div>
+          <div class="suit-sub">Materie · Lichaam · Rijkdom</div>
         </div>
-      </div>
-    </section>
+        <span class="suit-status" id="status-bottom-aarde">Geen afbeelding</span>
+</div>
+      <div class="thumbs-row" id="thumb-aarde" style="display:none;"></div>
+      <div class="tgrid suit-aarde" id="grid-aarde" style="display:none;"></div>
+    </div>
 
-    <!-- DECK BUILDER + SPREADS -->
-    <section class="panel" id="deckPanel">
-      <div class="hd">
-        <div class="label">🂠 Tarotdeck (max 5 cards)</div>
-        <div class="controls">
-          <button class="btn" id="deckShuffle" disabled>🔀 Shuffle deck</button>
-          <button class="btn" id="deckDownload" disabled>⬇️ Download deck (ZIP)</button>
-          <button class="btn" id="deckClear" disabled>🗑️ Clear deck</button>
+    <!-- Lucht -->
+    <div class="suit-section" data-suit="lucht">
+      <div class="suit-header">
+        <span class="suit-icon">💨</span>
+        <div>
+          <div class="suit-name">Zwaarden — Lucht</div>
+          <div class="suit-sub">Verstand · Conflict · Waarheid</div>
         </div>
-      </div>
-      <div class="bd">
-        <div class="deckRow">
-          <div>
-            <div class="stackWrap">
-              <div class="stack" id="deckStack" aria-label="Deck stack">
-                <div class="emptyStack" id="deckEmpty">No cards yet.<br/>Use “Send to Tarotdeck” on any generated card.</div>
-              </div>
-              <div>
-                <div class="pill" id="deckCountPill"><b>Deck</b> 0/5</div>
-                <p class="hint" style="margin-top:10px;">
-                  Drag the small deck thumbnails onto spread slots to place them manually.
-                </p>
-                <div class="thumbs" id="deckThumbs" style="margin-top:10px;"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="spreads">
-            <div class="spreadTabs">
-              <button class="tab active" data-spread="day">Card of the Day</button>
-              <button class="tab" data-spread="choice">Choice</button>
-              <button class="tab" data-spread="insight">Insight</button>
-              <span class="pill"><b>Tip</b> drag cards onto slots</span>
-              <button class="btn" id="dealBtn" disabled style="margin-left:auto;">🃏 Deal</button>
-              <button class="btn" id="resetSpread" disabled>↩ Reset</button>
-            </div>
-
-            <div class="spreadBoard">
-              <div id="spreadSlots" class="slots day"></div>
-              <p class="hint" style="margin:12px 0 0;">
-                Deal draws from your deck (random top). Or drag thumbnails onto the slots to place them.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- GENERATORS -->
-    <div id="decks"></div>
-
-    <footer>
-      Everything runs locally, works on GitHub Pages. Meanings are included in every download (TXT + JSON).
-    </footer>
+        <span class="suit-status" id="status-bottom-lucht">Geen afbeelding</span>
+</div>
+      <div class="thumbs-row" id="thumb-lucht" style="display:none;"></div>
+      <div class="tgrid suit-lucht" id="grid-lucht" style="display:none;"></div>
+    </div>
   </div>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- Export overlay -->
+<div id="export-overlay">
+  <div class="ex-title">Exporteren…</div>
+  <div id="exp-track"><div id="exp-fill"></div></div>
+  <div id="exp-msg">Bezig…</div>
+</div>
+
+<canvas id="work-canvas" style="display:none"></canvas>
+<canvas id="render-canvas" style="display:none"></canvas>
 
 <script>
-(() => {
-  // -----------------------------
-  // Card data
-  // -----------------------------
-  const MAJOR = [
-    { n: 0,  title: "The Fool",          desc: "Beginnings, spontaneity, trust. Step forward with open curiosity." },
-    { n: 1,  title: "The Magician",      desc: "Will, skill, manifestation. Focus your tools and make it real." },
-    { n: 2,  title: "The High Priestess",desc: "Intuition, mystery, inner knowing. Listen beneath the surface." },
-    { n: 3,  title: "The Empress",       desc: "Nurture, abundance, creation. Growth through care and embodiment." },
-    { n: 4,  title: "The Emperor",       desc: "Structure, authority, stability. Lead with clear boundaries." },
-    { n: 5,  title: "The Hierophant",    desc: "Tradition, learning, guidance. Wisdom through shared values." },
-    { n: 6,  title: "The Lovers",        desc: "Union, choice, alignment. Commit to what matches your values." },
-    { n: 7,  title: "The Chariot",       desc: "Drive, control, victory. Steer opposing forces with discipline." },
-    { n: 8,  title: "Strength",          desc: "Courage, compassion, resilience. Gentle power over brute force." },
-    { n: 9,  title: "The Hermit",        desc: "Solitude, insight, truth. Step back to see what matters." },
-    { n: 10, title: "Wheel of Fortune",  desc: "Cycles, change, turning points. Adapt as the wheel turns." },
-    { n: 11, title: "Justice",           desc: "Fairness, clarity, consequences. Choose integrity and balance." },
-    { n: 12, title: "The Hanged Man",    desc: "Pause, surrender, new view. Let go to gain perspective." },
-    { n: 13, title: "Death",             desc: "Endings, transformation, release. Clear space for renewal." },
-    { n: 14, title: "Temperance",        desc: "Balance, patience, harmony. Blend opposites into a steady flow." },
-    { n: 15, title: "The Devil",         desc: "Attachment, temptation, shadow. Notice what binds you—and why." },
-    { n: 16, title: "The Tower",         desc: "Upheaval, truth revealed. What’s unstable falls away fast." },
-    { n: 17, title: "The Star",          desc: "Hope, renewal, inspiration. A quiet light returns your faith." },
-    { n: 18, title: "The Moon",          desc: "Dreams, illusion, uncertainty. Trust intuition; clear fear’s fog." },
-    { n: 19, title: "The Sun",           desc: "Joy, vitality, success. Step into warmth, clarity, and truth." },
-    { n: 20, title: "Judgement",         desc: "Awakening, calling, release. Answer the call and rise renewed." },
-    { n: 21, title: "The World",         desc: "Completion, integration, wholeness. A cycle closes; mastery earned." }
-  ];
-
-  function makeMinorSuit(suitName){
-    const s = suitName;
-    const flavor = {
-      "Wands":       "passion, will, creative drive",
-      "Cups":        "emotion, intuition, connection",
-      "Pentacles":   "work, resources, the physical world",
-      "Swords":      "thought, truth, communication"
-    }[s];
-
-    const base = [
-      {n:1,  t:`Ace of ${s}`,    d:`A new spark opens: ${flavor}.`},
-      {n:2,  t:`Two of ${s}`,    d:`Planning and choices. Weigh options and commit.`},
-      {n:3,  t:`Three of ${s}`,  d:`Momentum and expansion. Early results and growth.`},
-      {n:4,  t:`Four of ${s}`,   d:`Stability and rest. Create a safe base; recover.`},
-      {n:5,  t:`Five of ${s}`,   d:`Challenge and friction. Learn through testing.`},
-      {n:6,  t:`Six of ${s}`,    d:`Progress and recognition. A step forward after effort.`},
-      {n:7,  t:`Seven of ${s}`,  d:`Defense and resolve. Hold your ground; protect it.`},
-      {n:8,  t:`Eight of ${s}`,  d:`Speed and movement. Things shift quickly—focus.`},
-      {n:9,  t:`Nine of ${s}`,   d:`Resilience and boundaries. Stay steady; you’re close.`},
-      {n:10, t:`Ten of ${s}`,    d:`Completion and weight. Finish, delegate, or release.`},
-      {n:11, t:`Page of ${s}`,   d:`Curiosity and learning. A message or first attempt.`},
-      {n:12, t:`Knight of ${s}`, d:`Action and pursuit. Move boldly—channel intensity.`},
-      {n:13, t:`Queen of ${s}`,  d:`Mature expression. Inner mastery; steady power.`},
-      {n:14, t:`King of ${s}`,   d:`Authority and direction. Lead with wisdom and clarity.`},
-    ];
-    return base.map(x => ({ n:x.n, title:x.t, desc:x.d }));
-  }
-
-  const SECTIONS = [
-    { id:"major", label:"Major Arcana (0–21)", emoji:"🃏", count:22, cards: MAJOR, hint:"Drop an image here → 22 Major Arcana crops." },
-    { id:"wands", label:"Wands (Fire) — 14 cards", emoji:"🔥", count:14, cards: makeMinorSuit("Wands"), hint:"Drop an image here → 14 Wands crops." },
-    { id:"cups",  label:"Cups (Water) — 14 cards", emoji:"💧", count:14, cards: makeMinorSuit("Cups"), hint:"Drop an image here → 14 Cups crops." },
-    { id:"pents", label:"Pentacles (Earth) — 14 cards", emoji:"🌿", count:14, cards: makeMinorSuit("Pentacles"), hint:"Drop an image here → 14 Pentacles crops." },
-    { id:"swords",label:"Swords (Air) — 14 cards", emoji:"🌬️", count:14, cards: makeMinorSuit("Swords"), hint:"Drop an image here → 14 Swords crops." },
-  ];
-
-  // -----------------------------
-  // ZIP (store, no compression)
-  // -----------------------------
-  function crc32Table(){
-    const tbl = new Uint32Array(256);
-    for (let i=0;i<256;i++){
-      let c = i;
-      for (let k=0;k<8;k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
-      tbl[i] = c >>> 0;
-    }
-    return tbl;
-  }
-  const CRC_TBL = crc32Table();
-  function crc32(u8){
-    let c = 0xFFFFFFFF;
-    for (let i=0;i<u8.length;i++){
-      c = CRC_TBL[(c ^ u8[i]) & 0xFF] ^ (c >>> 8);
-    }
-    return (c ^ 0xFFFFFFFF) >>> 0;
-  }
-  const te = new TextEncoder();
-  function u16(n){ return new Uint8Array([n & 255, (n>>>8) & 255]); }
-  function u32(n){ return new Uint8Array([n & 255, (n>>>8)&255, (n>>>16)&255, (n>>>24)&255]); }
-  function concatU8(parts){
-    let len = 0;
-    for (const p of parts) len += p.length;
-    const out = new Uint8Array(len);
-    let off = 0;
-    for (const p of parts){ out.set(p, off); off += p.length; }
-    return out;
-  }
-  class ZipStore {
-    constructor(){ this.files = []; }
-    addFile(name, dataU8){
-      const nameU8 = te.encode(name);
-      const crc = crc32(dataU8);
-      this.files.push({ nameU8, dataU8, crc });
-    }
-    toBlob(){
-      const localParts = [];
-      const centralParts = [];
-      let offset = 0;
-
-      for (const f of this.files){
-        const localHeader = concatU8([
-          u32(0x04034b50), u16(20), u16(0), u16(0),
-          u16(0), u16(0),
-          u32(f.crc),
-          u32(f.dataU8.length),
-          u32(f.dataU8.length),
-          u16(f.nameU8.length),
-          u16(0)
-        ]);
-        localParts.push(localHeader, f.nameU8, f.dataU8);
-
-        const centralHeader = concatU8([
-          u32(0x02014b50),
-          u16(20), u16(20),
-          u16(0), u16(0),
-          u16(0), u16(0),
-          u32(f.crc),
-          u32(f.dataU8.length),
-          u32(f.dataU8.length),
-          u16(f.nameU8.length),
-          u16(0), u16(0), u16(0), u16(0),
-          u32(0),
-          u32(offset)
-        ]);
-        centralParts.push(centralHeader, f.nameU8);
-
-        offset += localHeader.length + f.nameU8.length + f.dataU8.length;
-      }
-
-      const centralStart = offset;
-      const centralData = concatU8(centralParts);
-      offset += centralData.length;
-
-      const endRecord = concatU8([
-        u32(0x06054b50),
-        u16(0), u16(0),
-        u16(this.files.length),
-        u16(this.files.length),
-        u32(centralData.length),
-        u32(centralStart),
-        u16(0)
-      ]);
-
-      return new Blob([concatU8([...localParts, centralData, endRecord])], { type: "application/zip" });
-    }
-  }
-
-  function safeFileName(s){
-    return s.replace(/[^\w\-]+/g, "_").replace(/_+/g,"_").replace(/^_+|_+$/g,"");
-  }
-
-  async function canvasToPngU8(canvas){
-    const blob = await new Promise(res => canvas.toBlob(res, "image/png", 1.0));
-    return new Uint8Array(await blob.arrayBuffer());
-  }
-  async function canvasToBlobAndUrl(canvas){
-    const blob = await new Promise(res => canvas.toBlob(res, "image/png", 1.0));
-    const url = URL.createObjectURL(blob);
-    return { blob, url };
-  }
-
-  // -----------------------------
-  // Global settings UI
-  // -----------------------------
-  const zoomEl = document.getElementById("zoom");
-  const overlapEl = document.getElementById("overlap");
-  const zoomLabelEl = document.getElementById("zoomLabel");
-  const overlapLabelEl = document.getElementById("overlapLabel");
-
-  function zoomPreset(val){
-    if (val < 34) return { name: "Tight",  base: 0.18 };
-    if (val < 67) return { name: "Medium", base: 0.26 };
-    return            { name: "Wide",   base: 0.34 };
-  }
-  function overlapPreset(val){
-    if (val < 34) return { name: "Loose",   iouMax: 0.40 };
-    if (val < 67) return { name: "Balanced",iouMax: 0.25 };
-    return            { name: "Strict",  iouMax: 0.14 };
-  }
-  function updateLabels(){
-    zoomLabelEl.innerHTML = "<b>" + zoomPreset(+zoomEl.value).name + "</b>";
-    overlapLabelEl.innerHTML = "<b>" + overlapPreset(+overlapEl.value).name + "</b>";
-  }
-  updateLabels();
-  zoomEl.addEventListener("input", updateLabels);
-  overlapEl.addEventListener("input", updateLabels);
-
-  // -----------------------------
-  // Crop selection
-  // -----------------------------
-  function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
-  function iou(a,b){
-    const x1 = Math.max(a.x, b.x);
-    const y1 = Math.max(a.y, b.y);
-    const x2 = Math.min(a.x + a.w, b.x + b.w);
-    const y2 = Math.min(a.y + a.h, b.y + b.h);
-    const iw = Math.max(0, x2 - x1);
-    const ih = Math.max(0, y2 - y1);
-    const inter = iw*ih;
-    const uni = a.w*a.h + b.w*b.h - inter;
-    return uni <= 0 ? 0 : inter / uni;
-  }
-  function computeScore(offCanvas, rect){
-    const patchW = 48, patchH = 72;
-    const tmp = document.createElement("canvas");
-    tmp.width = patchW; tmp.height = patchH;
-    const tctx = tmp.getContext("2d", { willReadFrequently: true });
-    tctx.drawImage(offCanvas, rect.x, rect.y, rect.w, rect.h, 0, 0, patchW, patchH);
-    const data = tctx.getImageData(0,0,patchW,patchH).data;
-
-    const L = new Float32Array(patchW*patchH);
-    let mean = 0;
-    for (let i=0,p=0;i<data.length;i+=4,p++){
-      const r=data[i], g=data[i+1], b=data[i+2];
-      const y = 0.2126*r + 0.7152*g + 0.0722*b;
-      L[p]=y; mean += y;
-    }
-    mean /= L.length;
-
-    let varSum = 0;
-    for (let i=0;i<L.length;i++){
-      const d=L[i]-mean;
-      varSum += d*d;
-    }
-    const variance = varSum / L.length;
-
-    let edge = 0;
-    const w = patchW, h = patchH;
-    for (let y=1;y<h-1;y++){
-      for (let x=1;x<w-1;x++){
-        const i = y*w + x;
-        const gx = (L[i+1]-L[i-1]) + 0.5*(L[i-w+1]-L[i-w-1]) + 0.5*(L[i+w+1]-L[i+w-1]);
-        const gy = (L[i+w]-L[i-w]) + 0.5*(L[i+w-1]-L[i-w-1]) + 0.5*(L[i+w+1]-L[i-w+1]);
-        edge += Math.abs(gx) + Math.abs(gy);
-      }
-    }
-    edge /= (w*h);
-
-    const brightnessPenalty = Math.abs(mean - 128) / 128;
-    return (variance * 0.85) + (edge * 8.0) - (brightnessPenalty * 10.0);
-  }
-
-  function generateCandidates(offCanvas){
-    const iw = offCanvas.width, ih = offCanvas.height;
-    const z = zoomPreset(+zoomEl.value);
-    const aspect = 2/3;
-
-    const base = z.base;
-    const minDim = Math.min(iw, ih);
-    const baseW = clamp(minDim * base, 80, minDim);
-    const sizes = [baseW * 0.85, baseW * 1.00, baseW * 1.18];
-
-    const perSize = 240;
-    const candidates = [];
-
-    for (const w0 of sizes){
-      const w = Math.floor(clamp(w0, 80, iw));
-      const h = Math.floor(clamp(w / aspect, 120, ih));
-      const maxX = Math.max(0, iw - w);
-      const maxY = Math.max(0, ih - h);
-
-      for (let i=0;i<perSize;i++){
-        const rx = (Math.random() + Math.random()) / 2;
-        const ry = (Math.random() + Math.random()) / 2;
-        const x = Math.floor(rx * maxX);
-        const y = Math.floor(ry * maxY);
-        const rect = { x, y, w, h, score: 0 };
-        rect.score = computeScore(offCanvas, rect);
-        candidates.push(rect);
-      }
-    }
-    candidates.sort((a,b)=>b.score-a.score);
-    return candidates;
-  }
-
-  function pickRects(candidates, count){
-    const o = overlapPreset(+overlapEl.value);
-    const picked = [];
-
-    for (const c of candidates){
-      let ok = true;
-      for (const p of picked){
-        if (iou(c,p) > o.iouMax){ ok=false; break; }
-      }
-      if (ok){
-        picked.push(c);
-        if (picked.length>=count) break;
-      }
-    }
-
-    if (picked.length < count){
-      let relax = o.iouMax;
-      while (picked.length < count && relax < 0.55){
-        relax += 0.08;
-        for (const c of candidates){
-          if (picked.length>=count) break;
-          let ok = true;
-          for (const p of picked){
-            if (iou(c,p) > relax){ ok=false; break; }
-          }
-          if (ok) picked.push(c);
-        }
-      }
-    }
-
-    if (picked.length < count){
-      const used = new Set(picked.map(r => r.x+"|"+r.y+"|"+r.w+"|"+r.h));
-      for (const c of candidates){
-        const k=c.x+"|"+c.y+"|"+c.w+"|"+c.h;
-        if (!used.has(k)){
-          picked.push(c);
-          used.add(k);
-          if (picked.length>=count) break;
-        }
-      }
-    }
-
-    return picked.slice(0,count);
-  }
-
-  // -----------------------------
-  // Tarot line-art overlay (procedural)
-  // -----------------------------
-  function seededRand(seed){
-    // deterministic-ish for repeatable patterns
-    let t = seed >>> 0;
-    return () => {
-      t += 0x6D2B79F5;
-      let x = Math.imul(t ^ (t >>> 15), 1 | t);
-      x ^= x + Math.imul(x ^ (x >>> 7), 61 | x);
-      return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
-    };
-  }
-
-  function drawFrame(ctx, w, h){
-    const pad = Math.max(10, Math.floor(Math.min(w,h) * 0.06));
-    const r = Math.max(8, Math.floor(Math.min(w,h) * 0.05));
-
-    ctx.lineWidth = Math.max(2, Math.floor(Math.min(w,h) * 0.008));
-    ctx.beginPath();
-    roundedRect(ctx, pad, pad, w - pad*2, h - pad*2, r);
-    ctx.stroke();
-
-    // corner accents
-    const a = pad + r*0.35;
-    const b = pad + r*1.15;
-    ctx.lineWidth = Math.max(1, Math.floor(Math.min(w,h) * 0.006));
-    // top-left
-    line(ctx, a, b, b, b); line(ctx, b, a, b, b);
-    // top-right
-    line(ctx, w-a, b, w-b, b); line(ctx, w-b, a, w-b, b);
-    // bottom-left
-    line(ctx, a, h-b, b, h-b); line(ctx, b, h-a, b, h-b);
-    // bottom-right
-    line(ctx, w-a, h-b, w-b, h-b); line(ctx, w-b, h-a, w-b, h-b);
-  }
-
-  function roundedRect(ctx, x, y, w, h, r){
-    const rr = Math.min(r, w/2, h/2);
-    ctx.moveTo(x+rr, y);
-    ctx.arcTo(x+w, y, x+w, y+h, rr);
-    ctx.arcTo(x+w, y+h, x, y+h, rr);
-    ctx.arcTo(x, y+h, x, y, rr);
-    ctx.arcTo(x, y, x+w, y, rr);
-    ctx.closePath();
-  }
-
-  function line(ctx, x1,y1,x2,y2){ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
-  function circle(ctx, cx, cy, r){ ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke(); }
-
-  function drawSuitSymbol(ctx, suit, cx, cy, s){
-    // simple line icons
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-
-    if (suit === "Wands"){
-      // wand = staff with leaves
-      line(ctx, -s*0.05, -s*0.55, s*0.05, s*0.55);
-      circle(ctx, 0, -s*0.62, s*0.06);
-      // leaves
-      ctx.beginPath();
-      ctx.moveTo(0, -s*0.15);
-      ctx.quadraticCurveTo(s*0.28, -s*0.30, s*0.18, -s*0.02);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(0, s*0.10);
-      ctx.quadraticCurveTo(-s*0.28, -s*0.02, -s*0.16, s*0.25);
-      ctx.stroke();
-    } else if (suit === "Cups"){
-      // cup bowl + stem
-      ctx.beginPath();
-      ctx.moveTo(-s*0.38, -s*0.10);
-      ctx.quadraticCurveTo(-s*0.10, s*0.25, 0, s*0.25);
-      ctx.quadraticCurveTo(s*0.10, s*0.25, s*0.38, -s*0.10);
-      ctx.lineTo(s*0.30, -s*0.45);
-      ctx.quadraticCurveTo(0, -s*0.30, -s*0.30, -s*0.45);
-      ctx.closePath();
-      ctx.stroke();
-      line(ctx, 0, s*0.25, 0, s*0.40);
-      line(ctx, -s*0.18, s*0.48, s*0.18, s*0.48);
-    } else if (suit === "Pentacles"){
-      // circle + pentagram
-      circle(ctx, 0, 0, s*0.48);
-      // star
-      ctx.beginPath();
-      for (let i=0;i<5;i++){
-        const a = -Math.PI/2 + i*(Math.PI*2/5);
-        const x = Math.cos(a)*s*0.46;
-        const y = Math.sin(a)*s*0.46;
-        if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-      }
-      ctx.closePath();
-      ctx.stroke();
-      // connect star points (pentagram)
-      const pts = [];
-      for (let i=0;i<5;i++){
-        const a = -Math.PI/2 + i*(Math.PI*2/5);
-        pts.push([Math.cos(a)*s*0.42, Math.sin(a)*s*0.42]);
-      }
-      ctx.beginPath();
-      ctx.moveTo(pts[0][0], pts[0][1]);
-      ctx.lineTo(pts[2][0], pts[2][1]);
-      ctx.lineTo(pts[4][0], pts[4][1]);
-      ctx.lineTo(pts[1][0], pts[1][1]);
-      ctx.lineTo(pts[3][0], pts[3][1]);
-      ctx.closePath();
-      ctx.stroke();
-    } else if (suit === "Swords"){
-      // sword blade + hilt
-      line(ctx, 0, -s*0.55, 0, s*0.40);
-      line(ctx, 0, -s*0.55, -s*0.10, -s*0.40);
-      line(ctx, 0, -s*0.55, s*0.10, -s*0.40);
-      line(ctx, -s*0.25, s*0.12, s*0.25, s*0.12);
-      line(ctx, 0, s*0.12, 0, s*0.32);
-      circle(ctx, 0, s*0.44, s*0.06);
-    }
-
-    ctx.restore();
-  }
-
-  function drawMajorMotif(ctx, n, w, h){
-    const cx = w/2, cy = h*0.50;
-    const s = Math.min(w,h) * 0.22;
-
-    // very simple symbolic motifs (all line-based)
-    ctx.save();
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-
-    const motif = (k) => {
-      if (k === 0){ // Fool: circle + cliff
-        circle(ctx, cx, cy - s*0.15, s*0.45);
-        line(ctx, cx - s*0.65, cy + s*0.45, cx + s*0.65, cy + s*0.45);
-        line(ctx, cx + s*0.30, cy + s*0.45, cx + s*0.65, cy + s*0.15);
-      } else if (k === 1){ // Magician: infinity + wand
-        // infinity
-        ctx.beginPath();
-        ctx.moveTo(cx - s*0.55, cy - s*0.35);
-        ctx.bezierCurveTo(cx - s*0.15, cy - s*0.70, cx + s*0.15, cy, cx - s*0.05, cy - s*0.12);
-        ctx.bezierCurveTo(cx - s*0.25, cy - s*0.30, cx - s*0.15, cy - s*0.70, cx + s*0.15, cy - s*0.35);
-        ctx.bezierCurveTo(cx + s*0.55, cy, cx + s*0.15, cy - s*0.70, cx + s*0.05, cy - s*0.12);
-        ctx.bezierCurveTo(cx - s*0.15, cy, cx + s*0.15, cy - s*0.70, cx + s*0.55, cy - s*0.35);
-        ctx.stroke();
-        // wand
-        line(ctx, cx, cy + s*0.15, cx, cy + s*0.75);
-      } else if (k === 2){ // High Priestess: moon
-        circle(ctx, cx, cy, s*0.55);
-        ctx.beginPath();
-        ctx.arc(cx + s*0.20, cy, s*0.55, -Math.PI/2, Math.PI/2);
-        ctx.stroke();
-      } else if (k === 3){ // Empress: venus-ish
-        circle(ctx, cx, cy - s*0.10, s*0.45);
-        line(ctx, cx, cy + s*0.35, cx, cy + s*0.75);
-        line(ctx, cx - s*0.20, cy + s*0.55, cx + s*0.20, cy + s*0.55);
-      } else if (k === 4){ // Emperor: square + crown
-        ctx.strokeRect(cx - s*0.55, cy - s*0.35, s*1.10, s*0.95);
-        // crown points
-        line(ctx, cx - s*0.45, cy - s*0.50, cx - s*0.25, cy - s*0.75);
-        line(ctx, cx - s*0.25, cy - s*0.75, cx, cy - s*0.55);
-        line(ctx, cx, cy - s*0.55, cx + s*0.25, cy - s*0.75);
-        line(ctx, cx + s*0.25, cy - s*0.75, cx + s*0.45, cy - s*0.50);
-      } else if (k === 5){ // Hierophant: keys
-        circle(ctx, cx - s*0.20, cy - s*0.05, s*0.18);
-        circle(ctx, cx + s*0.20, cy - s*0.05, s*0.18);
-        line(ctx, cx - s*0.20, cy + s*0.12, cx - s*0.20, cy + s*0.60);
-        line(ctx, cx + s*0.20, cy + s*0.12, cx + s*0.20, cy + s*0.60);
-        line(ctx, cx - s*0.20, cy + s*0.55, cx - s*0.05, cy + s*0.55);
-        line(ctx, cx + s*0.20, cy + s*0.48, cx + s*0.05, cy + s*0.48);
-      } else if (k === 6){ // Lovers: two circles + bridge
-        circle(ctx, cx - s*0.35, cy, s*0.32);
-        circle(ctx, cx + s*0.35, cy, s*0.32);
-        line(ctx, cx - s*0.05, cy - s*0.15, cx + s*0.05, cy - s*0.15);
-      } else if (k === 7){ // Chariot: wheel + reins
-        circle(ctx, cx, cy + s*0.25, s*0.30);
-        line(ctx, cx, cy - s*0.55, cx, cy + s*0.10);
-        line(ctx, cx - s*0.35, cy - s*0.20, cx, cy - s*0.05);
-        line(ctx, cx + s*0.35, cy - s*0.20, cx, cy - s*0.05);
-      } else if (k === 8){ // Strength: lion-ish arc
-        circle(ctx, cx, cy - s*0.05, s*0.38);
-        ctx.beginPath();
-        ctx.arc(cx, cy + s*0.15, s*0.48, Math.PI*0.10, Math.PI*0.90);
-        ctx.stroke();
-      } else if (k === 9){ // Hermit: lantern
-        ctx.strokeRect(cx - s*0.20, cy - s*0.45, s*0.40, s*0.55);
-        line(ctx, cx, cy - s*0.55, cx, cy - s*0.45);
-        line(ctx, cx, cy + s*0.10, cx, cy + s*0.75);
-      } else if (k === 10){ // Wheel: circle + spokes
-        circle(ctx, cx, cy, s*0.55);
-        for (let i=0;i<6;i++){
-          const a = i*(Math.PI*2/6);
-          line(ctx, cx, cy, cx + Math.cos(a)*s*0.55, cy + Math.sin(a)*s*0.55);
-        }
-      } else if (k === 11){ // Justice: scales
-        line(ctx, cx, cy - s*0.55, cx, cy + s*0.65);
-        line(ctx, cx - s*0.45, cy - s*0.35, cx + s*0.45, cy - s*0.35);
-        // pans
-        circle(ctx, cx - s*0.30, cy - s*0.10, s*0.16);
-        circle(ctx, cx + s*0.30, cy - s*0.10, s*0.16);
-        line(ctx, cx - s*0.30, cy - s*0.35, cx - s*0.30, cy - s*0.26);
-        line(ctx, cx + s*0.30, cy - s*0.35, cx + s*0.30, cy - s*0.26);
-      } else if (k === 12){ // Hanged Man: inverted triangle
-        ctx.beginPath();
-        ctx.moveTo(cx, cy + s*0.60);
-        ctx.lineTo(cx - s*0.50, cy - s*0.30);
-        ctx.lineTo(cx + s*0.50, cy - s*0.30);
-        ctx.closePath();
-        ctx.stroke();
-        circle(ctx, cx, cy - s*0.05, s*0.18);
-      } else if (k === 13){ // Death: scythe curve
-        line(ctx, cx - s*0.10, cy - s*0.55, cx - s*0.10, cy + s*0.65);
-        ctx.beginPath();
-        ctx.arc(cx + s*0.20, cy - s*0.25, s*0.45, Math.PI*0.70, Math.PI*1.55);
-        ctx.stroke();
-      } else if (k === 14){ // Temperance: two cups
-        drawSuitSymbol(ctx, "Cups", cx - s*0.35, cy, s*0.65);
-        drawSuitSymbol(ctx, "Cups", cx + s*0.35, cy, s*0.65);
-        // flow line
-        ctx.beginPath();
-        ctx.moveTo(cx - s*0.05, cy - s*0.05);
-        ctx.bezierCurveTo(cx, cy + s*0.05, cx, cy + s*0.05, cx + s*0.05, cy - s*0.05);
-        ctx.stroke();
-      } else if (k === 15){ // Devil: horns
-        circle(ctx, cx, cy, s*0.40);
-        ctx.beginPath();
-        ctx.arc(cx - s*0.18, cy - s*0.35, s*0.20, Math.PI*0.10, Math.PI*1.20);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(cx + s*0.18, cy - s*0.35, s*0.20, Math.PI*1.80, Math.PI*0.90, true);
-        ctx.stroke();
-      } else if (k === 16){ // Tower: bolt
-        ctx.strokeRect(cx - s*0.35, cy - s*0.35, s*0.70, s*0.95);
-        ctx.beginPath();
-        ctx.moveTo(cx + s*0.05, cy - s*0.60);
-        ctx.lineTo(cx - s*0.10, cy - s*0.25);
-        ctx.lineTo(cx + s*0.10, cy - s*0.25);
-        ctx.lineTo(cx - s*0.05, cy + s*0.10);
-        ctx.stroke();
-      } else if (k === 17){ // Star: 8-point star
-        for (let i=0;i<8;i++){
-          const a = i*(Math.PI*2/8);
-          line(ctx, cx, cy, cx + Math.cos(a)*s*0.60, cy + Math.sin(a)*s*0.60);
-        }
-        circle(ctx, cx, cy, s*0.18);
-      } else if (k === 18){ // Moon: crescent + ripples
-        circle(ctx, cx, cy - s*0.05, s*0.55);
-        ctx.beginPath();
-        ctx.arc(cx + s*0.22, cy - s*0.05, s*0.55, -Math.PI/2, Math.PI/2);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(cx - s*0.55, cy + s*0.55);
-        ctx.quadraticCurveTo(cx, cy + s*0.35, cx + s*0.55, cy + s*0.55);
-        ctx.stroke();
-      } else if (k === 19){ // Sun: rays
-        circle(ctx, cx, cy, s*0.35);
-        for (let i=0;i<12;i++){
-          const a = i*(Math.PI*2/12);
-          line(ctx, cx + Math.cos(a)*s*0.45, cy + Math.sin(a)*s*0.45,
-                   cx + Math.cos(a)*s*0.70, cy + Math.sin(a)*s*0.70);
-        }
-      } else if (k === 20){ // Judgement: trumpet
-        ctx.beginPath();
-        ctx.moveTo(cx - s*0.55, cy - s*0.15);
-        ctx.lineTo(cx + s*0.10, cy - s*0.15);
-        ctx.lineTo(cx + s*0.35, cy - s*0.30);
-        ctx.lineTo(cx + s*0.35, cy);
-        ctx.lineTo(cx + s*0.10, cy - s*0.15);
-        ctx.stroke();
-        line(ctx, cx - s*0.55, cy - s*0.15, cx - s*0.55, cy + s*0.45);
-      } else if (k === 21){ // World: wreath circle
-        circle(ctx, cx, cy, s*0.55);
-        for (let i=0;i<8;i++){
-          const a = i*(Math.PI*2/8);
-          circle(ctx, cx + Math.cos(a)*s*0.55, cy + Math.sin(a)*s*0.55, s*0.05);
-        }
-      } else {
-        circle(ctx, cx, cy, s*0.50);
-      }
-    };
-
-    motif(n);
-    ctx.restore();
-  }
-
-  function drawMinorMotif(ctx, suit, number, w, h){
-    const cx = w/2, cy = h*0.52;
-    const s = Math.min(w,h) * 0.25;
-
-    // center suit
-    drawSuitSymbol(ctx, suit, cx, cy, s*1.35);
-
-    // pips for 1..10 only
-    if (number >= 1 && number <= 10){
-      const count = number;
-      const ringR = s*1.20;
-      const dots = Math.min(count, 10);
-
-      for (let i=0;i<dots;i++){
-        const a = -Math.PI/2 + i*(Math.PI*2/dots);
-        const px = cx + Math.cos(a)*ringR;
-        const py = cy + Math.sin(a)*ringR;
-        circle(ctx, px, py, s*0.10);
-      }
-    } else {
-      // court cards: crown + suit
-      const topY = h*0.28;
-      line(ctx, cx - s*0.60, topY, cx + s*0.60, topY);
-      line(ctx, cx - s*0.60, topY, cx - s*0.30, topY - s*0.30);
-      line(ctx, cx - s*0.30, topY - s*0.30, cx, topY - s*0.12);
-      line(ctx, cx, topY - s*0.12, cx + s*0.30, topY - s*0.30);
-      line(ctx, cx + s*0.30, topY - s*0.30, cx + s*0.60, topY);
-      circle(ctx, cx, topY - s*0.12, s*0.06);
-    }
-  }
-
-  function drawTarotLineArt(ctx, meta, w, h){
-    // meta: { sectionId, number, title }
-    // Draw both black and white strokes for contrast
-    ctx.save();
-    ctx.globalAlpha = 0.85;
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-
-    // black stroke (under)
-    ctx.strokeStyle = "rgba(0,0,0,.85)";
-    drawFrame(ctx, w, h);
-
-    // white stroke (top)
-    ctx.strokeStyle = "rgba(255,255,255,.85)";
-    drawFrame(ctx, w, h);
-
-    // motif with a bit less opacity
-    ctx.globalAlpha = 0.65;
-
-    // black motif under
-    ctx.strokeStyle = "rgba(0,0,0,.75)";
-    ctx.lineWidth = Math.max(1.5, Math.min(w,h) * 0.010);
-
-    if (meta.sectionId === "major"){
-      drawMajorMotif(ctx, meta.number, w, h);
-    } else {
-      const suit = (
-        meta.sectionId === "wands" ? "Wands" :
-        meta.sectionId === "cups" ? "Cups" :
-        meta.sectionId === "pents" ? "Pentacles" :
-        "Swords"
-      );
-      drawMinorMotif(ctx, suit, meta.number, w, h);
-    }
-
-    // white motif on top
-    ctx.strokeStyle = "rgba(255,255,255,.75)";
-    if (meta.sectionId === "major"){
-      drawMajorMotif(ctx, meta.number, w, h);
-    } else {
-      const suit = (
-        meta.sectionId === "wands" ? "Wands" :
-        meta.sectionId === "cups" ? "Cups" :
-        meta.sectionId === "pents" ? "Pentacles" :
-        "Swords"
-      );
-      drawMinorMotif(ctx, suit, meta.number, w, h);
-    }
-
-    // subtle random scratches (deterministic)
-    ctx.globalAlpha = 0.22;
-    const seed = (meta.sectionId.length * 131) ^ (meta.number * 997) ^ (meta.title.length * 733);
-    const rnd = seededRand(seed);
-    ctx.lineWidth = Math.max(1, Math.min(w,h) * 0.004);
-    for (let i=0;i<10;i++){
-      const x1 = w * (0.12 + rnd()*0.76);
-      const y1 = h * (0.12 + rnd()*0.76);
-      const x2 = x1 + (rnd()-0.5) * w * 0.20;
-      const y2 = y1 + (rnd()-0.5) * h * 0.20;
-      ctx.strokeStyle = rnd() > 0.5 ? "rgba(255,255,255,.55)" : "rgba(0,0,0,.55)";
-      line(ctx, x1,y1,x2,y2);
-    }
-
-    ctx.restore();
-  }
-
-  // -----------------------------
-  // Tarotdeck (max 5) + drag/drop to spread slots
-  // -----------------------------
-  const deck = { cards: [] }; // { pngBlob, url, number, title, meaning, sourceLabel, fileBase }
-  const deckStackEl = document.getElementById("deckStack");
-  const deckThumbsEl = document.getElementById("deckThumbs");
-  const deckEmptyEl = document.getElementById("deckEmpty");
-  const deckCountPill = document.getElementById("deckCountPill");
-  const deckShuffleBtn = document.getElementById("deckShuffle");
-  const deckDownloadBtn = document.getElementById("deckDownload");
-  const deckClearBtn = document.getElementById("deckClear");
-
-  const tabs = Array.from(document.querySelectorAll(".tab"));
-  const spreadSlotsEl = document.getElementById("spreadSlots");
-  const dealBtn = document.getElementById("dealBtn");
-  const resetSpreadBtn = document.getElementById("resetSpread");
-
-  let activeSpread = "day";
-  let spreadPlaced = []; // each slot stores deck index or null
-  let drawPile = [];
-
-  function resetDrawPile(){
-    drawPile = deck.cards.map((_, i) => i);
-    for (let i=drawPile.length-1;i>0;i--){
-      const j = Math.floor(Math.random()*(i+1));
-      [drawPile[i], drawPile[j]] = [drawPile[j], drawPile[i]];
-    }
-  }
-
-  function updateDeckUI(){
-    deckCountPill.innerHTML = `<b>Deck</b> ${deck.cards.length}/5`;
-    deckShuffleBtn.disabled = deck.cards.length < 2;
-    deckDownloadBtn.disabled = deck.cards.length < 1;
-    deckClearBtn.disabled = deck.cards.length < 1;
-
-    dealBtn.disabled = deck.cards.length < 1;
-    resetSpreadBtn.disabled = spreadPlaced.every(v => v == null);
-
-    deckStackEl.querySelectorAll(".stackCard").forEach(n => n.remove());
-    if (deck.cards.length === 0){
-      deckEmptyEl.style.display = "";
-    } else {
-      deckEmptyEl.style.display = "none";
-      const maxShow = Math.min(deck.cards.length, 5);
-      for (let i=0;i<maxShow;i++){
-        const c = deck.cards[i];
-        const layer = document.createElement("div");
-        layer.className = "stackCard";
-        const img = document.createElement("img");
-        img.src = c.url;
-        layer.appendChild(img);
-
-        const rot = (i - (maxShow-1)/2) * 1.2;
-        const dy = i * 1.5;
-        const dx = i * 0.8;
-        layer.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
-        layer.style.opacity = String(0.95 - i*0.06);
-        deckStackEl.appendChild(layer);
-      }
-    }
-
-    deckThumbsEl.innerHTML = "";
-    deck.cards.forEach((c, idx) => {
-      const t = document.createElement("div");
-      t.className = "thumb";
-
-      const img = document.createElement("img");
-      img.src = c.url;
-
-      const drag = document.createElement("div");
-      drag.className = "drag";
-      drag.textContent = "↕";
-      drag.title = "Drag onto a spread slot";
-      drag.draggable = true;
-      drag.addEventListener("dragstart", (e) => {
-        e.dataTransfer.setData("text/plain", String(idx));
-        e.dataTransfer.effectAllowed = "copyMove";
-      });
-
-      const x = document.createElement("button");
-      x.textContent = "×";
-      x.title = "Remove from deck";
-      x.addEventListener("click", (e) => {
-        e.stopPropagation();
-        removeDeckCard(idx);
-      });
-
-      t.appendChild(img);
-      t.appendChild(drag);
-      t.appendChild(x);
-      deckThumbsEl.appendChild(t);
+/* ══════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════ */
+
+const ARCANA = [
+  {num:"0",  roman:"0",    sym:"🃏", name:"De Dwaas",           en:"The Fool",          kw:"Onbevangenheid · Begin · Vertrouwen",       el:"Lucht · Uranus",     full:"De Dwaas staat aan het begin van alle dingen. Hij draagt alles in een klein bundeltje en kijkt omhoog — niet naar het ravijn. Zijn getal is 0: alles en niets tegelijk. Hij vertegenwoordigt kinderlijke onbevangenheid, vrijheid van conditionering en het onbegrensde potentieel van de ziel die haar reis begint."},
+  {num:"I",  roman:"I",    sym:"🪄", name:"De Magiër",           en:"The Magician",      kw:"Wil · Vaardigheid · Manifestatie",          el:"Lucht · Mercurius",  full:"De Magiër heeft de vier symbolen van de Minor Arcana voor zich en wijst tegelijk omhoog én omlaag: 'Zo boven, zo beneden.' Hij is de meester van concentratie en intentie, die ideeën omzet in werkelijkheid. Zijn lemniscaat-hoed duidt op oneindige energie en meesterschap."},
+  {num:"II", roman:"II",   sym:"🌙", name:"De Hogepriesteres",   en:"The High Priestess",kw:"Intuïtie · Mysterie · Innerlijke kennis",  el:"Water · Maan",       full:"Tussen twee zuilen zit zij stil. Achter haar hangt een sluier van granaatappels. Ze houdt de Torah op haar schoot en draagt een maankroon. Ze is het onderbewuste, de droom, de stille stem die je hoort als je ophoudt met praten."},
+  {num:"III",roman:"III",  sym:"🌾", name:"De Keizerin",         en:"The Empress",       kw:"Vruchtbaarheid · Natuur · Overvloed",       el:"Aarde · Venus",      full:"Ze zit in een weelderig veld omringd door rijpe tarwe, haar kroon telt twaalf sterren. Ze is de godin van vruchtbaarheid, schoonheid en overvloed. Ze herinnert eraan dat het lichaam heilig is, dat de aarde ons voedt en dat creatie altijd een daad van liefde is."},
+  {num:"IV", roman:"IV",   sym:"♛",  name:"De Keizer",           en:"The Emperor",       kw:"Structuur · Autoriteit · Stabiliteit",      el:"Vuur · Aries",       full:"Hij zit op een stenen troon met rammenhoofden. In zijn rechterhand de ankh, teken van leven; in zijn linker de rijksbol. Hij is de vader-energie: structuur, wetten, bescherming en discipline. Waar De Keizerin vloeit, bouwt hij muren."},
+  {num:"V",  roman:"V",    sym:"✝",  name:"De Hogepriester",     en:"The Hierophant",    kw:"Traditie · Geloof · Spirituele leiding",    el:"Aarde · Stier",      full:"Tussen twee zuilen van een tempel zit hij op een verhoogde troon, zijn hand geheven in zegen. De Hogepriester vertegenwoordigt georganiseerde spiritualiteit, traditie en het doorgeven van wijsheid. De vraag: geloof je uit gewoonte of uit innerlijke overtuiging?"},
+  {num:"VI", roman:"VI",   sym:"💞", name:"De Geliefden",        en:"The Lovers",        kw:"Keuze · Verbinding · Waarden",              el:"Lucht · Tweelingen", full:"Een man en vrouw staan naakt onder de zegen van aartsengel Rafaël. De kaart gaat over meer dan liefde: het is de keuze tussen twee paden, twee waarden. De engel brengt ze samen, maar de keuze en verantwoordelijkheid blijven bij henzelf."},
+  {num:"VII",roman:"VII",  sym:"⚔",  name:"De Strijdwagen",      en:"The Chariot",       kw:"Wilskracht · Controle · Overwinning",       el:"Water · Kreeft",     full:"Een gepantserde krijger bestuurt zijn wagen zonder teugels — de sfingen worden door concentratie alleen geleid. De Strijdwagen vraagt discipline: niet het onderdrukken van tegenstellingen, maar ze balanceren zodat ze samen vooruitgaan."},
+  {num:"VIII",roman:"VIII",sym:"♾",  name:"Kracht",              en:"Strength",          kw:"Moed · Zachtheid · Innerlijke kracht",      el:"Vuur · Leeuw",       full:"Boven haar hoofd zweeft een lemniscaat. Ze opent kalm de muil van de leeuw, die niet vecht. Dit is niet de kracht van spieren maar van karakter: moed die niet brult, vertrouwen dat niet wankelt."},
+  {num:"IX", roman:"IX",   sym:"🏮", name:"De Kluizenaar",       en:"The Hermit",        kw:"Terugtrekking · Wijsheid · Innerlijk licht", el:"Aarde · Maagd",     full:"In grijs gewaad staat hij op een besneeuwde bergtop, een lantaarn geheven met de zespuntige ster erin. Hij heeft zich teruggetrokken om zichzelf te vinden. Zijn licht is voor jou — als je bereid bent de tocht omhoog te maken."},
+  {num:"X",  roman:"X",    sym:"🎡", name:"Het Rad van Fortuin", en:"Wheel of Fortune",  kw:"Cyclus · Lot · Wending",                    el:"Vuur · Jupiter",     full:"Op het rad staan T-A-R-O en alchemistische symbolen. Vier figuren aan de hoeken lezen rustig hun boeken terwijl het rad draait. Het staat voor de onvermijdelijke cycli van het leven. Niemand blijft op dezelfde positie."},
+  {num:"XI", roman:"XI",   sym:"⚖",  name:"Gerechtigheid",       en:"Justice",           kw:"Waarheid · Balans · Consequentie",          el:"Lucht · Weegschaal", full:"Ze zit met een zwaard omhoog en een weegschaal in evenwicht. Gerechtigheid in tarot gaat niet over menselijke rechtssystemen maar over kosmische oorzaak en gevolg. Elke actie heeft een consequentie."},
+  {num:"XII",roman:"XII",  sym:"🙃", name:"De Gehangene",        en:"The Hanged Man",    kw:"Opoffering · Overgave · Nieuw perspectief", el:"Water · Neptunus",  full:"Hij hangt aan zijn enkel, zijn vrije been gekruist, zijn gezicht vredig met een aureool. Hij is niet gestraft; hij koos dit. De Gehangene vertegenwoordigt vrijwillige overgave: loslaten van controle om iets diepers te begrijpen."},
+  {num:"XIII",roman:"XIII",sym:"🌅", name:"De Dood",             en:"Death",             kw:"Transformatie · Einde · Doorgang",          el:"Water · Schorpioen", full:"Een skelet in zwart harnas rijdt op een wit paard; in de achtergrond gaat de zon op tussen twee torens. De Dood vraagt niet om fysieke dood maar om afscheid: van een identiteit, een relatie, een fase."},
+  {num:"XIV",roman:"XIV",  sym:"🏹", name:"Matigheid",           en:"Temperance",        kw:"Balans · Geduld · Alchemie",                el:"Vuur · Boogschutter",full:"De engel giet vloeistof van de ene kelk in de andere — omhoog, tegen de zwaartekracht in. Matigheid is de alchemist die tegengestelde krachten combineert tot iets nieuws. Niet onthouding maar meesterlijk doseren."},
+  {num:"XV", roman:"XV",   sym:"🐐", name:"De Duivel",           en:"The Devil",         kw:"Schaduw · Verslaving · Materialisme",       el:"Aarde · Steenbok",   full:"Twee geketende figuren — maar hun kettingen zijn wijd genoeg om over hun hoofd te tillen. Ze blijven uit gewoonte, angst of comfort. De Duivel is de spiegel van onze eigen schaduw. Erkenning is de eerste stap naar bevrijding."},
+  {num:"XVI",roman:"XVI",  sym:"⚡",  name:"De Toren",            en:"The Tower",         kw:"Omwenteling · Openbaring · Catharsis",      el:"Vuur · Mars",        full:"Een hoge toren wordt getroffen; figuren vallen terwijl vlammen uitbarsten. De Toren is de plotselinge instorting van wat niet klopte. Wat valt mócht vallen. Op de lege plek kan nu iets waarachtigs worden gebouwd."},
+  {num:"XVII",roman:"XVII",sym:"✦",  name:"De Ster",             en:"The Star",          kw:"Hoop · Genezing · Inspiratie",              el:"Lucht · Waterman",   full:"Ze knielt bij een poel en giet water met twee kruiken. Boven haar schittert een grote gele ster. De Ster volgt De Toren: na vernietiging komt hoop. Vertrouw op het proces. Genees. Droom."},
+  {num:"XVIII",roman:"XVIII",sym:"🐺",name:"De Maan",            en:"The Moon",          kw:"Illusie · Angst · Onderbewuste",            el:"Water · Vissen",     full:"Een volle maan schijnt op een pad tussen twee torens. Een kreeft kruipt uit het water; wolf en hond huilen. De Maan is het onderbewuste, dromen en angsten. Ze nodigt uit om door de duisternis te lopen."},
+  {num:"XIX",roman:"XIX",  sym:"☀",  name:"De Zon",              en:"The Sun",           kw:"Vreugde · Vitaliteit · Succes",             el:"Vuur · Zon",         full:"Een triomfantelijk kind rijdt op een wit paard onder een stralende zon. De Zon is de meest welwillende kaart. Helderheid, vitaliteit, succes en authenticiteit. Je mag er zijn, precies zoals je bent."},
+  {num:"XX", roman:"XX",   sym:"🎺", name:"Het Oordeel",         en:"Judgement",         kw:"Roeping · Opstanding · Vergeving",          el:"Vuur · Pluto",       full:"Gabriël blaast de bazuin; mensen stijgen op uit hun graven. Het Oordeel is geen straf maar een uitnodiging: word wie je werkelijk bent. Het vraagt om zelfonderzoek en vergeving — van anderen, maar vooral van jezelf."},
+  {num:"XXI",roman:"XXI",  sym:"🌍", name:"De Wereld",           en:"The World",         kw:"Voltooiing · Integratie · Dans",            el:"Aarde · Saturnus",   full:"Een dansende figuur in een laurierkrans met de vier hoekfiguren: stier, leeuw, adelaar, engel. De Wereld is het einde van de Grote Arcana-reis. De Dwaas is thuisgekomen. Nu danst hij — vrij, heel, aanwezig."}
+];
+
+/* Minor Arcana suits */
+const SUITS = {
+  vuur:  { name:"Staven",  element:"Vuur",   icon:"🔥", color:"#d97a4a" },
+  water: { name:"Bekers",  element:"Water",  icon:"🌊", color:"#4a8fd9" },
+  aarde: { name:"Schijven",element:"Aarde",  icon:"🌿", color:"#6ab06a" },
+  lucht: { name:"Zwaarden",element:"Lucht",  icon:"💨", color:"#b0a0d0" }
+};
+
+function buildMinorCards(suitKey) {
+  const s = SUITS[suitKey];
+  const cards = [];
+  const nums = ["Aas","2","3","4","5","6","7","8","9","10","Knave","Ridder","Koningin","Koning"];
+  const descs = {
+    "Aas":     `Het zuivere begin van ${s.element.toLowerCase()}. De Aas van ${s.name} brengt een nieuw zaad van ${s.element === 'Vuur' ? 'inspiratie en passie' : s.element === 'Water' ? 'emotie en gevoel' : s.element === 'Aarde' ? 'mogelijkheid en overvloed' : 'gedachte en helderheid'}. Het is een uitnodiging — pak je hem aan?`,
+    "2":       `Twee van ${s.name}: een eerste keuze of balans binnen het veld van ${s.element.toLowerCase()}. Twee krachten staan tegenover elkaar; jij bepaalt hoe je ermee omgaat.`,
+    "3":       `Drie van ${s.name}: eerste groei en expansie. Er is vooruitgang; de energie van ${s.element.toLowerCase()} begint concreet te worden. Samenwerking of eerste vrucht.`,
+    "4":       `Vier van ${s.name}: consolidatie en rust. Een periode van stabilisering binnen ${s.element.toLowerCase()}. Bouw op wat je hebt; vier het behaalde.`,
+    "5":       `Vijf van ${s.name}: conflict of verlies. De energie van ${s.element.toLowerCase()} raakt verstoord. Er is wrijving of verlies — maar ook een kans om te groeien door tegenstand.`,
+    "6":       `Zes van ${s.name}: harmonie en stroom. De middenweg in ${s.element.toLowerCase()} is gevonden. Geven en ontvangen, terugkeer of beloning na inspanning.`,
+    "7":       `Zeven van ${s.name}: uitdaging en moed. Verdedig wat je hebt opgebouwd in het veld van ${s.element.toLowerCase()}. Volharding is nu de sleutel.`,
+    "8":       `Acht van ${s.name}: snelheid en focus. De energie van ${s.element.toLowerCase()} beweegt snel. Verander van koers of ga er vol voor — stilstand is geen optie.`,
+    "9":       `Negen van ${s.name}: bijna voltooid. Na alle uitdagingen in ${s.element.toLowerCase()} is de finish nabij. Houd stand; de kracht is bijeengebracht.`,
+    "10":      `Tien van ${s.name}: voltooiing en overdracht. De cyclus van ${s.element.toLowerCase()} is compleet. Zowel de pracht als de last van het eindresultaat.`,
+    "Knave":   `Knave van ${s.name}: de leerling van ${s.element.toLowerCase()}. Enthousiast, nieuwsgierig en onervaren. Staat aan het begin van het pad; vol potentieel maar nog in ontwikkeling.`,
+    "Ridder":  `Ridder van ${s.name}: de actieve kracht van ${s.element.toLowerCase()}. In volle beweging — soms impulsief, altijd gedreven. Brengt de energie van de suit in de wereld.`,
+    "Koningin":`Koningin van ${s.name}: de rijpe vrouwelijke kracht van ${s.element.toLowerCase()}. Meesterlijk in het integreren van deze energie. Intuïtief, zeker en uitnodigend.`,
+    "Koning":  `Koning van ${s.name}: de meester van ${s.element.toLowerCase()}. Heeft volledige controle over en inzicht in deze energie. Leidt anderen met de kracht van ervaring en visie.`
+  };
+  nums.forEach((n,i) => {
+    const label = `${n} van ${s.name}`;
+    cards.push({
+      num: n, index: i+1,
+      name: label,
+      kw: descs[n].split('.')[0],
+      full: descs[n],
+      suit: suitKey,
+      suitName: s.name,
+      element: s.element,
+      icon: s.icon,
+      color: s.color
     });
-
-    resetDrawPile();
-  }
-
-  function removeDeckCard(idx){
-    const [c] = deck.cards.splice(idx, 1);
-    try{ URL.revokeObjectURL(c.url); }catch(e){}
-    // reset spread because indices shift
-    spreadPlaced = spreadPlaced.map(() => null);
-    renderSpread();
-    updateDeckUI();
-  }
-
-  function clearDeck(){
-    deck.cards.forEach(c => { try{ URL.revokeObjectURL(c.url); }catch(e){} });
-    deck.cards = [];
-    spreadPlaced = spreadPlaced.map(() => null);
-    renderSpread();
-    updateDeckUI();
-  }
-
-  function shuffleDeck(){
-    for (let i=deck.cards.length-1;i>0;i--){
-      const j = Math.floor(Math.random()*(i+1));
-      [deck.cards[i], deck.cards[j]] = [deck.cards[j], deck.cards[i]];
-    }
-    spreadPlaced = spreadPlaced.map(() => null);
-    renderSpread();
-    updateDeckUI();
-  }
-
-  async function downloadDeckZip(){
-    const zip = new ZipStore();
-    const manifest = [];
-
-    for (const c of deck.cards){
-      zip.addFile(`${c.fileBase}.png`, new Uint8Array(await c.pngBlob.arrayBuffer()));
-
-      const txt = [
-        `Custom Tarotdeck (max 5 cards)`,
-        `Source: ${c.sourceLabel}`,
-        `Number: ${c.number}`,
-        `Title: ${c.title}`,
-        ``,
-        `Meaning:`,
-        `${c.meaning}`,
-        ``
-      ].join("\n");
-      zip.addFile(`${c.fileBase}.txt`, te.encode(txt));
-
-      const json = JSON.stringify({
-        source: c.sourceLabel,
-        number: c.number,
-        title: c.title,
-        meaning: c.meaning
-      }, null, 2);
-      zip.addFile(`${c.fileBase}.json`, te.encode(json));
-
-      manifest.push({ file: `${c.fileBase}.png`, number: c.number, title: c.title, meaning: c.meaning, source: c.sourceLabel });
-    }
-
-    zip.addFile("DECK_MANIFEST.json", te.encode(JSON.stringify(manifest, null, 2)));
-
-    const blob = zip.toBlob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `custom_tarotdeck_${deck.cards.length}_cards.zip`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>{ try{ URL.revokeObjectURL(url);}catch(e){} }, 2500);
-  }
-
-  deckShuffleBtn.addEventListener("click", shuffleDeck);
-  deckDownloadBtn.addEventListener("click", downloadDeckZip);
-  deckClearBtn.addEventListener("click", clearDeck);
-
-  // -----------------------------
-  // Spreads (with drop targets)
-  // -----------------------------
-  function spreadSpec(name){
-    if (name === "day"){
-      return [{ label:"Card of the Day" }];
-    }
-    if (name === "choice"){
-      return [{ label:"Situation A" }, { label:"Situation B" }];
-    }
-    return [
-      { label:"What needs awareness", className:"insightTop" },
-      { label:"The past", className:"insightPast" },
-      { label:"The situation", className:"insightNow" },
-      { label:"The possibility", className:"insightPoss" },
-    ];
-  }
-
-  function setActiveSpread(name){
-    activeSpread = name;
-    tabs.forEach(t => t.classList.toggle("active", t.dataset.spread === name));
-    spreadPlaced = spreadSpec(activeSpread).map(() => null);
-    renderSpread();
-    updateDeckUI();
-  }
-  tabs.forEach(t => t.addEventListener("click", () => setActiveSpread(t.dataset.spread)));
-
-  function renderSpread(){
-    const spec = spreadSpec(activeSpread);
-    if (!spreadPlaced || spreadPlaced.length !== spec.length){
-      spreadPlaced = spec.map(() => null);
-    }
-
-    spreadSlotsEl.className = "slots " + activeSpread;
-    spreadSlotsEl.innerHTML = "";
-
-    spec.forEach((s, slotIndex) => {
-      const wrap = document.createElement("div");
-      if (s.className) wrap.className = s.className;
-
-      const slot = document.createElement("div");
-      slot.className = "slot";
-
-      slot.addEventListener("dragenter", (e) => { e.preventDefault(); slot.classList.add("dragover"); });
-      slot.addEventListener("dragover", (e) => { e.preventDefault(); });
-      slot.addEventListener("dragleave", () => slot.classList.remove("dragover"));
-      slot.addEventListener("drop", (e) => {
-        e.preventDefault();
-        slot.classList.remove("dragover");
-        const idx = parseInt(e.dataTransfer.getData("text/plain"), 10);
-        if (!Number.isFinite(idx) || !deck.cards[idx]) return;
-        spreadPlaced[slotIndex] = idx;
-        renderSpread();
-        updateDeckUI();
-      });
-
-      const placedIdx = spreadPlaced[slotIndex];
-      if (typeof placedIdx === "number" && deck.cards[placedIdx]){
-        const c = deck.cards[placedIdx];
-        const img = document.createElement("img");
-        img.src = c.url;
-        slot.appendChild(img);
-
-        const n = document.createElement("div");
-        n.className = "slotNum tarotFont";
-        n.textContent = String(c.number);
-
-        const tt = document.createElement("div");
-        tt.className = "slotTitle tarotFont";
-        tt.textContent = c.title;
-
-        slot.appendChild(n);
-        slot.appendChild(tt);
-
-        slot.title = c.meaning;
-
-        // click to clear slot
-        slot.style.cursor = "pointer";
-        slot.addEventListener("click", () => {
-          spreadPlaced[slotIndex] = null;
-          renderSpread();
-          updateDeckUI();
-        }, { once:true });
-      } else {
-        slot.title = "Drop a deck card here (or Deal)";
-      }
-
-      const label = document.createElement("div");
-      label.className = "slotLabel tarotFont";
-      label.textContent = s.label;
-
-      wrap.appendChild(slot);
-      wrap.appendChild(label);
-      spreadSlotsEl.appendChild(wrap);
-    });
-
-    resetSpreadBtn.disabled = spreadPlaced.every(v => v == null);
-  }
-
-  function deal(){
-    if (deck.cards.length === 0) return;
-    const needed = spreadSpec(activeSpread).length;
-    spreadPlaced = new Array(needed).fill(null);
-
-    for (let i=0;i<needed;i++){
-      if (drawPile.length === 0) resetDrawPile();
-      spreadPlaced[i] = drawPile.pop();
-    }
-    renderSpread();
-    updateDeckUI();
-  }
-
-  document.getElementById("dealBtn").addEventListener("click", deal);
-  document.getElementById("resetSpread").addEventListener("click", () => {
-    spreadPlaced = spreadPlaced.map(() => null);
-    renderSpread();
-    updateDeckUI();
   });
+  return cards;
+}
 
-  // deck stack drag feedback (optional)
-  deckStackEl.addEventListener("dragenter", (e)=>{ e.preventDefault(); deckStackEl.classList.add("dragover"); });
-  deckStackEl.addEventListener("dragover", (e)=>{ e.preventDefault(); });
-  deckStackEl.addEventListener("dragleave", ()=> deckStackEl.classList.remove("dragover"));
-  deckStackEl.addEventListener("drop", (e)=>{ e.preventDefault(); deckStackEl.classList.remove("dragover"); });
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+let gaImages=[], gaActiveId=null, gaRegions=[], arcanaOrder=[...Array(22).keys()];
+const suitState = { vuur:null, water:null, aarde:null, lucht:null }; // {img, regions}
 
-  // -----------------------------
-  // Build generator sections (drag&drop per preview)
-  // -----------------------------
-  const decksRoot = document.getElementById("decks");
+/* ══════════════════════════════════════════════
+   DOM REFS
+══════════════════════════════════════════════ */
+const workCvs   = document.getElementById('work-canvas');
+const workCtx   = workCvs.getContext('2d');
+const renderCvs = document.getElementById('render-canvas');
+const renderCtx = renderCvs.getContext('2d');
 
-  function attachDropzone(el, onFile){
-    el.addEventListener("dragenter", (e) => { e.preventDefault(); el.classList.add("dragover"); });
-    el.addEventListener("dragover", (e) => { e.preventDefault(); });
-    el.addEventListener("dragleave", () => el.classList.remove("dragover"));
-    el.addEventListener("drop", (e) => {
-      e.preventDefault();
-      el.classList.remove("dragover");
-      const f = e.dataTransfer.files && e.dataTransfer.files[0];
-      if (f && f.type && f.type.startsWith("image/")) onFile(f);
-    });
+/* ══════════════════════════════════════════════
+   GROTE ARCANA — upload & analyse
+══════════════════════════════════════════════ */
+const gaUploadBtn  = document.getElementById('ga-upload-btn');
+const gaFileInput  = document.getElementById('ga-file-input');
+const gaDropZone   = document.getElementById('ga-drop-zone');
+const gaLibrary    = document.getElementById('ga-library');
+const gaThumbs     = document.getElementById('ga-thumbs');
+const gaGrid       = document.getElementById('ga-grid');
+const gaGridCard   = document.getElementById('ga-grid-card');
+const reshuffleBtn = document.getElementById('reshuffle-btn');
+const allExportBtn = document.getElementById('all-export-btn');
+const statusEl     = document.getElementById('main-status');
+
+gaUploadBtn.addEventListener('click',()=>gaFileInput.click());
+gaFileInput.addEventListener('change',e=>{[...e.target.files].forEach(loadGAFile);gaFileInput.value='';});
+gaDropZone.addEventListener('click',()=>gaFileInput.click());
+
+gaDropZone.addEventListener('dragover',e=>{e.preventDefault();gaDropZone.classList.add('drag');});
+gaDropZone.addEventListener('dragleave',()=>{gaDropZone.classList.remove('drag');});
+gaDropZone.addEventListener('drop',e=>{
+  e.preventDefault();
+  gaDropZone.classList.remove('drag');
+  [...e.dataTransfer.files].filter(f=>f.type.startsWith('image/')).forEach(loadGAFile);
+});
+
+function wireSuitDrop(suit){
+  const dz=document.getElementById('drop-'+suit);
+  if(!dz) return;
+  dz.addEventListener('click',()=>triggerSuitUpload(suit));
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+  dz.addEventListener('drop',e=>{
+    e.preventDefault(); dz.classList.remove('drag');
+    const file=[...e.dataTransfer.files].find(f=>f.type && f.type.startsWith('image/'));
+    if(!file) return;
+    // Load directly (bypass input)
+    loadSuitFromFile(suit,file);
+  });
+}
+
+function loadSuitFromFile(suit,file){
+  if(!file) return;
+  const url=URL.createObjectURL(file);
+  const img=new Image();
+  img.onload=()=>{
+    setSuitStatus(suit,'Analyseren…','working');
+    const regions=extractRegions(img,14);
+    const cards=buildMinorCards(suit);
+    suitState[suit]={img,regions,cards};
+
+    // show thumb
+    const thumbEl=document.getElementById('thumb-'+suit);
+    thumbEl.style.display='flex';
+    thumbEl.innerHTML='';
+    const tw=document.createElement('div'); tw.className='thumb active';
+    const ti=document.createElement('img'); ti.src=url; tw.appendChild(ti);
+    thumbEl.appendChild(tw);
+    const newBtn=document.createElement('div'); newBtn.className='thumb-add';
+    newBtn.innerHTML='<span class="thumb-add-plus">↺</span><span style="font-size:10px">Ander</span>';
+    newBtn.addEventListener('click',()=>triggerSuitUpload(suit));
+    thumbEl.appendChild(newBtn);
+
+    renderSuitGrid(suit);
+    setSuitStatus(suit,'✓ 14 kaarten','done');
+    checkAllExport();
+  };
+  img.src=url;
+}
+
+// wire all suit dropzones
+['vuur','water','aarde','lucht'].forEach(wireSuitDrop);
+
+reshuffleBtn.addEventListener('click',reshuffle);
+allExportBtn.addEventListener('click',exportAllZip);
+
+function loadGAFile(file){
+  const url=URL.createObjectURL(file);
+  const img=new Image();
+  img.onload=()=>{
+    const id=Date.now()+Math.random();
+    gaImages.push({id,name:file.name,img,url});
+    const stGA=document.getElementById('status-top-ga');
+    if(stGA){ stGA.textContent = gaImages.length===1 ? '1 afbeelding' : (gaImages.length+' afbeeldingen'); }
+    if(gaImages.length===1){gaLibrary.style.display='block';}
+    renderGAThumbs();
+    selectGAImage(id);
+  };
+  img.src=url;
+}
+
+function renderGAThumbs(){
+  gaThumbs.innerHTML='';
+  if(gaImages.length===0){ gaLibrary.style.display='none'; }
+  gaImages.forEach(im=>{
+    const w=document.createElement('div');
+    w.className='thumb'+(im.id===gaActiveId?' active':'');
+    const ig=document.createElement('img'); ig.src=im.url; w.appendChild(ig);
+    const xb=document.createElement('button'); xb.className='thumb-x'; xb.textContent='✕';
+    xb.addEventListener('click',e=>{e.stopPropagation();gaImages=gaImages.filter(i=>i.id!==im.id);
+      const stGA=document.getElementById('status-top-ga');
+      if(stGA){ stGA.textContent = gaImages.length===0 ? 'Geen afbeeldingen' : (gaImages.length===1?'1 afbeelding':(gaImages.length+' afbeeldingen')); }
+      if(gaImages.length===0){gaActiveId=null;gaDropZone.style.display='block';gaLibrary.style.display='none';}else if(gaActiveId===im.id){gaActiveId=null;selectGAImage(gaImages[0].id);}renderGAThumbs();});
+    w.appendChild(xb);
+    w.addEventListener('click',()=>selectGAImage(im.id));
+    gaThumbs.appendChild(w);
+  });
+  const ab=document.createElement('div'); ab.className='thumb-add';
+  ab.innerHTML='<span class="thumb-add-plus">+</span><span style="font-size:10px">Meer</span>';
+  ab.addEventListener('click',()=>gaFileInput.click());
+  gaThumbs.appendChild(ab);
+}
+
+function selectGAImage(id){
+  if(gaActiveId===id) return;
+  gaActiveId=id; renderGAThumbs();
+  const f=gaImages.find(i=>i.id===id);
+  if(f) analyseGA(f.img);
+}
+
+function analyseGA(img){
+  setStatus('Grote Arcana analyseren…','working');
+  gaGrid.innerHTML=''; gaGridCard.style.display='none';
+  const regions=extractRegions(img,22);
+  gaRegions=regions;
+  arcanaOrder=[...Array(22).keys()];
+  renderGAGrid();
+  reshuffleBtn.disabled=false;
+  checkAllExport();
+  setStatus('22 details gevonden','done');
+  gaGridCard.style.display='block';
+  setTimeout(()=>gaGridCard.scrollIntoView({behavior:'smooth',block:'start'}),80);
+}
+
+function reshuffle(){
+  [...document.querySelectorAll('#ga-grid .tcard')].forEach((c,i)=>{c.style.animationDelay=(i*.012)+'s';c.classList.add('exiting');});
+  setTimeout(()=>{
+    for(let i=arcanaOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arcanaOrder[i],arcanaOrder[j]]=[arcanaOrder[j],arcanaOrder[i]];}
+    renderGAGrid(); setStatus('Arcana herschud','done');
+  },220);
+}
+
+function renderGAGrid(){
+  gaGrid.innerHTML='';
+  gaRegions.forEach((reg,i)=>{
+    const a=ARCANA[arcanaOrder[i]];
+    const dispCvs=makeDispCanvas(reg.hiResCvs);
+    const card=makeTCard(a.roman,a.sym,dispCvs,a.name,a.kw,a.el,a.full,
+      ()=>dlComposed(reg.hiResCvs,a.roman,a.name,a.el,'groot'),i);
+    gaGrid.appendChild(card);
+  });
+}
+
+
+function setSuitStatus(suit, text, cls=''){
+  const top = document.getElementById('status-top-'+suit);
+  const bot = document.getElementById('status-bottom-'+suit);
+  if(top){ top.textContent = text; top.className = 'upload-status ' + cls; }
+  if(bot){ bot.textContent = text; bot.className = 'suit-status ' + cls; }
+}
+
+/* ══════════════════════════════════════════════
+   MINOR ARCANA — suits
+══════════════════════════════════════════════ */
+function triggerSuitUpload(suit){ document.getElementById('file-'+suit).click(); }
+
+function loadSuit(suit,input){
+  const file=input.files[0]; if(!file) return;
+  input.value='';
+  loadSuitFromFile(suit,file);
+}
+
+function renderSuitGrid(suit){
+  const {regions,cards}=suitState[suit];
+  const gridEl=document.getElementById('grid-'+suit);
+  gridEl.style.display='grid';
+  gridEl.innerHTML='';
+  regions.forEach((reg,i)=>{
+    const c=cards[i];
+    const dispCvs=makeDispCanvas(reg.hiResCvs);
+    const card=makeTCard(c.num,c.icon,dispCvs,c.name,c.element,c.suitName,c.full,
+      ()=>dlComposed(reg.hiResCvs,c.num,c.name,c.element,suit),i);
+    gridEl.appendChild(card);
+  });
+}
+
+function checkAllExport(){
+  const hasSomething=gaRegions.length>0||Object.values(suitState).some(s=>s);
+  allExportBtn.disabled=!hasSomething;
+}
+
+/* ══════════════════════════════════════════════
+   CARD FACTORY
+══════════════════════════════════════════════ */
+function makeDispCanvas(hiRes){
+  const c=document.createElement('canvas'); c.width=200; c.height=200;
+  c.getContext('2d').drawImage(hiRes,0,0,200,200); return c;
+}
+
+function makeTCard(numLabel,sym,dispCvs,title,kw,sub,fullText,dlFn,animIdx){
+  const card=document.createElement('div');
+  card.className='tcard';
+  card.style.animationDelay=(animIdx*.03)+'s';
+
+  // Number — centered, Cinzel font
+  const numEl=document.createElement('div');
+  numEl.className='tcard-num';
+  numEl.textContent=numLabel;
+  card.appendChild(numEl);
+
+  // Image
+  const imgWrap=document.createElement('div'); imgWrap.className='tcard-img';
+  imgWrap.appendChild(dispCvs);
+  const tip=document.createElement('div'); tip.className='tcard-tip';
+  tip.innerHTML=`<div class="tip-name">${esc(title)}</div><p>${esc(fullText)}</p>`;
+  imgWrap.appendChild(tip);
+  card.appendChild(imgWrap);
+
+  // Body
+  const body=document.createElement('div'); body.className='tcard-body';
+  body.innerHTML=`<div class="tcard-title">${esc(title)}</div><div class="tcard-kw">${esc(kw)}</div><div class="tcard-el">${esc(sub)}</div>`;
+  card.appendChild(body);
+
+  // Footer verwijderd (geen individuele downloads)
+  return card;
+}
+
+
+/* ══════════════════════════════════════════════
+   EXTRACT REGIONS
+══════════════════════════════════════════════ */
+function extractRegions(img,count){
+  const MAX=1200,scale=Math.min(1,MAX/img.width,MAX/img.height);
+  const W=Math.round(img.width*scale),H=Math.round(img.height*scale);
+  workCvs.width=W; workCvs.height=H;
+  workCtx.drawImage(img,0,0,W,H);
+  const imgData=workCtx.getImageData(0,0,W,H);
+
+  const COLS=Math.ceil(Math.sqrt(count*1.5)), ROWS=COLS;
+  const cw=W/COLS,ch=H/ROWS;
+  const cells=[];
+  for(let row=0;row<ROWS;row++) for(let col=0;col<COLS;col++){
+    const x=Math.round(col*cw),y=Math.round(row*ch),w=Math.round(cw),h=Math.round(ch);
+    const s=calcStats(imgData,x,y,w,h,W);
+    cells.push({col,row,x,y,w,h,interest:s.variance*.45+s.edges*.4+s.saturation*.15});
+  }
+  cells.sort((a,b)=>b.interest-a.interest);
+  const chosen=[];
+  for(const c of cells){
+    if(chosen.length>=count) break;
+    if(!chosen.some(o=>Math.abs(o.col-c.col)<2&&Math.abs(o.row-c.row)<2)) chosen.push(c);
+  }
+  for(const c of cells){if(chosen.length>=count) break;if(!chosen.includes(c)) chosen.push(c);}
+
+  const sx=img.width/W,sy=img.height/H;
+  return chosen.slice(0,count).map((c,i)=>{
+    const orig={x:Math.round(c.x*sx),y:Math.round(c.y*sy),w:Math.round(c.w*sx),h:Math.round(c.h*sy)};
+    const cvs=document.createElement('canvas'); cvs.width=400; cvs.height=400;
+    const sq=Math.min(orig.w,orig.h);
+    cvs.getContext('2d').drawImage(img,orig.x+(orig.w-sq)/2,orig.y+(orig.h-sq)/2,sq,sq,0,0,400,400);
+    return{regionIdx:i,hiResCvs:cvs};
+  });
+}
+
+/* ══════════════════════════════════════════════
+   COMPOSE CARD — bake title + number into PNG
+══════════════════════════════════════════════ */
+function composeCard(hiResCvs, numLabel, title, subtitle){
+  const W=400, H=480;
+  renderCvs.width=W; renderCvs.height=H;
+  const ctx=renderCtx;
+
+  // Background
+  ctx.fillStyle='#121826';
+  ctx.beginPath(); roundRect(ctx,0,0,W,H,14); ctx.fill();
+
+  // Number area top
+  ctx.fillStyle='rgba(214,220,255,0.06)';
+  ctx.fillRect(0,0,W,48);
+
+  // Number text — Cinzel style via measureText fallback
+  ctx.textAlign='center';
+  ctx.fillStyle='#d6dcff';
+  ctx.font='bold 20px "Cinzel", Georgia, serif';
+  ctx.fillText(numLabel, W/2, 32);
+
+  // Image (square, padded)
+  const pad=10, imgY=48, imgSize=W-pad*2;
+  ctx.save();
+  ctx.beginPath(); roundRect(ctx,pad,imgY,imgSize,imgSize,8); ctx.clip();
+  ctx.drawImage(hiResCvs,pad,imgY,imgSize,imgSize);
+  ctx.restore();
+
+  // Border on image
+  ctx.strokeStyle='rgba(31,42,61,0.8)'; ctx.lineWidth=1;
+  ctx.beginPath(); roundRect(ctx,pad,imgY,imgSize,imgSize,8); ctx.stroke();
+
+  // Title area
+  const titleY=imgY+imgSize+8;
+  ctx.fillStyle='#e7eaf0';
+  ctx.font='bold 15px system-ui, Arial, sans-serif';
+  ctx.textAlign='center';
+  wrapText(ctx, title, W/2, titleY+16, W-24, 20);
+
+  ctx.fillStyle='#8fa0bf';
+  ctx.font='11px system-ui, Arial, sans-serif';
+  ctx.fillText(subtitle, W/2, titleY+42);
+
+  // Bottom border line
+  ctx.strokeStyle='#1f2a3d'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(20,H-18); ctx.lineTo(W-20,H-18); ctx.stroke();
+
+  return renderCvs;
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+function wrapText(ctx,text,x,y,maxW,lineH){
+  const words=text.split(' '); let line='';
+  for(const w of words){
+    const test=line?line+' '+w:w;
+    if(ctx.measureText(test).width>maxW && line){ctx.fillText(line,x,y);line=w;y+=lineH;}
+    else line=test;
+  }
+  ctx.fillText(line,x,y);
+}
+
+/* ══════════════════════════════════════════════
+   DOWNLOAD SINGLE — composed
+══════════════════════════════════════════════ */
+function dlComposed(hiResCvs, numLabel, title, subtitle, suitKey){
+  const composed=composeCard(hiResCvs,numLabel,title,subtitle);
+  const safe=title.replace(/[^a-zA-Z0-9\-_]/g,'-').replace(/-+/g,'-');
+  composed.toBlob(blob=>{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=`${numLabel}-${safe}.png`; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+  },'image/png');
+}
+
+/* ══════════════════════════════════════════════
+   EXPORT SECTION
+══════════════════════════════════════════════ */
+async function exportSection(section){
+  const files=[];
+  if(section==='groot' && gaRegions.length){
+    for(let i=0;i<gaRegions.length;i++){
+      const a=ARCANA[arcanaOrder[i]];
+      const cvs=composeCard(gaRegions[i].hiResCvs,a.roman,a.name,a.el);
+      const safe=a.name.replace(/[^a-zA-Z0-9]/g,'-');
+      const blob=await cvs2blob(cvs);
+      files.push({name:`grote-arcana/${String(i).padStart(2,'0')}-${a.roman}-${safe}.png`,data:new Uint8Array(await blob.arrayBuffer())});
+      files.push({name:`grote-arcana/${String(i).padStart(2,'0')}-${a.roman}-${safe}.txt`,data:strBytes(`${a.name} (${a.en})\nGetal: ${a.roman}\nKernwoorden: ${a.kw}\nElement: ${a.el}\n\n${a.full}`)});
+    }
+  }
+  await doZipDownload(files,`tarot-grote-arcana.zip`);
+}
+
+async function exportAllZip(){
+  showExport(true);
+  const fill=document.getElementById('exp-fill');
+  const msg=document.getElementById('exp-msg');
+  const files=[];
+  let total=0, done=0;
+  if(gaRegions.length) total+=22;
+  Object.values(suitState).forEach(s=>{if(s) total+=14;});
+  if(total===0){showExport(false);return;}
+
+  // Grote Arcana
+  if(gaRegions.length){
+    for(let i=0;i<gaRegions.length;i++){
+      const a=ARCANA[arcanaOrder[i]];
+      msg.textContent=`Grote Arcana: ${a.name} (${i+1}/22)`;
+      const cvs=composeCard(gaRegions[i].hiResCvs,a.roman,a.name,a.el);
+      const safe=a.name.replace(/[^a-zA-Z0-9]/g,'-');
+      const blob=await cvs2blob(cvs);
+      files.push({name:`grote-arcana/${String(i).padStart(2,'0')}-${a.roman}-${safe}.png`,data:new Uint8Array(await blob.arrayBuffer())});
+      files.push({name:`grote-arcana/${String(i).padStart(2,'0')}-${a.roman}-${safe}.txt`,data:strBytes(`${a.name} (${a.en})\nGetal: ${a.roman}\nKernwoorden: ${a.kw}\nElement: ${a.el}\n\n${a.full}`)});
+      done++; fill.style.width=((done/total)*90)+'%';
+      await tick();
+    }
   }
 
-  function buildSection(section){
-    const panel = document.createElement("section");
-    panel.className = "panel";
-
-    const hd = document.createElement("div");
-    hd.className = "hd";
-
-    const left = document.createElement("div");
-    left.className = "label";
-    left.innerHTML = `${section.emoji} <span style="color:var(--text);font-weight:750">${section.label}</span>`;
-
-    const status = document.createElement("div");
-    status.className = "label";
-    status.textContent = "No image loaded";
-
-    const controls = document.createElement("div");
-    controls.className = "controls";
-
-    const fileLabel = document.createElement("label");
-    fileLabel.className = "file";
-    fileLabel.innerHTML = `📷 Upload <input type="file" accept="image/*" style="display:none" />`;
-
-    const reshuffleBtn = document.createElement("button");
-    reshuffleBtn.className = "btn";
-    reshuffleBtn.disabled = true;
-    reshuffleBtn.textContent = "🔀 Reshuffle";
-
-    const dlAllBtn = document.createElement("button");
-    dlAllBtn.className = "btn";
-    dlAllBtn.disabled = true;
-    dlAllBtn.textContent = "⬇️ Download all (ZIP)";
-
-    controls.appendChild(fileLabel);
-    controls.appendChild(reshuffleBtn);
-    controls.appendChild(dlAllBtn);
-
-    hd.appendChild(left);
-    hd.appendChild(status);
-    hd.appendChild(controls);
-
-    const bd = document.createElement("div");
-    bd.className = "bd";
-
-    const row = document.createElement("div");
-    row.className = "row";
-
-    const previewWrap = document.createElement("div");
-
-    const preview = document.createElement("div");
-    preview.className = "preview";
-    const pCanvas = document.createElement("canvas");
-    const pCtx = pCanvas.getContext("2d", { willReadFrequently:true });
-
-    const empty = document.createElement("div");
-    empty.className = "empty";
-    empty.textContent = section.hint;
-
-    const dropHint = document.createElement("div");
-    dropHint.className = "dropHint";
-    dropHint.textContent = "Drop an image to generate cards";
-
-    preview.appendChild(pCanvas);
-    preview.appendChild(empty);
-    preview.appendChild(dropHint);
-
-    const hint = document.createElement("p");
-    hint.className = "hint";
-    hint.innerHTML = `Drop image here • Hover cards → meaning • Click card image → download ZIP • <span class="kbd">R</span> reshuffle`;
-
-    previewWrap.appendChild(preview);
-    previewWrap.appendChild(hint);
-
-    const info = document.createElement("div");
-    info.innerHTML = `
-      <div class="mini">
-        <div class="tag"><b>${section.count}</b> cards</div>
-        <div class="tag">Line-art overlay per card</div>
-        <div class="tag">Send up to 5 to deck</div>
-      </div>
-    `;
-
-    row.appendChild(previewWrap);
-    row.appendChild(info);
-
-    const grid = document.createElement("div");
-    grid.className = "grid";
-
-    bd.appendChild(row);
-    bd.appendChild(grid);
-
-    panel.appendChild(hd);
-    panel.appendChild(bd);
-    decksRoot.appendChild(panel);
-
-    // state
-    const state = {
-      img: null,
-      off: document.createElement("canvas"),
-      offCtx: null,
-      rects: null,
-      fullCanvases: [],
-      meta: [],
-      lastBlobUrls: [],
-    };
-    state.offCtx = state.off.getContext("2d", { willReadFrequently:true });
-
-    function setStatus(t){ status.textContent = t; }
-    function revokeUrls(){
-      for (const u of state.lastBlobUrls){
-        try{ URL.revokeObjectURL(u); }catch(e){}
-      }
-      state.lastBlobUrls = [];
+  // Minor Arcana
+  for(const [suitKey,state] of Object.entries(suitState)){
+    if(!state) continue;
+    const s=SUITS[suitKey];
+    for(let i=0;i<state.regions.length;i++){
+      const c=state.cards[i];
+      msg.textContent=`${s.name}: ${c.name} (${i+1}/14)`;
+      const cvs=composeCard(state.regions[i].hiResCvs,c.num,c.name,c.element);
+      const safe=c.name.replace(/[^a-zA-Z0-9]/g,'-');
+      const blob=await cvs2blob(cvs);
+      files.push({name:`${suitKey}-${s.name.toLowerCase()}/${String(i+1).padStart(2,'0')}-${c.num.replace(/[^a-zA-Z0-9]/g,'')}-${safe}.png`,data:new Uint8Array(await blob.arrayBuffer())});
+      files.push({name:`${suitKey}-${s.name.toLowerCase()}/${String(i+1).padStart(2,'0')}-${c.num.replace(/[^a-zA-Z0-9]/g,'')}-${safe}.txt`,data:strBytes(`${c.name}\nNummer: ${c.num}\nSuit: ${c.suitName}\nElement: ${c.element}\n\n${c.full}`)});
+      done++; fill.style.width=((done/total)*90)+'%';
+      await tick();
     }
-    function clearGrid(){
-      revokeUrls();
-      grid.innerHTML = "";
-      state.fullCanvases = [];
-      state.meta = [];
-    }
-
-    function drawPreview(){
-      if (!state.img) return;
-      const rect = pCanvas.getBoundingClientRect();
-      const w = Math.max(1, Math.floor(rect.width * devicePixelRatio));
-      const h = Math.max(1, Math.floor(rect.height * devicePixelRatio));
-      if (pCanvas.width !== w || pCanvas.height !== h){ pCanvas.width=w; pCanvas.height=h; }
-      pCtx.clearRect(0,0,w,h);
-
-      const iw = state.img.width, ih = state.img.height;
-      const scale = Math.min(w/iw, h/ih);
-      const dw = iw*scale, dh = ih*scale;
-      const dx = (w-dw)/2, dy = (h-dh)/2;
-      pCtx.drawImage(state.img, dx, dy, dw, dh);
-
-      pCtx.strokeStyle = "rgba(255,255,255,.12)";
-      pCtx.lineWidth = Math.max(1, Math.floor(devicePixelRatio));
-      pCtx.strokeRect(dx + 0.5, dy + 0.5, dw - 1, dh - 1);
-    }
-    new ResizeObserver(drawPreview).observe(preview);
-
-    async function buildCards(){
-      if (!state.img) return;
-      setStatus("Selecting details…");
-      clearGrid();
-
-      const candidates = generateCandidates(state.off);
-      state.rects = pickRects(candidates, section.count);
-
-      for (let i=0;i<section.count;i++){
-        const cardInfo = section.cards[i];
-        const rect = state.rects[i];
-
-        // Full-res canvas = crop + line-art
-        const full = document.createElement("canvas");
-        full.width = rect.w;
-        full.height = rect.h;
-        const fctx = full.getContext("2d");
-        fctx.imageSmoothingEnabled = true;
-        fctx.imageSmoothingQuality = "high";
-        fctx.drawImage(state.off, rect.x, rect.y, rect.w, rect.h, 0, 0, rect.w, rect.h);
-
-        // line art overlay
-        drawTarotLineArt(fctx, { sectionId: section.id, number: cardInfo.n, title: cardInfo.title }, rect.w, rect.h);
-
-        state.fullCanvases.push(full);
-
-        const fileBase = `${section.id}_${String(cardInfo.n).padStart(2,"0")}_${safeFileName(cardInfo.title)}`;
-        state.meta.push({
-          sectionId: section.id,
-          sourceLabel: section.label,
-          number: cardInfo.n,
-          title: cardInfo.title,
-          meaning: cardInfo.desc,
-          fileBase
-        });
-
-        // UI card
-        const cardEl = document.createElement("div");
-        cardEl.className = "card";
-
-        const inner = document.createElement("div");
-        inner.className = "cardInner";
-
-        const cnv = document.createElement("canvas");
-        const ctx = cnv.getContext("2d");
-
-        const num = document.createElement("div");
-        num.className = "num tarotFont";
-        num.textContent = String(cardInfo.n);
-
-        const title = document.createElement("div");
-        title.className = "titleUnder tarotFont";
-        title.textContent = cardInfo.title;
-
-        const overlay = document.createElement("div");
-        overlay.className = "overlay";
-        const pp = document.createElement("p");
-        pp.textContent = cardInfo.desc;
-        overlay.appendChild(pp);
-
-        inner.appendChild(cnv);
-        inner.appendChild(num);
-        inner.appendChild(title);
-        inner.appendChild(overlay);
-
-        const actions = document.createElement("div");
-        actions.className = "actions";
-
-        // download button removed (per request) — still downloadable by clicking image
-        const btnDeck = document.createElement("button");
-        btnDeck.className = "smallBtn";
-        btnDeck.type = "button";
-        btnDeck.textContent = "🂠 Send to Tarotdeck";
-        btnDeck.disabled = deck.cards.length >= 5;
-
-        actions.appendChild(btnDeck);
-
-        cardEl.appendChild(inner);
-        cardEl.appendChild(actions);
-        grid.appendChild(cardEl);
-
-        function renderDisplay(){
-          const cssW = inner.clientWidth;
-          const cssH = inner.clientHeight;
-          const w = Math.max(1, Math.floor(cssW * devicePixelRatio));
-          const h = Math.max(1, Math.floor(cssH * devicePixelRatio));
-          if (cnv.width !== w || cnv.height !== h){ cnv.width=w; cnv.height=h; }
-          ctx.clearRect(0,0,w,h);
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = "high";
-          ctx.drawImage(full, 0, 0, full.width, full.height, 0, 0, w, h);
-        }
-        requestAnimationFrame(renderDisplay);
-        new ResizeObserver(renderDisplay).observe(inner);
-
-        async function downloadCardZip(){
-          const meta = state.meta[i];
-          const zip = new ZipStore();
-
-          const pngU8 = await canvasToPngU8(full);
-          zip.addFile(`${meta.fileBase}.png`, pngU8);
-
-          const txt = [
-            `Deck: ${meta.sourceLabel}`,
-            `Number: ${meta.number}`,
-            `Title: ${meta.title}`,
-            ``,
-            `Meaning:`,
-            `${meta.meaning}`,
-            ``
-          ].join("\n");
-          zip.addFile(`${meta.fileBase}.txt`, te.encode(txt));
-
-          const json = JSON.stringify({
-            source: meta.sourceLabel,
-            number: meta.number,
-            title: meta.title,
-            meaning: meta.meaning
-          }, null, 2);
-          zip.addFile(`${meta.fileBase}.json`, te.encode(json));
-
-          const blob = zip.toBlob();
-          const url = URL.createObjectURL(blob);
-          state.lastBlobUrls.push(url);
-
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `${meta.fileBase}.zip`;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-        }
-
-        async function sendToDeck(){
-          if (deck.cards.length >= 5) return;
-          const meta = state.meta[i];
-          const { blob, url } = await canvasToBlobAndUrl(full);
-
-          deck.cards.push({
-            pngBlob: blob,
-            url,
-            number: meta.number,
-            title: meta.title,
-            meaning: meta.meaning,
-            sourceLabel: meta.sourceLabel,
-            fileBase: meta.fileBase
-          });
-
-          btnDeck.disabled = deck.cards.length >= 5;
-          updateDeckUI();
-        }
-
-        inner.addEventListener("click", downloadCardZip);
-        btnDeck.addEventListener("click", sendToDeck);
-      }
-
-      setStatus(`Ready — ${section.count} cards generated.`);
-    }
-
-    async function loadFile(file){
-      if (!file) return;
-      setStatus("Loading image…");
-      reshuffleBtn.disabled = true;
-      dlAllBtn.disabled = true;
-      empty.style.display = "none";
-      clearGrid();
-
-      const url = URL.createObjectURL(file);
-      try{
-        let im;
-        if ("createImageBitmap" in window){
-          im = await createImageBitmap(file);
-        } else {
-          im = await new Promise((resolve,reject)=>{
-            const img = new Image();
-            img.onload = () => resolve(img);
-            img.onerror = reject;
-            img.src = url;
-          });
-        }
-        state.img = im;
-
-        state.off.width = im.width;
-        state.off.height = im.height;
-        state.offCtx.clearRect(0,0,im.width, im.height);
-        state.offCtx.drawImage(im, 0, 0);
-
-        drawPreview();
-        reshuffleBtn.disabled = false;
-        dlAllBtn.disabled = false;
-
-        await buildCards();
-      } catch(e){
-        console.error(e);
-        setStatus("Could not load image.");
-        empty.style.display = "";
-      } finally {
-        try{ URL.revokeObjectURL(url); }catch(e){}
-      }
-    }
-
-    async function reshuffle(){
-      if (!state.img) return;
-      await buildCards();
-    }
-
-    async function downloadAllZip(){
-      if (!state.img || !state.fullCanvases.length) return;
-      setStatus("Building ZIP…");
-
-      const zip = new ZipStore();
-      const lines = [];
-      lines.push(section.label);
-      lines.push("");
-      lines.push("Contains one PNG per card + TXT/JSON meanings.");
-      lines.push("");
-
-      for (let i=0;i<state.fullCanvases.length;i++){
-        const meta = state.meta[i];
-        const cnv = state.fullCanvases[i];
-
-        zip.addFile(`${meta.fileBase}.png`, await canvasToPngU8(cnv));
-
-        const txt = [
-          `Deck: ${meta.sourceLabel}`,
-          `Number: ${meta.number}`,
-          `Title: ${meta.title}`,
-          ``,
-          `Meaning:`,
-          `${meta.meaning}`,
-          ``
-        ].join("\n");
-        zip.addFile(`${meta.fileBase}.txt`, te.encode(txt));
-
-        zip.addFile(`${meta.fileBase}.json`, te.encode(JSON.stringify({
-          source: meta.sourceLabel,
-          number: meta.number,
-          title: meta.title,
-          meaning: meta.meaning
-        }, null, 2)));
-
-        lines.push(`${meta.number} — ${meta.title}: ${meta.meaning}`);
-      }
-
-      zip.addFile(`README_${section.id}.txt`, te.encode(lines.join("\n")));
-
-      const blob = zip.toBlob();
-      const url = URL.createObjectURL(blob);
-      state.lastBlobUrls.push(url);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${section.id}_all_cards.zip`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      setStatus(`Downloaded — ${section.count} cards.`);
-    }
-
-    // wire events
-    fileLabel.querySelector("input").addEventListener("change", (e) => {
-      const f = e.target.files && e.target.files[0];
-      if (f) loadFile(f);
-      e.target.value = "";
-    });
-    reshuffleBtn.addEventListener("click", reshuffle);
-    dlAllBtn.addEventListener("click", downloadAllZip);
-
-    // Dropzone on preview
-    attachDropzone(preview, loadFile);
-
-    // hotkey R reshuffle this section if loaded
-    window.addEventListener("keydown", (e) => {
-      if ((e.key === "r" || e.key === "R") && state.img && !reshuffleBtn.disabled){
-        reshuffle();
-      }
-    });
-
-    // rebuild on slider change if loaded
-    function onGlobalChange(){ if (state.img) reshuffle(); }
-    zoomEl.addEventListener("input", onGlobalChange);
-    overlapEl.addEventListener("input", onGlobalChange);
   }
 
-  // init spreads & deck
-  setActiveSpread("day");
-  renderSpread();
-  updateDeckUI();
+  msg.textContent='ZIP samenstellen…'; fill.style.width='95%';
+  await tick();
+  const zip=buildZip(files);
+  fill.style.width='100%'; msg.textContent='Gereed!';
+  await new Promise(r=>setTimeout(r,300));
 
-  // build all generator sections
-  SECTIONS.forEach(buildSection);
+  const blob=new Blob([zip],{type:'application/zip'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='tarot-volledig.zip'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+  showExport(false);
+}
 
-  // Deal / Reset buttons already wired above
-  resetDrawPile();
-})();
+async function doZipDownload(files,filename){
+  if(!files.length) return;
+  showExport(true);
+  document.getElementById('exp-fill').style.width='80%';
+  document.getElementById('exp-msg').textContent='Samenstellen…';
+  await tick();
+  const zip=buildZip(files);
+  document.getElementById('exp-fill').style.width='100%';
+  await new Promise(r=>setTimeout(r,200));
+  const blob=new Blob([zip],{type:'application/zip'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=filename; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+  showExport(false);
+}
+
+/* ══════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════ */
+function calcStats(imgData,x,y,w,h,imgW){
+  const d=imgData.data;let sumR=0,sumG=0,sumB=0,cnt=0;const vals=[];
+  for(let py=y;py<y+h;py++) for(let px=x;px<x+w;px++){const i=(py*imgW+px)*4;vals.push(0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]);sumR+=d[i];sumG+=d[i+1];sumB+=d[i+2];cnt++;}
+  if(!cnt) return{variance:0,edges:0,saturation:0};
+  const mean=vals.reduce((a,b)=>a+b,0)/vals.length;
+  const variance=vals.reduce((s,v)=>s+(v-mean)**2,0)/vals.length;
+  let es=0,ec=0;
+  for(let py=y+1;py<y+h-1;py++) for(let px=x+1;px<x+w-1;px++){
+    const i=(py*imgW+px)*4,ih=(py*imgW+px+1)*4,iv=((py+1)*imgW+px)*4;
+    const lC=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+    es+=Math.abs(lC-0.299*d[ih]-0.587*d[ih+1]-0.114*d[ih+2])+Math.abs(lC-0.299*d[iv]-0.587*d[iv+1]-0.114*d[iv+2]);ec++;
+  }
+  const cmax=Math.max(sumR,sumG,sumB)/(cnt*255),cmin=Math.min(sumR,sumG,sumB)/(cnt*255);
+  return{variance,edges:ec?es/ec:0,saturation:cmax?((cmax-cmin)/cmax)*100:0};
+}
+
+function cvs2blob(cvs){ return new Promise(res=>cvs.toBlob(res,'image/png')); }
+function tick(){ return new Promise(r=>setTimeout(r,0)); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function strBytes(s){ return new TextEncoder().encode(s); }
+function showExport(on){ document.getElementById('export-overlay').classList.toggle('visible',on); if(on){document.getElementById('exp-fill').style.width='0%';document.getElementById('exp-msg').textContent='Voorbereiden…';} }
+function setStatus(msg,cls=''){ statusEl.textContent=msg; statusEl.className=cls; }
+
+/* ══════════════════════════════════════════════
+   ZIP BUILDER (STORE, no deps)
+══════════════════════════════════════════════ */
+function buildZip(files){
+  const enc=new TextEncoder(),parts=[],cds=[];let off=0;
+  for(const f of files){
+    const nb=enc.encode(f.name),crc=crc32(f.data),sz=f.data.length;
+    const lh=new Uint8Array(30+nb.length),lv=new DataView(lh.buffer);
+    lv.setUint32(0,0x04034b50,true);lv.setUint16(4,20,true);lv.setUint16(6,0,true);lv.setUint16(8,0,true);
+    lv.setUint16(10,0,true);lv.setUint16(12,0,true);lv.setUint32(14,crc,true);
+    lv.setUint32(18,sz,true);lv.setUint32(22,sz,true);lv.setUint16(26,nb.length,true);lv.setUint16(28,0,true);lh.set(nb,30);
+    const cd=new Uint8Array(46+nb.length),cv=new DataView(cd.buffer);
+    cv.setUint32(0,0x02014b50,true);cv.setUint16(4,20,true);cv.setUint16(6,20,true);cv.setUint16(8,0,true);
+    cv.setUint16(10,0,true);cv.setUint16(12,0,true);cv.setUint16(14,0,true);cv.setUint32(16,crc,true);
+    cv.setUint32(20,sz,true);cv.setUint32(24,sz,true);cv.setUint16(28,nb.length,true);
+    cv.setUint16(30,0,true);cv.setUint16(32,0,true);cv.setUint16(34,0,true);cv.setUint16(36,0,true);
+    cv.setUint32(38,0,true);cv.setUint32(42,off,true);cd.set(nb,46);
+    parts.push(lh,f.data);cds.push(cd);off+=lh.length+f.data.length;
+  }
+  const cdSz=cds.reduce((s,b)=>s+b.length,0);
+  const eocd=new Uint8Array(22),ev=new DataView(eocd.buffer);
+  ev.setUint32(0,0x06054b50,true);ev.setUint16(4,0,true);ev.setUint16(6,0,true);
+  ev.setUint16(8,files.length,true);ev.setUint16(10,files.length,true);
+  ev.setUint32(12,cdSz,true);ev.setUint32(16,off,true);ev.setUint16(20,0,true);
+  const all=[...parts,...cds,eocd],total=all.reduce((s,b)=>s+b.length,0);
+  const out=new Uint8Array(total);let pos=0;
+  for(const b of all){out.set(b,pos);pos+=b.length;}
+  return out;
+}
+function crc32(data){
+  const t=new Uint32Array(256);
+  for(let i=0;i<256;i++){let c=i;for(let j=0;j<8;j++)c=c&1?(0xedb88320^(c>>>1)):c>>>1;t[i]=c;}
+  let c=0xffffffff;
+  for(let i=0;i<data.length;i++)c=(c>>>8)^t[(c^data[i])&0xff];
+  return(c^0xffffffff)>>>0;
+}
 </script>
 </body>
 </html>
