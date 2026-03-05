@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tarot Detail Cutter (22 Major Arcana)</title>
+  <title>Tarot Detail Cutter — Major + 4 Suits</title>
   <style>
     :root{
       --bg:#0b0d12;
@@ -33,7 +33,6 @@
         var(--bg);
       color:var(--text);
     }
-    a{ color:inherit; }
     .wrap{
       max-width:1200px;
       margin: 0 auto;
@@ -47,11 +46,6 @@
       flex-wrap:wrap;
       margin-bottom:14px;
     }
-    .title{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
     h1{
       margin:0;
       font-size: 22px;
@@ -59,12 +53,41 @@
       font-weight: 720;
     }
     .sub{
-      margin:0;
+      margin:6px 0 0;
       color:var(--muted);
       font-size: 13px;
       line-height:1.35;
-      max-width: 70ch;
+      max-width: 85ch;
     }
+
+    .panel{
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      margin-top: 14px;
+    }
+    .panel .hd{
+      padding: 12px 14px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      background: rgba(0,0,0,.18);
+      flex-wrap:wrap;
+    }
+    .panel .hd .label{
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 650;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .panel .bd{ padding: 14px; }
+
     .controls{
       display:flex;
       gap:10px;
@@ -111,48 +134,45 @@
       gap:8px;
       align-items:center;
     }
-    .pill b{
-      color: var(--text);
-      font-weight: 750;
-    }
+    .pill b{ color: var(--text); font-weight: 750; }
+
     .row{
       display:grid;
       grid-template-columns: 1.15fr .85fr;
       gap: 14px;
-      margin: 12px 0 18px;
+      margin: 12px 0 0;
     }
-    @media (max-width: 980px){
-      .row{ grid-template-columns: 1fr; }
-    }
-    .panel{
-      border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .panel .hd{
-      padding: 12px 14px;
-      border-bottom:1px solid var(--line);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
+    @media (max-width: 980px){ .row{ grid-template-columns: 1fr; } }
+
+    .preview{
+      width:100%;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.18);
-    }
-    .panel .hd .label{
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 650;
+      overflow:hidden;
+      position:relative;
+      aspect-ratio: 16/10;
       display:flex;
-      gap:10px;
       align-items:center;
+      justify-content:center;
+      min-height: 220px;
     }
-    .panel .bd{
-      padding: 14px;
+    .preview canvas{ width:100%; height:100%; display:block; }
+    .preview .empty{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
     }
+
     .hint{
-      margin:0;
+      margin:10px 0 0;
       color: var(--muted);
       font-size: 13px;
       line-height: 1.5;
@@ -171,47 +191,11 @@
       color: var(--muted);
       font-size: 12px;
     }
-    .previewWrap{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-    .preview{
-      width:100%;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      overflow:hidden;
-      position:relative;
-      aspect-ratio: 16/10;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-height: 240px;
-    }
-    .preview canvas{
-      width:100%;
-      height:100%;
-      display:block;
-    }
-    .preview .empty{
-      position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding: 18px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
-    }
 
     .grid{
       display:grid;
       grid-template-columns: repeat(6, minmax(0,1fr));
       gap: 12px;
-      margin-top: 14px;
     }
     @media (max-width: 1200px){ .grid{ grid-template-columns: repeat(5, minmax(0,1fr)); } }
     @media (max-width: 980px){ .grid{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
@@ -241,19 +225,25 @@
       height:100%;
       display:block;
     }
+
+    /* Number top center + “stylish” font */
     .num{
       position:absolute;
       top: 10px;
-      left: 10px;
+      left: 50%;
+      transform: translateX(-50%);
       font-size: 12px;
-      font-weight: 850;
-      letter-spacing: .6px;
-      padding: 6px 8px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      padding: 7px 10px 6px;
       border-radius: 999px;
       background: rgba(0,0,0,.55);
       border: 1px solid rgba(255,255,255,.18);
       backdrop-filter: blur(6px);
+      font-family: ui-serif, "Georgia", "Times New Roman", serif;
+      text-transform: uppercase;
     }
+
     .titleUnder{
       position:absolute;
       bottom: 10px;
@@ -323,6 +313,7 @@
       align-items:center;
       justify-content:center;
       text-decoration:none;
+      white-space: nowrap;
     }
     .smallBtn:hover{
       transform: translateY(-1px);
@@ -335,13 +326,6 @@
       background: rgba(122,162,255,.10);
     }
 
-    footer{
-      margin-top: 18px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height:1.4;
-      opacity:.9;
-    }
     .kbd{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 11px;
@@ -351,170 +335,265 @@
       background: rgba(0,0,0,.24);
       color: rgba(233,236,242,.9);
     }
+    input[type="range"]{ width:100%; }
+    footer{
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height:1.4;
+      opacity:.9;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="title">
-        <h1>Tarot Detail Cutter — 22 Major Arcana (0–21)</h1>
+      <div>
+        <h1>Tarot Detail Cutter — Major Arcana + Minor Suits</h1>
         <p class="sub">
-          Upload any image and the app will automatically cut out <b>22 “interesting” details</b> (high texture/edge regions),
-          display them as tarot-like cards, and let you <b>download each card</b> as a separate image.
-          Hover a card to see a short meaning.
+          Upload an image per section. The app automatically cuts “interesting” detail crops and lays them out as tarot cards.
+          Hover a card for its meaning. Each card can be downloaded as a <b>ZIP (PNG + meaning text)</b>, and you can also
+          download <b>all cards in one ZIP</b>.
         </p>
       </div>
-
-      <div class="controls">
-        <label class="file" title="Choose an image">
-          <span>📷 Upload image</span>
-          <input id="file" type="file" accept="image/*" style="display:none" />
-        </label>
-        <button id="reshuffle" class="btn" disabled title="Pick 22 new details from the same image">🔀 Reshuffle details</button>
-        <span class="pill" title="How the selection works">
-          <b>Selector</b> edge+variance
-        </span>
-      </div>
+      <div class="pill" title="Selection method"><b>Selector</b> edge+variance</div>
     </header>
 
-    <div class="row">
-      <section class="panel">
-        <div class="hd">
-          <div class="label">🖼️ Source preview</div>
-          <div class="label" id="meta">No image loaded</div>
-        </div>
-        <div class="bd">
-          <div class="previewWrap">
-            <div class="preview">
-              <canvas id="srcPreview" aria-label="Source preview"></canvas>
-              <div class="empty" id="emptyMsg">
-                Upload an image to generate 22 cropped “detail cards”.<br/>
-                Tip: higher-resolution images give sharper downloads.
-              </div>
-            </div>
-            <p class="hint">
-              The picker searches many candidate crops and keeps the <b>22 best-scoring regions</b>.
-              Scores favor areas with strong edges and contrast (so faces, patterns, text, and high-detail regions usually win).
-            </p>
-            <div class="mini">
-              <div class="tag">Hover cards → meaning</div>
-              <div class="tag">Each card downloads separately</div>
-              <div class="tag">Reshuffle → new crop set</div>
-              <div class="tag">Works offline / GitHub Pages</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="hd">
-          <div class="label">🧪 Settings</div>
-          <div class="label">Tarot aspect: <span class="kbd">2:3</span></div>
-        </div>
-        <div class="bd">
-          <p class="hint" style="margin-bottom:10px">
-            You can tweak how “zoomed in” the details are. Smaller crops → more zoom.
-          </p>
-
-          <div style="display:grid; gap:10px;">
-            <div style="display:grid; gap:8px;">
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span class="hint" style="margin:0; font-weight:700; color:var(--text)">Crop zoom</span>
-                <span class="pill" id="zoomLabel"><b>Medium</b></span>
-              </div>
-              <input id="zoom" type="range" min="0" max="100" value="55" />
-              <p class="hint" style="margin:0">
-                <span class="kbd">Left</span> = tighter details • <span class="kbd">Right</span> = wider context
-              </p>
-            </div>
-
-            <div style="display:grid; gap:8px; margin-top:4px;">
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span class="hint" style="margin:0; font-weight:700; color:var(--text)">Non-overlap strength</span>
-                <span class="pill" id="overlapLabel"><b>Balanced</b></span>
-              </div>
-              <input id="overlap" type="range" min="0" max="100" value="55" />
-              <p class="hint" style="margin:0">
-                Higher = spreads crops out more (less overlap), but may pick slightly lower-scoring regions.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-
+    <!-- GLOBAL SETTINGS -->
     <section class="panel">
       <div class="hd">
-        <div class="label">🃏 22 cards</div>
-        <div class="label" id="status">Upload an image to begin</div>
+        <div class="label">🧪 Global settings</div>
+        <div class="label">Card aspect: <span class="kbd">2:3</span></div>
       </div>
       <div class="bd">
-        <div id="grid" class="grid" aria-label="Tarot cards grid"></div>
+        <div class="row" style="margin:0;">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="label" style="color:var(--text); font-weight:750">Crop zoom</span>
+              <span class="pill" id="zoomLabel"><b>Medium</b></span>
+            </div>
+            <input id="zoom" type="range" min="0" max="100" value="55" />
+            <p class="hint" style="margin-top:8px">
+              <span class="kbd">Left</span> = tighter details • <span class="kbd">Right</span> = wider context
+            </p>
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="label" style="color:var(--text); font-weight:750">Non-overlap strength</span>
+              <span class="pill" id="overlapLabel"><b>Balanced</b></span>
+            </div>
+            <input id="overlap" type="range" min="0" max="100" value="55" />
+            <p class="hint" style="margin-top:8px">
+              Higher = spreads crops out more (less overlap).
+            </p>
+          </div>
+        </div>
+
+        <div class="mini" style="margin-top:12px;">
+          <div class="tag">Click card image = download ZIP (PNG + meaning)</div>
+          <div class="tag">“Download all” creates 1 ZIP for the whole section</div>
+          <div class="tag">Everything runs locally (GitHub Pages friendly)</div>
+        </div>
       </div>
     </section>
 
+    <!-- DECKS -->
+    <div id="decks"></div>
+
     <footer>
-      Note: everything happens locally in your browser. No uploads. For best results, use large images.
+      Tip: use higher-resolution images for sharper downloads. Court cards are numbered <span class="kbd">11–14</span> (Page, Knight, Queen, King).
     </footer>
   </div>
 
 <script>
 (() => {
-  // --- Major Arcana (0-21) ---
-  const arcana = [
-    { n: 0,  title: "The Fool",          desc: "Beginnings, spontaneity, trust. A leap into the unknown with open eyes." },
-    { n: 1,  title: "The Magician",      desc: "Will, skill, manifestation. Turning intention into reality with focus." },
-    { n: 2,  title: "The High Priestess",desc: "Intuition, mystery, inner knowing. Listen for what’s unspoken." },
+  // -----------------------------
+  // Card Data (short meanings)
+  // -----------------------------
+  const MAJOR = [
+    { n: 0,  title: "The Fool",          desc: "Beginnings, spontaneity, trust. Step forward with open curiosity." },
+    { n: 1,  title: "The Magician",      desc: "Will, skill, manifestation. Focus your tools and make it real." },
+    { n: 2,  title: "The High Priestess",desc: "Intuition, mystery, inner knowing. Listen beneath the surface." },
     { n: 3,  title: "The Empress",       desc: "Nurture, abundance, creation. Growth through care and embodiment." },
-    { n: 4,  title: "The Emperor",       desc: "Structure, authority, stability. Build solid foundations and lead wisely." },
-    { n: 5,  title: "The Hierophant",    desc: "Tradition, learning, guidance. Values, rituals, and trusted teachers." },
-    { n: 6,  title: "The Lovers",        desc: "Union, choice, alignment. Commit to what matches your true values." },
-    { n: 7,  title: "The Chariot",       desc: "Drive, control, victory. Steer opposing forces toward one direction." },
-    { n: 8,  title: "Strength",          desc: "Courage, compassion, resilience. Gentle power tames the wild." },
-    { n: 9,  title: "The Hermit",        desc: "Solitude, insight, truth. Step back to see what matters most." },
-    { n: 10, title: "Wheel of Fortune",  desc: "Cycles, change, fate. The turn of events invites adaptation." },
-    { n: 11, title: "Justice",           desc: "Fairness, clarity, consequences. Choose integrity; weigh the facts." },
+    { n: 4,  title: "The Emperor",       desc: "Structure, authority, stability. Lead with clear boundaries." },
+    { n: 5,  title: "The Hierophant",    desc: "Tradition, learning, guidance. Wisdom through shared values." },
+    { n: 6,  title: "The Lovers",        desc: "Union, choice, alignment. Commit to what matches your values." },
+    { n: 7,  title: "The Chariot",       desc: "Drive, control, victory. Steer opposing forces with discipline." },
+    { n: 8,  title: "Strength",          desc: "Courage, compassion, resilience. Gentle power over brute force." },
+    { n: 9,  title: "The Hermit",        desc: "Solitude, insight, truth. Step back to see what matters." },
+    { n: 10, title: "Wheel of Fortune",  desc: "Cycles, change, turning points. Adapt as the wheel turns." },
+    { n: 11, title: "Justice",           desc: "Fairness, clarity, consequences. Choose integrity and balance." },
     { n: 12, title: "The Hanged Man",    desc: "Pause, surrender, new view. Let go to gain perspective." },
-    { n: 13, title: "Death",             desc: "Endings, transformation, release. Make room for the next chapter." },
+    { n: 13, title: "Death",             desc: "Endings, transformation, release. Clear space for renewal." },
     { n: 14, title: "Temperance",        desc: "Balance, patience, harmony. Blend opposites into a steady flow." },
-    { n: 15, title: "The Devil",         desc: "Attachment, temptation, shadow. Notice what holds you—and why." },
-    { n: 16, title: "The Tower",         desc: "Shock, upheaval, truth revealed. What’s false falls so truth can stand." },
-    { n: 17, title: "The Star",          desc: "Hope, renewal, inspiration. A quiet light guiding you forward." },
-    { n: 18, title: "The Moon",          desc: "Dreams, illusion, uncertainty. Trust intuition while clearing fear’s fog." },
-    { n: 19, title: "The Sun",           desc: "Joy, vitality, success. Illuminate, celebrate, and be seen." },
-    { n: 20, title: "Judgement",         desc: "Awakening, calling, reckoning. Answer the call and rise renewed." },
-    { n: 21, title: "The World",         desc: "Completion, integration, wholeness. A cycle closes; mastery is earned." }
+    { n: 15, title: "The Devil",         desc: "Attachment, temptation, shadow. Notice what binds you—and why." },
+    { n: 16, title: "The Tower",         desc: "Upheaval, truth revealed. What’s unstable falls away fast." },
+    { n: 17, title: "The Star",          desc: "Hope, renewal, inspiration. A quiet light returns your faith." },
+    { n: 18, title: "The Moon",          desc: "Dreams, illusion, uncertainty. Trust intuition; clear fear’s fog." },
+    { n: 19, title: "The Sun",           desc: "Joy, vitality, success. Step into warmth, clarity, and truth." },
+    { n: 20, title: "Judgement",         desc: "Awakening, calling, release. Answer the call and rise renewed." },
+    { n: 21, title: "The World",         desc: "Completion, integration, wholeness. A cycle closes; mastery earned." }
   ];
 
-  // --- DOM ---
-  const fileEl = document.getElementById("file");
-  const reshuffleBtn = document.getElementById("reshuffle");
-  const gridEl = document.getElementById("grid");
-  const statusEl = document.getElementById("status");
-  const metaEl = document.getElementById("meta");
-  const emptyMsgEl = document.getElementById("emptyMsg");
+  function makeMinorSuit(suitName){
+    // 1..10 + 11 Page + 12 Knight + 13 Queen + 14 King
+    const s = suitName; // "Wands", "Cups", "Pentacles", "Swords"
+    const titles = [
+      {n:1,  t:`Ace of ${s}`,   d:"A new spark opens. A fresh start in the suit’s element."},
+      {n:2,  t:`Two of ${s}`,   d:"Planning and choices. Weigh options and commit to a direction."},
+      {n:3,  t:`Three of ${s}`, d:"Momentum and expansion. Early results; look toward what’s next."},
+      {n:4,  t:`Four of ${s}`,  d:"Stability and rest. Create a safe base; celebrate what’s built."},
+      {n:5,  t:`Five of ${s}`,  d:"Challenge and friction. Learn through contrast, conflict, or testing."},
+      {n:6,  t:`Six of ${s}`,   d:"Progress and recognition. A step forward after effort."},
+      {n:7,  t:`Seven of ${s}`, d:"Defense and resolve. Hold your ground; protect your position."},
+      {n:8,  t:`Eight of ${s}`, d:"Speed and movement. Things shift quickly—act with focus."},
+      {n:9,  t:`Nine of ${s}`,  d:"Resilience and boundaries. Stay steady; you’re close."},
+      {n:10, t:`Ten of ${s}`,   d:"Completion and weight. A cycle peaks—finish, delegate, or release."},
+      {n:11, t:`Page of ${s}`,  d:"Curiosity and learning. A message, a student’s mind, a first attempt."},
+      {n:12, t:`Knight of ${s}`,d:"Action and pursuit. Move boldly—channel intensity with skill."},
+      {n:13, t:`Queen of ${s}`, d:"Mastery within. Mature expression—care, insight, and steady power."},
+      {n:14, t:`King of ${s}`,  d:"Authority and direction. Lead with wisdom; embody the suit’s strength."},
+    ];
 
-  const srcPreviewCanvas = document.getElementById("srcPreview");
-  const srcPreviewCtx = srcPreviewCanvas.getContext("2d", { willReadFrequently: true });
+    // suit-flavored micro-tuning (keeps it short, but more specific)
+    const flavor = {
+      "Wands":       { element:"Fire",  add:"passion, will, creative drive" },
+      "Cups":        { element:"Water", add:"emotion, intuition, connection" },
+      "Pentacles":   { element:"Earth", add:"work, resources, the physical world" },
+      "Swords":      { element:"Air",   add:"thought, truth, communication" }
+    }[s];
 
+    return titles.map(x => ({
+      n: x.n,
+      title: x.t,
+      desc: x.d.replace("the suit’s element", `${flavor.add}`)
+    }));
+  }
+
+  const DECKS = [
+    { id:"major", label:"Major Arcana (0–21)", emoji:"🃏", count:22, cards: MAJOR, hint:"Upload 1 image → 22 Major Arcana crops." },
+    { id:"wands", label:"Wands (Fire) — 14 cards", emoji:"🔥", count:14, cards: makeMinorSuit("Wands"), hint:"Upload 1 image → 14 Wands crops (1–10, Page, Knight, Queen, King)." },
+    { id:"cups",  label:"Cups (Water) — 14 cards", emoji:"💧", count:14, cards: makeMinorSuit("Cups"), hint:"Upload 1 image → 14 Cups crops (1–10, Page, Knight, Queen, King)." },
+    { id:"pents", label:"Pentacles (Earth) — 14 cards", emoji:"🌿", count:14, cards: makeMinorSuit("Pentacles"), hint:"Upload 1 image → 14 Pentacles crops (1–10, Page, Knight, Queen, King)." },
+    { id:"swords",label:"Swords (Air) — 14 cards", emoji:"🌬️", count:14, cards: makeMinorSuit("Swords"), hint:"Upload 1 image → 14 Swords crops (1–10, Page, Knight, Queen, King)." },
+  ];
+
+  // -----------------------------
+  // ZIP builder (store/no compression)
+  // -----------------------------
+  function crc32Table(){
+    const tbl = new Uint32Array(256);
+    for (let i=0;i<256;i++){
+      let c = i;
+      for (let k=0;k<8;k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      tbl[i] = c >>> 0;
+    }
+    return tbl;
+  }
+  const CRC_TBL = crc32Table();
+
+  function crc32(u8){
+    let c = 0xFFFFFFFF;
+    for (let i=0;i<u8.length;i++){
+      c = CRC_TBL[(c ^ u8[i]) & 0xFF] ^ (c >>> 8);
+    }
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function u16(n){ return new Uint8Array([n & 255, (n>>>8) & 255]); }
+  function u32(n){ return new Uint8Array([n & 255, (n>>>8)&255, (n>>>16)&255, (n>>>24)&255]); }
+
+  function concatU8(parts){
+    let len = 0;
+    for (const p of parts) len += p.length;
+    const out = new Uint8Array(len);
+    let off = 0;
+    for (const p of parts){ out.set(p, off); off += p.length; }
+    return out;
+  }
+
+  class ZipStore {
+    constructor(){ this.files = []; }
+    addFile(name, dataU8){
+      const nameU8 = new TextEncoder().encode(name);
+      const crc = crc32(dataU8);
+      this.files.push({ name, nameU8, dataU8, crc });
+    }
+    toBlob(){
+      // Simple ZIP (store). Uses “local header + central dir + end record”
+      const localParts = [];
+      const centralParts = [];
+      let offset = 0;
+
+      for (const f of this.files){
+        const localHeader = concatU8([
+          u32(0x04034b50), // local file header sig
+          u16(20),         // version needed
+          u16(0),          // flags
+          u16(0),          // method = 0 (store)
+          u16(0), u16(0),  // time/date (0)
+          u32(f.crc),
+          u32(f.dataU8.length),
+          u32(f.dataU8.length),
+          u16(f.nameU8.length),
+          u16(0)           // extra len
+        ]);
+
+        localParts.push(localHeader, f.nameU8, f.dataU8);
+
+        const centralHeader = concatU8([
+          u32(0x02014b50), // central header sig
+          u16(20),         // version made by
+          u16(20),         // version needed
+          u16(0),          // flags
+          u16(0),          // method
+          u16(0), u16(0),  // time/date
+          u32(f.crc),
+          u32(f.dataU8.length),
+          u32(f.dataU8.length),
+          u16(f.nameU8.length),
+          u16(0),          // extra
+          u16(0),          // comment
+          u16(0),          // disk start
+          u16(0),          // internal attrs
+          u32(0),          // external attrs
+          u32(offset)      // local header offset
+        ]);
+
+        centralParts.push(centralHeader, f.nameU8);
+
+        offset += localHeader.length + f.nameU8.length + f.dataU8.length;
+      }
+
+      const centralStart = offset;
+      const centralData = concatU8(centralParts);
+      offset += centralData.length;
+
+      const endRecord = concatU8([
+        u32(0x06054b50),           // end sig
+        u16(0), u16(0),            // disk numbers
+        u16(this.files.length),
+        u16(this.files.length),
+        u32(centralData.length),
+        u32(centralStart),
+        u16(0)                     // comment length
+      ]);
+
+      const zipU8 = concatU8([...localParts, centralData, endRecord]);
+      return new Blob([zipU8], { type: "application/zip" });
+    }
+  }
+
+  // -----------------------------
+  // “Interesting detail” selection
+  // -----------------------------
   const zoomEl = document.getElementById("zoom");
   const overlapEl = document.getElementById("overlap");
   const zoomLabelEl = document.getElementById("zoomLabel");
   const overlapLabelEl = document.getElementById("overlapLabel");
 
-  // --- State ---
-  let img = null;
-  let imgBitmap = null;
-
-  // Offscreen for scoring and crop rendering
-  const off = document.createElement("canvas");
-  const offCtx = off.getContext("2d", { willReadFrequently: true });
-
-  function setStatus(text){ statusEl.textContent = text; }
-  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
-
   function zoomPreset(val){
-    // 0..100 → names + scale band
     if (val < 34) return { name: "Tight",  base: 0.18 };
     if (val < 67) return { name: "Medium", base: 0.26 };
     return            { name: "Wide",   base: 0.34 };
@@ -531,89 +610,8 @@
     overlapLabelEl.innerHTML = "<b>" + o.name + "</b>";
   }
   updateLabels();
-  zoomEl.addEventListener("input", () => { updateLabels(); if (img) reshuffle(); });
-  overlapEl.addEventListener("input", () => { updateLabels(); if (img) reshuffle(); });
 
-  // --- Preview drawing ---
-  function drawPreview(){
-    if (!img) return;
-    const rect = srcPreviewCanvas.getBoundingClientRect();
-    const w = Math.max(1, Math.floor(rect.width * devicePixelRatio));
-    const h = Math.max(1, Math.floor(rect.height * devicePixelRatio));
-    if (srcPreviewCanvas.width !== w || srcPreviewCanvas.height !== h){
-      srcPreviewCanvas.width = w;
-      srcPreviewCanvas.height = h;
-    }
-
-    srcPreviewCtx.clearRect(0,0,w,h);
-
-    // Fit image into preview
-    const iw = img.width, ih = img.height;
-    const scale = Math.min(w / iw, h / ih);
-    const dw = iw * scale;
-    const dh = ih * scale;
-    const dx = (w - dw) / 2;
-    const dy = (h - dh) / 2;
-
-    srcPreviewCtx.drawImage(img, dx, dy, dw, dh);
-
-    // Subtle frame
-    srcPreviewCtx.strokeStyle = "rgba(255,255,255,.12)";
-    srcPreviewCtx.lineWidth = Math.max(1, Math.floor(devicePixelRatio));
-    srcPreviewCtx.strokeRect(dx + 0.5, dy + 0.5, dw - 1, dh - 1);
-  }
-  window.addEventListener("resize", () => drawPreview());
-
-  // --- “Interesting detail” scoring (fast, local) ---
-  function computeScoreForRect(rect){
-    // Downsample region to small patch, score = variance + edge magnitude
-    // Rect is in image coords
-    const patchW = 48, patchH = 72; // keeps 2:3 vibe
-    const tmp = document.createElement("canvas");
-    tmp.width = patchW;
-    tmp.height = patchH;
-    const tctx = tmp.getContext("2d", { willReadFrequently: true });
-    tctx.drawImage(off, rect.x, rect.y, rect.w, rect.h, 0, 0, patchW, patchH);
-
-    const imgData = tctx.getImageData(0,0,patchW,patchH).data;
-
-    // luminance array
-    const L = new Float32Array(patchW*patchH);
-    let mean = 0;
-    for (let i=0, p=0; i<imgData.length; i+=4, p++){
-      const r = imgData[i], g = imgData[i+1], b = imgData[i+2];
-      const y = 0.2126*r + 0.7152*g + 0.0722*b;
-      L[p] = y;
-      mean += y;
-    }
-    mean /= L.length;
-
-    let varSum = 0;
-    for (let i=0;i<L.length;i++){
-      const d = L[i]-mean;
-      varSum += d*d;
-    }
-    const variance = varSum / L.length;
-
-    // Simple edge magnitude (Sobel-lite)
-    let edge = 0;
-    const w = patchW, h = patchH;
-    for (let y=1; y<h-1; y++){
-      for (let x=1; x<w-1; x++){
-        const i = y*w + x;
-        const gx = (L[i+1] - L[i-1]) + 0.5*(L[i-w+1]-L[i-w-1]) + 0.5*(L[i+w+1]-L[i+w-1]);
-        const gy = (L[i+w] - L[i-w]) + 0.5*(L[i+w-1]-L[i-w-1]) + 0.5*(L[i+w+1]-L[i-w+1]);
-        edge += Math.abs(gx) + Math.abs(gy);
-      }
-    }
-    edge /= (w*h);
-
-    // Encourage mid brightness (avoid pure black/white blank space a bit)
-    const brightnessPenalty = Math.abs(mean - 128) / 128; // 0..1
-    const score = (variance * 0.85) + (edge * 8.0) - (brightnessPenalty * 10.0);
-    return score;
-  }
-
+  function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
   function iou(a,b){
     const x1 = Math.max(a.x, b.x);
     const y1 = Math.max(a.y, b.y);
@@ -626,24 +624,57 @@
     return union <= 0 ? 0 : inter / union;
   }
 
-  function generateCandidates(){
-    const iw = off.width, ih = off.height;
+  function computeScore(offCanvas, rect){
+    const patchW = 48, patchH = 72; // 2:3-ish
+    const tmp = document.createElement("canvas");
+    tmp.width = patchW; tmp.height = patchH;
+    const tctx = tmp.getContext("2d", { willReadFrequently: true });
+    tctx.drawImage(offCanvas, rect.x, rect.y, rect.w, rect.h, 0, 0, patchW, patchH);
+    const data = tctx.getImageData(0,0,patchW,patchH).data;
 
+    const L = new Float32Array(patchW*patchH);
+    let mean = 0;
+    for (let i=0,p=0;i<data.length;i+=4,p++){
+      const r=data[i], g=data[i+1], b=data[i+2];
+      const y = 0.2126*r + 0.7152*g + 0.0722*b;
+      L[p]=y; mean += y;
+    }
+    mean /= L.length;
+
+    let varSum = 0;
+    for (let i=0;i<L.length;i++){
+      const d=L[i]-mean;
+      varSum += d*d;
+    }
+    const variance = varSum / L.length;
+
+    let edge = 0;
+    const w = patchW, h = patchH;
+    for (let y=1;y<h-1;y++){
+      for (let x=1;x<w-1;x++){
+        const i = y*w + x;
+        const gx = (L[i+1]-L[i-1]) + 0.5*(L[i-w+1]-L[i-w-1]) + 0.5*(L[i+w+1]-L[i+w-1]);
+        const gy = (L[i+w]-L[i-w]) + 0.5*(L[i+w-1]-L[i-w-1]) + 0.5*(L[i+w+1]-L[i-w+1]);
+        edge += Math.abs(gx) + Math.abs(gy);
+      }
+    }
+    edge /= (w*h);
+
+    const brightnessPenalty = Math.abs(mean - 128) / 128;
+    return (variance * 0.85) + (edge * 8.0) - (brightnessPenalty * 10.0);
+  }
+
+  function generateCandidates(offCanvas){
+    const iw = offCanvas.width, ih = offCanvas.height;
     const z = zoomPreset(+zoomEl.value);
     const aspect = 2/3;
 
-    // base crop width as fraction of min dimension (then we explore around it)
-    const base = z.base; // 0.18..0.34
+    const base = z.base;
     const minDim = Math.min(iw, ih);
     const baseW = clamp(minDim * base, 80, minDim);
-    const sizes = [
-      baseW * 0.85,
-      baseW * 1.00,
-      baseW * 1.18
-    ];
+    const sizes = [baseW * 0.85, baseW * 1.00, baseW * 1.18];
 
-    // Count candidates (kept moderate for performance)
-    const perSize = 260; // total ~780
+    const perSize = 240;
     const candidates = [];
 
     for (const w0 of sizes){
@@ -652,275 +683,504 @@
       const maxX = Math.max(0, iw - w);
       const maxY = Math.max(0, ih - h);
 
-      for (let i=0; i<perSize; i++){
-        // Slightly biased random (toward center a bit, but still explores edges)
-        const rx = (Math.random() + Math.random()) / 2; // 0..1 center-ish
+      for (let i=0;i<perSize;i++){
+        const rx = (Math.random() + Math.random()) / 2;
         const ry = (Math.random() + Math.random()) / 2;
         const x = Math.floor(rx * maxX);
         const y = Math.floor(ry * maxY);
-
         const rect = { x, y, w, h, score: 0 };
-        rect.score = computeScoreForRect(rect);
+        rect.score = computeScore(offCanvas, rect);
         candidates.push(rect);
       }
     }
+    candidates.sort((a,b)=>b.score-a.score);
     return candidates;
   }
 
-  function pickTopRects(candidates, count){
-    // sort by score desc
-    candidates.sort((a,b) => b.score - a.score);
-
+  function pickRects(candidates, count){
     const o = overlapPreset(+overlapEl.value);
     const picked = [];
+
     for (const c of candidates){
       let ok = true;
       for (const p of picked){
-        if (iou(c,p) > o.iouMax){ ok = false; break; }
+        if (iou(c,p) > o.iouMax){ ok=false; break; }
       }
       if (ok){
         picked.push(c);
-        if (picked.length >= count) break;
+        if (picked.length>=count) break;
       }
     }
 
-    // If overlap is strict and we couldn't fill, relax progressively
+    // Relax if needed
     if (picked.length < count){
       let relax = o.iouMax;
       while (picked.length < count && relax < 0.55){
         relax += 0.08;
         for (const c of candidates){
-          if (picked.length >= count) break;
+          if (picked.length>=count) break;
           let ok = true;
           for (const p of picked){
-            if (iou(c,p) > relax){ ok = false; break; }
+            if (iou(c,p) > relax){ ok=false; break; }
           }
           if (ok) picked.push(c);
         }
       }
     }
 
-    // Absolute fallback: fill remaining from top scores
+    // Hard fill
     if (picked.length < count){
       const used = new Set(picked.map(r => r.x+"|"+r.y+"|"+r.w+"|"+r.h));
       for (const c of candidates){
-        const k = c.x+"|"+c.y+"|"+c.w+"|"+c.h;
+        const k=c.x+"|"+c.y+"|"+c.w+"|"+c.h;
         if (!used.has(k)){
           picked.push(c);
           used.add(k);
-          if (picked.length >= count) break;
+          if (picked.length>=count) break;
         }
       }
     }
+
     return picked.slice(0,count);
   }
 
-  // --- Rendering cards + downloads ---
-  function makeCard(cardInfo, rect, index){
-    const el = document.createElement("div");
-    el.className = "card";
+  // -----------------------------
+  // Deck UI factory
+  // -----------------------------
+  const decksRoot = document.getElementById("decks");
 
-    const inner = document.createElement("div");
-    inner.className = "cardInner";
-
-    const cnv = document.createElement("canvas");
-    const ctx = cnv.getContext("2d");
-
-    const num = document.createElement("div");
-    num.className = "num";
-    num.textContent = String(cardInfo.n);
-
-    const title = document.createElement("div");
-    title.className = "titleUnder";
-    title.textContent = cardInfo.title;
-
-    const overlay = document.createElement("div");
-    overlay.className = "overlay";
-    const p = document.createElement("p");
-    p.textContent = cardInfo.desc;
-    overlay.appendChild(p);
-
-    inner.appendChild(cnv);
-    inner.appendChild(num);
-    inner.appendChild(title);
-    inner.appendChild(overlay);
-
-    const actions = document.createElement("div");
-    actions.className = "actions";
-
-    const aDl = document.createElement("a");
-    aDl.className = "smallBtn secondary";
-    aDl.href = "#";
-    aDl.download = `tarot_${String(cardInfo.n).padStart(2,"0")}_${cardInfo.title.replace(/[^\w]+/g,"_")}.png`;
-    aDl.textContent = "⬇️ Download";
-
-    const aView = document.createElement("button");
-    aView.className = "smallBtn";
-    aView.type = "button";
-    aView.textContent = "🔎 Open";
-
-    actions.appendChild(aDl);
-    actions.appendChild(aView);
-
-    el.appendChild(inner);
-    el.appendChild(actions);
-
-    function renderToCanvas(){
-      const cssW = inner.clientWidth;
-      const cssH = inner.clientHeight;
-      const w = Math.max(1, Math.floor(cssW * devicePixelRatio));
-      const h = Math.max(1, Math.floor(cssH * devicePixelRatio));
-      if (cnv.width !== w || cnv.height !== h){
-        cnv.width = w;
-        cnv.height = h;
-      }
-      ctx.clearRect(0,0,w,h);
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = "high";
-      ctx.drawImage(off, rect.x, rect.y, rect.w, rect.h, 0, 0, w, h);
-    }
-
-    // Build a full-res crop PNG download URL
-    async function refreshDownloadHref(){
-      // Full resolution crop (rect size)
-      const c = document.createElement("canvas");
-      c.width = rect.w;
-      c.height = rect.h;
-      const cctx = c.getContext("2d");
-      cctx.imageSmoothingEnabled = true;
-      cctx.imageSmoothingQuality = "high";
-      cctx.drawImage(off, rect.x, rect.y, rect.w, rect.h, 0, 0, rect.w, rect.h);
-
-      const blob = await new Promise(resolve => c.toBlob(resolve, "image/png", 1.0));
-      const url = URL.createObjectURL(blob);
-
-      // Revoke old URL if any
-      if (aDl.dataset.url){ try { URL.revokeObjectURL(aDl.dataset.url); } catch(e){} }
-      aDl.dataset.url = url;
-      aDl.href = url;
-    }
-
-    // Open in new tab as image
-    aView.addEventListener("click", async () => {
-      await refreshDownloadHref();
-      window.open(aDl.href, "_blank", "noopener,noreferrer");
-    });
-
-    // Click image area = download
-    inner.addEventListener("click", async () => {
-      await refreshDownloadHref();
-      aDl.click();
-    });
-
-    // Render now & set download href
-    requestAnimationFrame(() => renderToCanvas());
-    refreshDownloadHref();
-
-    // Re-render on resize (grid responsive)
-    const ro = new ResizeObserver(() => renderToCanvas());
-    ro.observe(inner);
-
-    return el;
+  function safeFileName(s){
+    return s.replace(/[^\w\-]+/g, "_").replace(/_+/g,"_").replace(/^_+|_+$/g,"");
   }
 
-  function clearGrid(){
-    // revoke blob urls
-    gridEl.querySelectorAll("a[data-url]").forEach(a => {
-      try { URL.revokeObjectURL(a.dataset.url); } catch(e){}
-    });
-    gridEl.innerHTML = "";
+  async function canvasToPngU8(canvas){
+    const blob = await new Promise(res => canvas.toBlob(res, "image/png", 1.0));
+    const buf = await blob.arrayBuffer();
+    return new Uint8Array(buf);
   }
 
-  async function buildCards(){
-    if (!img) return;
+  function buildDeckSection(deck){
+    const panel = document.createElement("section");
+    panel.className = "panel";
+    panel.id = "panel_" + deck.id;
 
-    setStatus("Selecting 22 interesting details…");
-    clearGrid();
+    const hd = document.createElement("div");
+    hd.className = "hd";
 
-    // Candidates & pick
-    const candidates = generateCandidates();
-    const rects = pickTopRects(candidates, 22);
+    const left = document.createElement("div");
+    left.className = "label";
+    left.innerHTML = `${deck.emoji} <span style="color:var(--text);font-weight:750">${deck.label}</span>`;
 
-    // Render cards in 0..21 order
-    for (let i=0;i<22;i++){
-      const info = arcana[i];
-      const rect = rects[i] || rects[rects.length-1];
-      const cardEl = makeCard(info, rect, i);
-      gridEl.appendChild(cardEl);
-    }
+    const status = document.createElement("div");
+    status.className = "label";
+    status.textContent = "No image loaded";
 
-    setStatus("Done — hover to read, click to download.");
-  }
+    const controls = document.createElement("div");
+    controls.className = "controls";
 
-  function reshuffle(){
-    if (!img) return;
-    buildCards();
-  }
+    const fileLabel = document.createElement("label");
+    fileLabel.className = "file";
+    fileLabel.innerHTML = `📷 Upload image <input type="file" accept="image/*" style="display:none" />`;
 
-  // --- Loading image ---
-  async function loadFile(file){
-    if (!file) return;
-
-    setStatus("Loading image…");
+    const reshuffleBtn = document.createElement("button");
+    reshuffleBtn.className = "btn";
     reshuffleBtn.disabled = true;
-    emptyMsgEl.style.display = "none";
+    reshuffleBtn.textContent = "🔀 Reshuffle details";
 
-    // Clean old
-    clearGrid();
+    const dlAllBtn = document.createElement("button");
+    dlAllBtn.className = "btn";
+    dlAllBtn.disabled = true;
+    dlAllBtn.textContent = "⬇️ Download all (ZIP)";
 
-    // Decode
-    const url = URL.createObjectURL(file);
-    try{
-      // Use ImageBitmap when available for faster decode/draw
-      if ("createImageBitmap" in window){
-        imgBitmap = await createImageBitmap(file);
-        img = imgBitmap;
-      }else{
-        img = await new Promise((resolve,reject) => {
-          const im = new Image();
-          im.onload = () => resolve(im);
-          im.onerror = reject;
-          im.src = url;
-        });
+    controls.appendChild(fileLabel);
+    controls.appendChild(reshuffleBtn);
+    controls.appendChild(dlAllBtn);
+
+    hd.appendChild(left);
+    hd.appendChild(status);
+    hd.appendChild(controls);
+
+    const bd = document.createElement("div");
+    bd.className = "bd";
+
+    const row = document.createElement("div");
+    row.className = "row";
+    row.style.margin = "0 0 12px";
+
+    const previewWrap = document.createElement("div");
+    const preview = document.createElement("div");
+    preview.className = "preview";
+    const pCanvas = document.createElement("canvas");
+    const pCtx = pCanvas.getContext("2d", { willReadFrequently: true });
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = deck.hint;
+
+    preview.appendChild(pCanvas);
+    preview.appendChild(empty);
+
+    const hint = document.createElement("p");
+    hint.className = "hint";
+    hint.innerHTML = `Hover cards → meaning • Click card image → download ZIP (PNG + meaning) • Use <span class="kbd">R</span> to reshuffle`;
+
+    previewWrap.appendChild(preview);
+    previewWrap.appendChild(hint);
+
+    const info = document.createElement("div");
+    info.innerHTML = `
+      <div class="mini">
+        <div class="tag"><b>${deck.count}</b> cards per upload</div>
+        <div class="tag">Card number at top center</div>
+        <div class="tag">Title at bottom</div>
+        <div class="tag">Meanings included in downloads</div>
+      </div>
+    `;
+
+    row.appendChild(previewWrap);
+    row.appendChild(info);
+
+    const grid = document.createElement("div");
+    grid.className = "grid";
+
+    bd.appendChild(row);
+    bd.appendChild(grid);
+
+    panel.appendChild(hd);
+    panel.appendChild(bd);
+    decksRoot.appendChild(panel);
+
+    // Deck state
+    const state = {
+      img: null,
+      off: document.createElement("canvas"),
+      offCtx: null,
+      candidates: null,
+      rects: null,
+      cardCanvases: [], // full-res canvases (for downloads)
+      cardMeta: [],     // {n,title,desc, fileBase}
+      lastBlobUrls: [],
+    };
+    state.offCtx = state.off.getContext("2d", { willReadFrequently: true });
+
+    function setStatus(t){ status.textContent = t; }
+
+    function revokeAllUrls(){
+      for (const u of state.lastBlobUrls){
+        try{ URL.revokeObjectURL(u); }catch(e){}
+      }
+      state.lastBlobUrls = [];
+    }
+
+    function clearGrid(){
+      revokeAllUrls();
+      grid.innerHTML = "";
+      state.cardCanvases = [];
+      state.cardMeta = [];
+    }
+
+    function drawPreview(){
+      if (!state.img) return;
+
+      const rect = pCanvas.getBoundingClientRect();
+      const w = Math.max(1, Math.floor(rect.width * devicePixelRatio));
+      const h = Math.max(1, Math.floor(rect.height * devicePixelRatio));
+      if (pCanvas.width !== w || pCanvas.height !== h){
+        pCanvas.width = w; pCanvas.height = h;
+      }
+      pCtx.clearRect(0,0,w,h);
+
+      const iw = state.img.width, ih = state.img.height;
+      const scale = Math.min(w/iw, h/ih);
+      const dw = iw*scale, dh = ih*scale;
+      const dx = (w-dw)/2, dy = (h-dh)/2;
+      pCtx.drawImage(state.img, dx, dy, dw, dh);
+
+      pCtx.strokeStyle = "rgba(255,255,255,.12)";
+      pCtx.lineWidth = Math.max(1, Math.floor(devicePixelRatio));
+      pCtx.strokeRect(dx + 0.5, dy + 0.5, dw - 1, dh - 1);
+    }
+
+    const ro = new ResizeObserver(() => drawPreview());
+    ro.observe(preview);
+
+    async function buildCards(){
+      if (!state.img) return;
+
+      setStatus("Selecting details…");
+      clearGrid();
+
+      // candidates cache invalidates on zoom/overlap changes (we regenerate each time for “reshuffle” variety)
+      state.candidates = generateCandidates(state.off);
+      state.rects = pickRects(state.candidates, deck.count);
+
+      for (let i=0;i<deck.count;i++){
+        const cinfo = deck.cards[i];
+        const rect = state.rects[i];
+
+        // Create display card
+        const cardEl = document.createElement("div");
+        cardEl.className = "card";
+
+        const inner = document.createElement("div");
+        inner.className = "cardInner";
+
+        const cnv = document.createElement("canvas");
+        const ctx = cnv.getContext("2d");
+        const num = document.createElement("div");
+        num.className = "num";
+        num.textContent = String(cinfo.n);
+
+        const title = document.createElement("div");
+        title.className = "titleUnder";
+        title.textContent = cinfo.title;
+
+        const overlay = document.createElement("div");
+        overlay.className = "overlay";
+        const pp = document.createElement("p");
+        pp.textContent = cinfo.desc;
+        overlay.appendChild(pp);
+
+        inner.appendChild(cnv);
+        inner.appendChild(num);
+        inner.appendChild(title);
+        inner.appendChild(overlay);
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const btnOne = document.createElement("button");
+        btnOne.className = "smallBtn secondary";
+        btnOne.type = "button";
+        btnOne.textContent = "⬇️ Download card (ZIP)";
+
+        const btnOpen = document.createElement("button");
+        btnOpen.className = "smallBtn";
+        btnOpen.type = "button";
+        btnOpen.textContent = "🔎 Open image";
+
+        actions.appendChild(btnOne);
+        actions.appendChild(btnOpen);
+
+        cardEl.appendChild(inner);
+        cardEl.appendChild(actions);
+        grid.appendChild(cardEl);
+
+        // Full-res crop canvas (for downloads)
+        const full = document.createElement("canvas");
+        full.width = rect.w;
+        full.height = rect.h;
+        const fctx = full.getContext("2d");
+        fctx.imageSmoothingEnabled = true;
+        fctx.imageSmoothingQuality = "high";
+        fctx.drawImage(state.off, rect.x, rect.y, rect.w, rect.h, 0, 0, rect.w, rect.h);
+
+        state.cardCanvases.push(full);
+
+        const fileBase = `${deck.id}_${String(cinfo.n).padStart(2,"0")}_${safeFileName(cinfo.title)}`;
+        state.cardMeta.push({ n: cinfo.n, title: cinfo.title, desc: cinfo.desc, fileBase });
+
+        // Render on-screen
+        function renderDisplay(){
+          const cssW = inner.clientWidth;
+          const cssH = inner.clientHeight;
+          const w = Math.max(1, Math.floor(cssW * devicePixelRatio));
+          const h = Math.max(1, Math.floor(cssH * devicePixelRatio));
+          if (cnv.width !== w || cnv.height !== h){ cnv.width=w; cnv.height=h; }
+          ctx.clearRect(0,0,w,h);
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
+          ctx.drawImage(state.off, rect.x, rect.y, rect.w, rect.h, 0, 0, w, h);
+        }
+        requestAnimationFrame(renderDisplay);
+        new ResizeObserver(renderDisplay).observe(inner);
+
+        async function downloadOneZip(){
+          const zip = new ZipStore();
+          const pngU8 = await canvasToPngU8(full);
+          const txt = [
+            `Deck: ${deck.label}`,
+            `Number: ${cinfo.n}`,
+            `Title: ${cinfo.title}`,
+            ``,
+            `Meaning:`,
+            `${cinfo.desc}`,
+            ``
+          ].join("\n");
+          const txtU8 = new TextEncoder().encode(txt);
+
+          zip.addFile(`${fileBase}.png`, pngU8);
+          zip.addFile(`${fileBase}.txt`, txtU8);
+
+          // small manifest entry
+          const json = JSON.stringify({ deck: deck.id, number: cinfo.n, title: cinfo.title, meaning: cinfo.desc }, null, 2);
+          zip.addFile(`${fileBase}.json`, new TextEncoder().encode(json));
+
+          const blob = zip.toBlob();
+          const url = URL.createObjectURL(blob);
+          state.lastBlobUrls.push(url);
+
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${fileBase}.zip`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        }
+
+        async function openImage(){
+          const pngU8 = await canvasToPngU8(full);
+          const blob = new Blob([pngU8], { type: "image/png" });
+          const url = URL.createObjectURL(blob);
+          state.lastBlobUrls.push(url);
+          window.open(url, "_blank", "noopener,noreferrer");
+        }
+
+        // Click image area = download ZIP (as requested: meaning included)
+        inner.addEventListener("click", downloadOneZip);
+        btnOne.addEventListener("click", downloadOneZip);
+        btnOpen.addEventListener("click", openImage);
       }
 
-      off.width = img.width;
-      off.height = img.height;
-      offCtx.clearRect(0,0,off.width, off.height);
-      offCtx.drawImage(img, 0, 0);
-
-      metaEl.textContent = `${img.width}×${img.height}px`;
-      reshuffleBtn.disabled = false;
-
-      drawPreview();
-      await buildCards();
-    } catch (e){
-      console.error(e);
-      setStatus("Could not load that image.");
-      metaEl.textContent = "Load failed";
-      emptyMsgEl.style.display = "";
-    } finally {
-      try{ URL.revokeObjectURL(url); }catch(e){}
+      setStatus(`Ready — ${deck.count} cards generated.`);
     }
+
+    async function loadFile(file){
+      if (!file) return;
+
+      setStatus("Loading image…");
+      reshuffleBtn.disabled = true;
+      dlAllBtn.disabled = true;
+      empty.style.display = "none";
+      clearGrid();
+
+      const url = URL.createObjectURL(file);
+      try{
+        let im;
+        if ("createImageBitmap" in window){
+          im = await createImageBitmap(file);
+        }else{
+          im = await new Promise((resolve,reject)=>{
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = url;
+          });
+        }
+        state.img = im;
+
+        state.off.width = im.width;
+        state.off.height = im.height;
+        state.offCtx.clearRect(0,0,im.width, im.height);
+        state.offCtx.drawImage(im, 0, 0);
+
+        drawPreview();
+        reshuffleBtn.disabled = false;
+        dlAllBtn.disabled = false;
+
+        await buildCards();
+      } catch(e){
+        console.error(e);
+        setStatus("Could not load image.");
+        empty.style.display = "";
+      } finally {
+        try{ URL.revokeObjectURL(url); }catch(e){}
+      }
+    }
+
+    async function reshuffle(){
+      if (!state.img) return;
+      await buildCards();
+    }
+
+    async function downloadAllZip(){
+      if (!state.img || !state.cardCanvases.length) return;
+
+      setStatus("Building ZIP…");
+
+      const zip = new ZipStore();
+
+      // A small README with meanings
+      const lines = [];
+      lines.push(deck.label);
+      lines.push("");
+      lines.push("This ZIP contains:");
+      lines.push("- One PNG per card");
+      lines.push("- One TXT + JSON per card containing its meaning");
+      lines.push("");
+
+      for (let i=0;i<state.cardCanvases.length;i++){
+        const meta = state.cardMeta[i];
+        const cnv = state.cardCanvases[i];
+
+        const pngU8 = await canvasToPngU8(cnv);
+        zip.addFile(`${meta.fileBase}.png`, pngU8);
+
+        const txt = [
+          `Deck: ${deck.label}`,
+          `Number: ${meta.n}`,
+          `Title: ${meta.title}`,
+          ``,
+          `Meaning:`,
+          `${meta.desc}`,
+          ``
+        ].join("\n");
+        zip.addFile(`${meta.fileBase}.txt`, new TextEncoder().encode(txt));
+
+        const json = JSON.stringify({ deck: deck.id, number: meta.n, title: meta.title, meaning: meta.desc }, null, 2);
+        zip.addFile(`${meta.fileBase}.json`, new TextEncoder().encode(json));
+
+        lines.push(`${meta.n} — ${meta.title}: ${meta.desc}`);
+      }
+
+      zip.addFile(`README_${deck.id}.txt`, new TextEncoder().encode(lines.join("\n")));
+
+      const blob = zip.toBlob();
+      const url = URL.createObjectURL(blob);
+      state.lastBlobUrls.push(url);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${deck.id}_all_cards.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setStatus(`Ready — downloaded ${deck.count} cards.`);
+    }
+
+    // events
+    fileLabel.querySelector("input").addEventListener("change", (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (f) loadFile(f);
+      e.target.value = "";
+    });
+    reshuffleBtn.addEventListener("click", reshuffle);
+    dlAllBtn.addEventListener("click", downloadAllZip);
+
+    // hotkey R reshuffles last interacted deck (simple: if it has an image, reshuffle)
+    window.addEventListener("keydown", (e) => {
+      if ((e.key === "r" || e.key === "R") && state.img && !reshuffleBtn.disabled){
+        reshuffle();
+      }
+    });
+
+    // react to global sliders
+    function onGlobalChange(){
+      // only rebuild if loaded
+      if (state.img) reshuffle();
+    }
+    zoomEl.addEventListener("input", onGlobalChange);
+    overlapEl.addEventListener("input", onGlobalChange);
+
+    return panel;
   }
 
-  // --- Events ---
-  fileEl.addEventListener("change", (e) => {
-    const f = e.target.files && e.target.files[0];
-    if (f) loadFile(f);
-    // allow re-upload same file
-    fileEl.value = "";
-  });
+  // Build all sections
+  for (const d of DECKS) buildDeckSection(d);
 
-  reshuffleBtn.addEventListener("click", () => reshuffle());
-
-  // Keyboard shortcut: R to reshuffle
-  window.addEventListener("keydown", (e) => {
-    if ((e.key === "r" || e.key === "R") && !reshuffleBtn.disabled){
-      reshuffle();
-    }
-  });
-
+  // Global label updates
+  zoomEl.addEventListener("input", updateLabels);
+  overlapEl.addEventListener("input", updateLabels);
 })();
 </script>
 </body>
