@@ -3,12 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tarot Detail Cutter — Major + 4 Suits</title>
+  <title>Tarot Detail Cutter — Major + 4 Suits + Deck Builder</title>
   <style>
     :root{
-      --bg:#0b0d12;
+      --bg:#0b0d12;          /* no gradients */
       --panel:#121724;
-      --panel2:#0f1320;
       --text:#e9ecf2;
       --muted:#a9b0c2;
       --line:rgba(255,255,255,.10);
@@ -20,31 +19,30 @@
       --cardRadius: 16px;
       --ratioW: 2;
       --ratioH: 3;
+      --ink: rgba(0,0,0,.88);
     }
+
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      background:
-        radial-gradient(1000px 700px at 20% 0%, rgba(122,162,255,.14), transparent 60%),
-        radial-gradient(900px 700px at 100% 30%, rgba(255,210,122,.10), transparent 60%),
-        radial-gradient(900px 800px at 40% 110%, rgba(124,255,178,.08), transparent 55%),
-        var(--bg);
+      background: var(--bg);
       color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
     .wrap{
       max-width:1200px;
       margin: 0 auto;
       padding: 24px 18px 40px;
     }
+
     header{
       display:flex;
       gap:16px;
       align-items:flex-start;
       justify-content:space-between;
       flex-wrap:wrap;
-      margin-bottom:14px;
+      margin-bottom: 14px;
     }
     h1{
       margin:0;
@@ -57,12 +55,12 @@
       color:var(--muted);
       font-size: 13px;
       line-height:1.35;
-      max-width: 85ch;
+      max-width: 90ch;
     }
 
     .panel{
       border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      background: rgba(255,255,255,.03);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
@@ -75,8 +73,8 @@
       align-items:center;
       justify-content:space-between;
       gap: 12px;
-      background: rgba(0,0,0,.18);
       flex-wrap:wrap;
+      background: rgba(0,0,0,.22);
     }
     .panel .hd .label{
       font-size: 13px;
@@ -97,7 +95,7 @@
     }
     .btn, .file{
       border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      background: rgba(255,255,255,.04);
       color: var(--text);
       padding: 10px 12px;
       border-radius: 14px;
@@ -114,7 +112,7 @@
     .btn:hover, .file:hover{
       transform: translateY(-1px);
       border-color: rgba(122,162,255,.45);
-      background: linear-gradient(180deg, rgba(122,162,255,.12), rgba(255,255,255,.02));
+      background: rgba(122,162,255,.10);
     }
     .btn:active, .file:active{ transform: translateY(0px); }
     .btn[disabled]{
@@ -122,13 +120,14 @@
       cursor:not-allowed;
       transform:none;
     }
+
     .pill{
       font-size: 12px;
       font-weight: 700;
       padding: 6px 10px;
       border-radius: 999px;
       border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.03);
       color: var(--muted);
       display:inline-flex;
       gap:8px;
@@ -140,7 +139,7 @@
       display:grid;
       grid-template-columns: 1.15fr .85fr;
       gap: 14px;
-      margin: 12px 0 0;
+      margin: 0 0 12px;
     }
     @media (max-width: 980px){ .row{ grid-template-columns: 1fr; } }
 
@@ -226,24 +225,26 @@
       display:block;
     }
 
-    /* Number top center + “stylish” font */
+    /* Tarot-ish look: no label backgrounds, just shadowed text */
+    .tarotFont{
+      font-family: ui-serif, Georgia, "Times New Roman", serif;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
     .num{
       position:absolute;
       top: 10px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 800;
-      letter-spacing: 1.2px;
-      padding: 7px 10px 6px;
-      border-radius: 999px;
-      background: rgba(0,0,0,.55);
-      border: 1px solid rgba(255,255,255,.18);
-      backdrop-filter: blur(6px);
-      font-family: ui-serif, "Georgia", "Times New Roman", serif;
-      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,.95);
+      text-shadow:
+        0 2px 10px rgba(0,0,0,.75),
+        0 1px 0 rgba(0,0,0,.75);
+      pointer-events:none;
     }
-
     .titleUnder{
       position:absolute;
       bottom: 10px;
@@ -251,24 +252,24 @@
       right: 10px;
       font-size: 12px;
       font-weight: 800;
-      letter-spacing: .2px;
-      padding: 8px 10px;
-      border-radius: 12px;
-      background: rgba(0,0,0,.55);
-      border: 1px solid rgba(255,255,255,.18);
-      backdrop-filter: blur(6px);
+      color: rgba(255,255,255,.95);
+      text-shadow:
+        0 2px 12px rgba(0,0,0,.85),
+        0 1px 0 rgba(0,0,0,.8);
       text-align:center;
       overflow:hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      pointer-events:none;
     }
+
+    /* Hover meaning (no box, just readable shadow) */
     .overlay{
       position:absolute;
       inset:0;
       opacity:0;
-      transform: translateY(8px);
-      transition: opacity .18s ease, transform .18s ease;
-      background: linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.75));
+      transition: opacity .18s ease;
+      background: rgba(0,0,0,.40);
       display:flex;
       align-items:flex-end;
       padding: 12px;
@@ -277,17 +278,10 @@
       margin:0;
       font-size: 12px;
       line-height: 1.35;
-      color: rgba(233,236,242,.95);
-      background: rgba(0,0,0,.35);
-      border: 1px solid rgba(255,255,255,.16);
-      border-radius: 12px;
-      padding: 10px 10px;
-      backdrop-filter: blur(6px);
+      color: rgba(255,255,255,.96);
+      text-shadow: 0 2px 10px rgba(0,0,0,.85);
     }
-    .card:hover .overlay{
-      opacity:1;
-      transform: translateY(0);
-    }
+    .card:hover .overlay{ opacity:1; }
 
     .actions{
       display:flex;
@@ -320,11 +314,12 @@
       border-color: rgba(124,255,178,.35);
       background: rgba(124,255,178,.10);
     }
-    .smallBtn:active{ transform: translateY(0px); }
     .smallBtn.secondary:hover{
       border-color: rgba(122,162,255,.40);
       background: rgba(122,162,255,.10);
     }
+    .smallBtn:active{ transform: translateY(0px); }
+    .smallBtn[disabled]{ opacity:.45; cursor:not-allowed; transform:none; }
 
     .kbd{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -336,6 +331,196 @@
       color: rgba(233,236,242,.9);
     }
     input[type="range"]{ width:100%; }
+
+    /* Deck builder */
+    .deckRow{
+      display:grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 14px;
+      align-items:start;
+    }
+    @media (max-width: 980px){ .deckRow{ grid-template-columns: 1fr; } }
+
+    .stackWrap{
+      display:flex;
+      gap: 14px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+    .stack{
+      width: 180px;
+      aspect-ratio: 2/3;
+      border-radius: 18px;
+      border: 1px dashed rgba(255,255,255,.20);
+      background: rgba(0,0,0,.18);
+      position:relative;
+      overflow:hidden;
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+    }
+    .stack .stackCard{
+      position:absolute;
+      inset:0;
+      transform-origin: 50% 70%;
+      border-radius: 18px;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+    }
+    .stack .stackCard img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:block;
+    }
+    .stack .emptyStack{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color: var(--muted);
+      font-size: 12px;
+      text-align:center;
+      padding: 14px;
+    }
+
+    .thumbs{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    .thumb{
+      width: 72px;
+      aspect-ratio: 2/3;
+      border-radius: 12px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      position:relative;
+    }
+    .thumb img{ width:100%; height:100%; object-fit: cover; display:block; }
+    .thumb button{
+      position:absolute;
+      top:6px; right:6px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.45);
+      color: rgba(255,255,255,.92);
+      border-radius: 10px;
+      padding: 4px 6px;
+      cursor:pointer;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    /* Spreads area */
+    .spreads{
+      display:grid;
+      gap: 12px;
+    }
+    .spreadTabs{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .tab{
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 999px;
+      cursor:pointer;
+      font-weight: 800;
+      font-size: 12px;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+    }
+    .tab:hover{ transform: translateY(-1px); border-color: rgba(122,162,255,.45); background: rgba(122,162,255,.10); }
+    .tab.active{ border-color: rgba(124,255,178,.35); background: rgba(124,255,178,.10); }
+
+    .spreadBoard{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.16);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.30);
+    }
+    .slots{
+      display:grid;
+      gap: 14px;
+      align-items:end;
+      justify-items:center;
+    }
+
+    /* specific layouts */
+    .slots.day{ grid-template-columns: 1fr; }
+    .slots.choice{ grid-template-columns: repeat(2, 1fr); }
+    .slots.insight{
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto auto;
+    }
+
+    .slot{
+      width: 180px;
+      max-width: 100%;
+      aspect-ratio: 2/3;
+      border-radius: 18px;
+      border: 1px dashed rgba(255,255,255,.22);
+      background: rgba(0,0,0,.12);
+      position:relative;
+      overflow:hidden;
+    }
+    .slot img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:block;
+    }
+    .slot .slotNum{
+      position:absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,.95);
+      text-shadow: 0 2px 10px rgba(0,0,0,.75), 0 1px 0 rgba(0,0,0,.75);
+      pointer-events:none;
+    }
+    .slot .slotTitle{
+      position:absolute;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: rgba(255,255,255,.95);
+      text-shadow: 0 2px 12px rgba(0,0,0,.85), 0 1px 0 rgba(0,0,0,.8);
+      text-align:center;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      pointer-events:none;
+    }
+    .slotLabel{
+      margin-top:8px;
+      font-size: 12px;
+      color: var(--muted);
+      text-align:center;
+      font-weight: 750;
+      letter-spacing:.3px;
+    }
+
+    .insightTop{
+      grid-column: 3 / 4;
+      grid-row: 1 / 2;
+      align-self:start;
+      justify-self:center;
+    }
+    .insightPast{ grid-column: 1 / 2; grid-row: 2 / 3; }
+    .insightNow{  grid-column: 2 / 3; grid-row: 2 / 3; }
+    .insightPoss{ grid-column: 3 / 4; grid-row: 2 / 3; }
+
     footer{
       margin-top: 18px;
       color: var(--muted);
@@ -349,11 +534,11 @@
   <div class="wrap">
     <header>
       <div>
-        <h1>Tarot Detail Cutter — Major Arcana + Minor Suits</h1>
+        <h1>Tarot Detail Cutter — Major + Suits + Deck Builder</h1>
         <p class="sub">
-          Upload an image per section. The app automatically cuts “interesting” detail crops and lays them out as tarot cards.
-          Hover a card for its meaning. Each card can be downloaded as a <b>ZIP (PNG + meaning text)</b>, and you can also
-          download <b>all cards in one ZIP</b>.
+          Generate tarot-style crops from images. Hover a card to read its meaning.
+          Download single cards (PNG + meaning) or whole sections as one ZIP.
+          Use <b>Send to Tarotdeck</b> to collect up to <b>5</b> cards, then draw spreads: <b>Card of the Day</b>, <b>Choice</b>, and <b>Insight</b>.
         </p>
       </div>
       <div class="pill" title="Selection method"><b>Selector</b> edge+variance</div>
@@ -392,24 +577,73 @@
 
         <div class="mini" style="margin-top:12px;">
           <div class="tag">Click card image = download ZIP (PNG + meaning)</div>
-          <div class="tag">“Download all” creates 1 ZIP for the whole section</div>
+          <div class="tag">“Download all” creates 1 ZIP for that section</div>
           <div class="tag">Everything runs locally (GitHub Pages friendly)</div>
         </div>
       </div>
     </section>
 
-    <!-- DECKS -->
+    <!-- DECK BUILDER + SPREADS -->
+    <section class="panel" id="deckPanel">
+      <div class="hd">
+        <div class="label">🂠 Tarotdeck Builder (max 5 cards)</div>
+        <div class="controls">
+          <button class="btn" id="deckShuffle" disabled>🔀 Shuffle deck</button>
+          <button class="btn" id="deckDownload" disabled>⬇️ Download deck (ZIP)</button>
+          <button class="btn" id="deckClear" disabled>🗑️ Clear deck</button>
+        </div>
+      </div>
+      <div class="bd">
+        <div class="deckRow">
+          <div>
+            <div class="stackWrap">
+              <div class="stack" id="deckStack" aria-label="Deck stack">
+                <div class="emptyStack" id="deckEmpty">No cards yet.<br/>Use “Send to Tarotdeck” on any generated card.</div>
+              </div>
+              <div>
+                <div class="pill" id="deckCountPill"><b>Deck</b> 0/5</div>
+                <p class="hint" style="margin-top:10px;">
+                  You’re building a tiny custom deck from your own image details. When ready, draw spreads on the right.
+                </p>
+                <div class="thumbs" id="deckThumbs" style="margin-top:10px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="spreads">
+            <div class="spreadTabs">
+              <button class="tab active" data-spread="day">Card of the Day</button>
+              <button class="tab" data-spread="choice">Choice</button>
+              <button class="tab" data-spread="insight">Insight</button>
+              <span class="pill" id="spreadHint"><b>Draw</b> from your deck</span>
+              <button class="btn" id="dealBtn" disabled style="margin-left:auto;">🃏 Deal</button>
+              <button class="btn" id="resetSpread" disabled>↩ Reset</button>
+            </div>
+
+            <div class="spreadBoard">
+              <div id="spreadSlots" class="slots day"></div>
+              <p class="hint" style="margin:12px 0 0;">
+                Tip: Deal uses random cards from your deck (like drawing from the top). Build the deck first.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DECKS OUTPUT -->
     <div id="decks"></div>
 
     <footer>
-      Tip: use higher-resolution images for sharper downloads. Court cards are numbered <span class="kbd">11–14</span> (Page, Knight, Queen, King).
+      Court cards are numbered <span class="kbd">11–14</span> (Page, Knight, Queen, King).<br/>
+      Meanings are included inside every download (TXT + JSON).
     </footer>
   </div>
 
 <script>
 (() => {
   // -----------------------------
-  // Card Data (short meanings)
+  // Major Arcana (0–21) meanings
   // -----------------------------
   const MAJOR = [
     { n: 0,  title: "The Fool",          desc: "Beginnings, spontaneity, trust. Step forward with open curiosity." },
@@ -437,38 +671,31 @@
   ];
 
   function makeMinorSuit(suitName){
-    // 1..10 + 11 Page + 12 Knight + 13 Queen + 14 King
-    const s = suitName; // "Wands", "Cups", "Pentacles", "Swords"
-    const titles = [
-      {n:1,  t:`Ace of ${s}`,   d:"A new spark opens. A fresh start in the suit’s element."},
-      {n:2,  t:`Two of ${s}`,   d:"Planning and choices. Weigh options and commit to a direction."},
-      {n:3,  t:`Three of ${s}`, d:"Momentum and expansion. Early results; look toward what’s next."},
-      {n:4,  t:`Four of ${s}`,  d:"Stability and rest. Create a safe base; celebrate what’s built."},
-      {n:5,  t:`Five of ${s}`,  d:"Challenge and friction. Learn through contrast, conflict, or testing."},
-      {n:6,  t:`Six of ${s}`,   d:"Progress and recognition. A step forward after effort."},
-      {n:7,  t:`Seven of ${s}`, d:"Defense and resolve. Hold your ground; protect your position."},
-      {n:8,  t:`Eight of ${s}`, d:"Speed and movement. Things shift quickly—act with focus."},
-      {n:9,  t:`Nine of ${s}`,  d:"Resilience and boundaries. Stay steady; you’re close."},
-      {n:10, t:`Ten of ${s}`,   d:"Completion and weight. A cycle peaks—finish, delegate, or release."},
-      {n:11, t:`Page of ${s}`,  d:"Curiosity and learning. A message, a student’s mind, a first attempt."},
-      {n:12, t:`Knight of ${s}`,d:"Action and pursuit. Move boldly—channel intensity with skill."},
-      {n:13, t:`Queen of ${s}`, d:"Mastery within. Mature expression—care, insight, and steady power."},
-      {n:14, t:`King of ${s}`,  d:"Authority and direction. Lead with wisdom; embody the suit’s strength."},
-    ];
-
-    // suit-flavored micro-tuning (keeps it short, but more specific)
+    const s = suitName;
     const flavor = {
-      "Wands":       { element:"Fire",  add:"passion, will, creative drive" },
-      "Cups":        { element:"Water", add:"emotion, intuition, connection" },
-      "Pentacles":   { element:"Earth", add:"work, resources, the physical world" },
-      "Swords":      { element:"Air",   add:"thought, truth, communication" }
+      "Wands":       { add:"passion, will, creative drive" },
+      "Cups":        { add:"emotion, intuition, connection" },
+      "Pentacles":   { add:"work, resources, the physical world" },
+      "Swords":      { add:"thought, truth, communication" }
     }[s];
 
-    return titles.map(x => ({
-      n: x.n,
-      title: x.t,
-      desc: x.d.replace("the suit’s element", `${flavor.add}`)
-    }));
+    const base = [
+      {n:1,  t:`Ace of ${s}`,    d:`A new spark opens: ${flavor.add}.`},
+      {n:2,  t:`Two of ${s}`,    d:`Planning and choices. Weigh options and commit.`},
+      {n:3,  t:`Three of ${s}`,  d:`Momentum and expansion. Early results and growth.`},
+      {n:4,  t:`Four of ${s}`,   d:`Stability and rest. Create a safe base; recover.`},
+      {n:5,  t:`Five of ${s}`,   d:`Challenge and friction. Learn through testing.`},
+      {n:6,  t:`Six of ${s}`,    d:`Progress and recognition. A step forward after effort.`},
+      {n:7,  t:`Seven of ${s}`,  d:`Defense and resolve. Hold your ground; protect it.`},
+      {n:8,  t:`Eight of ${s}`,  d:`Speed and movement. Things shift quickly—focus.`},
+      {n:9,  t:`Nine of ${s}`,   d:`Resilience and boundaries. Stay steady; you’re close.`},
+      {n:10, t:`Ten of ${s}`,    d:`Completion and weight. Finish, delegate, or release.`},
+      {n:11, t:`Page of ${s}`,   d:`Curiosity and learning. A message or first attempt.`},
+      {n:12, t:`Knight of ${s}`, d:`Action and pursuit. Move boldly—channel intensity.`},
+      {n:13, t:`Queen of ${s}`,  d:`Mature expression. Inner mastery; steady power.`},
+      {n:14, t:`King of ${s}`,   d:`Authority and direction. Lead with wisdom and clarity.`},
+    ];
+    return base.map(x => ({ n:x.n, title:x.t, desc:x.d }));
   }
 
   const DECKS = [
@@ -480,7 +707,7 @@
   ];
 
   // -----------------------------
-  // ZIP builder (store/no compression)
+  // Tiny ZIP builder (store/no compression)
   // -----------------------------
   function crc32Table(){
     const tbl = new Uint32Array(256);
@@ -492,7 +719,6 @@
     return tbl;
   }
   const CRC_TBL = crc32Table();
-
   function crc32(u8){
     let c = 0xFFFFFFFF;
     for (let i=0;i<u8.length;i++){
@@ -500,10 +726,8 @@
     }
     return (c ^ 0xFFFFFFFF) >>> 0;
   }
-
   function u16(n){ return new Uint8Array([n & 255, (n>>>8) & 255]); }
   function u32(n){ return new Uint8Array([n & 255, (n>>>8)&255, (n>>>16)&255, (n>>>24)&255]); }
-
   function concatU8(parts){
     let len = 0;
     for (const p of parts) len += p.length;
@@ -512,7 +736,6 @@
     for (const p of parts){ out.set(p, off); off += p.length; }
     return out;
   }
-
   class ZipStore {
     constructor(){ this.files = []; }
     addFile(name, dataU8){
@@ -521,46 +744,43 @@
       this.files.push({ name, nameU8, dataU8, crc });
     }
     toBlob(){
-      // Simple ZIP (store). Uses “local header + central dir + end record”
       const localParts = [];
       const centralParts = [];
       let offset = 0;
 
       for (const f of this.files){
         const localHeader = concatU8([
-          u32(0x04034b50), // local file header sig
-          u16(20),         // version needed
-          u16(0),          // flags
-          u16(0),          // method = 0 (store)
-          u16(0), u16(0),  // time/date (0)
+          u32(0x04034b50),
+          u16(20),
+          u16(0),
+          u16(0),
+          u16(0), u16(0),
           u32(f.crc),
           u32(f.dataU8.length),
           u32(f.dataU8.length),
           u16(f.nameU8.length),
-          u16(0)           // extra len
+          u16(0)
         ]);
-
         localParts.push(localHeader, f.nameU8, f.dataU8);
 
         const centralHeader = concatU8([
-          u32(0x02014b50), // central header sig
-          u16(20),         // version made by
-          u16(20),         // version needed
-          u16(0),          // flags
-          u16(0),          // method
-          u16(0), u16(0),  // time/date
+          u32(0x02014b50),
+          u16(20),
+          u16(20),
+          u16(0),
+          u16(0),
+          u16(0), u16(0),
           u32(f.crc),
           u32(f.dataU8.length),
           u32(f.dataU8.length),
           u16(f.nameU8.length),
-          u16(0),          // extra
-          u16(0),          // comment
-          u16(0),          // disk start
-          u16(0),          // internal attrs
-          u32(0),          // external attrs
-          u32(offset)      // local header offset
+          u16(0),
+          u16(0),
+          u16(0),
+          u16(0),
+          u32(0),
+          u32(offset)
         ]);
-
         centralParts.push(centralHeader, f.nameU8);
 
         offset += localHeader.length + f.nameU8.length + f.dataU8.length;
@@ -571,13 +791,13 @@
       offset += centralData.length;
 
       const endRecord = concatU8([
-        u32(0x06054b50),           // end sig
-        u16(0), u16(0),            // disk numbers
+        u32(0x06054b50),
+        u16(0), u16(0),
         u16(this.files.length),
         u16(this.files.length),
         u32(centralData.length),
         u32(centralStart),
-        u16(0)                     // comment length
+        u16(0)
       ]);
 
       const zipU8 = concatU8([...localParts, centralData, endRecord]);
@@ -586,7 +806,7 @@
   }
 
   // -----------------------------
-  // “Interesting detail” selection
+  // Global settings
   // -----------------------------
   const zoomEl = document.getElementById("zoom");
   const overlapEl = document.getElementById("overlap");
@@ -610,6 +830,8 @@
     overlapLabelEl.innerHTML = "<b>" + o.name + "</b>";
   }
   updateLabels();
+  zoomEl.addEventListener("input", updateLabels);
+  overlapEl.addEventListener("input", updateLabels);
 
   function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
   function iou(a,b){
@@ -620,12 +842,13 @@
     const iw = Math.max(0, x2 - x1);
     const ih = Math.max(0, y2 - y1);
     const inter = iw*ih;
-    const union = a.w*a.h + b.w*b.h - inter;
-    return union <= 0 ? 0 : inter / union;
+    const uni = a.w*a.h + b.w*b.h - inter;
+    return uni <= 0 ? 0 : inter / uni;
   }
 
+  // score: variance + edges
   function computeScore(offCanvas, rect){
-    const patchW = 48, patchH = 72; // 2:3-ish
+    const patchW = 48, patchH = 72;
     const tmp = document.createElement("canvas");
     tmp.width = patchW; tmp.height = patchH;
     const tctx = tmp.getContext("2d", { willReadFrequently: true });
@@ -712,7 +935,6 @@
       }
     }
 
-    // Relax if needed
     if (picked.length < count){
       let relax = o.iouMax;
       while (picked.length < count && relax < 0.55){
@@ -728,7 +950,6 @@
       }
     }
 
-    // Hard fill
     if (picked.length < count){
       const used = new Set(picked.map(r => r.x+"|"+r.y+"|"+r.w+"|"+r.h));
       for (const c of candidates){
@@ -744,11 +965,6 @@
     return picked.slice(0,count);
   }
 
-  // -----------------------------
-  // Deck UI factory
-  // -----------------------------
-  const decksRoot = document.getElementById("decks");
-
   function safeFileName(s){
     return s.replace(/[^\w\-]+/g, "_").replace(/_+/g,"_").replace(/^_+|_+$/g,"");
   }
@@ -758,18 +974,306 @@
     const buf = await blob.arrayBuffer();
     return new Uint8Array(buf);
   }
+  async function canvasToBlobUrl(canvas){
+    const blob = await new Promise(res => canvas.toBlob(res, "image/png", 1.0));
+    const url = URL.createObjectURL(blob);
+    return { blob, url };
+  }
 
-  function buildDeckSection(deck){
+  // -----------------------------
+  // Tarotdeck (max 5) + spreads
+  // -----------------------------
+  const deck = {
+    cards: [], // {pngBlob, url, number, title, meaning, sourceLabel, fileBase}
+  };
+
+  const deckStackEl = document.getElementById("deckStack");
+  const deckThumbsEl = document.getElementById("deckThumbs");
+  const deckEmptyEl = document.getElementById("deckEmpty");
+  const deckCountPill = document.getElementById("deckCountPill");
+  const deckShuffleBtn = document.getElementById("deckShuffle");
+  const deckDownloadBtn = document.getElementById("deckDownload");
+  const deckClearBtn = document.getElementById("deckClear");
+
+  const tabs = Array.from(document.querySelectorAll(".tab"));
+  const spreadSlotsEl = document.getElementById("spreadSlots");
+  const dealBtn = document.getElementById("dealBtn");
+  const resetSpreadBtn = document.getElementById("resetSpread");
+
+  let activeSpread = "day";
+  let spreadDealt = []; // indices into deck.cards (or card objects)
+  let drawPile = [];    // shuffled indices
+
+  function updateDeckUI(){
+    deckCountPill.innerHTML = `<b>Deck</b> ${deck.cards.length}/5`;
+    deckShuffleBtn.disabled = deck.cards.length < 2;
+    deckDownloadBtn.disabled = deck.cards.length < 1;
+    deckClearBtn.disabled = deck.cards.length < 1;
+
+    dealBtn.disabled = deck.cards.length < 1;
+    resetSpreadBtn.disabled = spreadDealt.length === 0;
+
+    // stack visual
+    deckStackEl.querySelectorAll(".stackCard").forEach(n => n.remove());
+    if (deck.cards.length === 0){
+      deckEmptyEl.style.display = "";
+    } else {
+      deckEmptyEl.style.display = "none";
+      const maxShow = Math.min(deck.cards.length, 5);
+      for (let i=0;i<maxShow;i++){
+        const c = deck.cards[i];
+        const layer = document.createElement("div");
+        layer.className = "stackCard";
+        const img = document.createElement("img");
+        img.src = c.url;
+        layer.appendChild(img);
+
+        // slight fanning
+        const rot = (i - (maxShow-1)/2) * 1.2;
+        const dy = i * 1.5;
+        const dx = i * 0.8;
+        layer.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
+        layer.style.opacity = String(0.95 - i*0.06);
+        deckStackEl.appendChild(layer);
+      }
+    }
+
+    // thumbs
+    deckThumbsEl.innerHTML = "";
+    deck.cards.forEach((c, idx) => {
+      const t = document.createElement("div");
+      t.className = "thumb";
+      const img = document.createElement("img");
+      img.src = c.url;
+      const x = document.createElement("button");
+      x.textContent = "×";
+      x.title = "Remove from deck";
+      x.addEventListener("click", (e) => {
+        e.stopPropagation();
+        removeDeckCard(idx);
+      });
+      t.appendChild(img);
+      t.appendChild(x);
+      deckThumbsEl.appendChild(t);
+    });
+
+    // reset draw pile when deck changes
+    resetDrawPile();
+  }
+
+  function resetDrawPile(){
+    drawPile = deck.cards.map((_, i) => i);
+    // Fisher-Yates
+    for (let i=drawPile.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [drawPile[i], drawPile[j]] = [drawPile[j], drawPile[i]];
+    }
+  }
+
+  function removeDeckCard(idx){
+    const [c] = deck.cards.splice(idx, 1);
+    try{ URL.revokeObjectURL(c.url); }catch(e){}
+    // If removed card was in spread, reset spread
+    spreadDealt = [];
+    renderSpread();
+    updateDeckUI();
+  }
+
+  function clearDeck(){
+    deck.cards.forEach(c => { try{ URL.revokeObjectURL(c.url); }catch(e){} });
+    deck.cards = [];
+    spreadDealt = [];
+    renderSpread();
+    updateDeckUI();
+  }
+
+  function shuffleDeck(){
+    // reorder deck.cards
+    for (let i=deck.cards.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [deck.cards[i], deck.cards[j]] = [deck.cards[j], deck.cards[i]];
+    }
+    resetDrawPile();
+    spreadDealt = [];
+    renderSpread();
+    updateDeckUI();
+  }
+
+  async function downloadDeckZip(){
+    const zip = new ZipStore();
+    const manifest = [];
+
+    for (const c of deck.cards){
+      const pngBuf = await c.pngBlob.arrayBuffer();
+      zip.addFile(`${c.fileBase}.png`, new Uint8Array(pngBuf));
+
+      const txt = [
+        `Custom Tarotdeck (5 cards max)`,
+        `Source: ${c.sourceLabel}`,
+        `Number: ${c.number}`,
+        `Title: ${c.title}`,
+        ``,
+        `Meaning:`,
+        `${c.meaning}`,
+        ``
+      ].join("\n");
+      zip.addFile(`${c.fileBase}.txt`, new TextEncoder().encode(txt));
+
+      const json = JSON.stringify({
+        source: c.sourceLabel,
+        number: c.number,
+        title: c.title,
+        meaning: c.meaning
+      }, null, 2);
+      zip.addFile(`${c.fileBase}.json`, new TextEncoder().encode(json));
+
+      manifest.push({ file: `${c.fileBase}.png`, number: c.number, title: c.title, meaning: c.meaning, source: c.sourceLabel });
+    }
+
+    zip.addFile("DECK_MANIFEST.json", new TextEncoder().encode(JSON.stringify(manifest, null, 2)));
+
+    const blob = zip.toBlob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `custom_tarotdeck_${deck.cards.length}_cards.zip`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>{ try{ URL.revokeObjectURL(url);}catch(e){} }, 2500);
+  }
+
+  deckShuffleBtn.addEventListener("click", shuffleDeck);
+  deckDownloadBtn.addEventListener("click", downloadDeckZip);
+  deckClearBtn.addEventListener("click", clearDeck);
+
+  // -----------------------------
+  // Spreads rendering + dealing
+  // -----------------------------
+  function setActiveSpread(name){
+    activeSpread = name;
+    tabs.forEach(t => t.classList.toggle("active", t.dataset.spread === name));
+    spreadDealt = [];
+    renderSpread();
+    updateDeckUI();
+  }
+
+  tabs.forEach(t => t.addEventListener("click", () => setActiveSpread(t.dataset.spread)));
+
+  function spreadSpec(name){
+    if (name === "day"){
+      return [
+        { key:"1", label:"Card of the Day" }
+      ];
+    }
+    if (name === "choice"){
+      return [
+        { key:"1", label:"Situation A" },
+        { key:"2", label:"Situation B" }
+      ];
+    }
+    // insight
+    return [
+      { key:"4", label:"What needs awareness", className:"insightTop" },
+      { key:"2", label:"The past", className:"insightPast" },
+      { key:"1", label:"The situation", className:"insightNow" },
+      { key:"3", label:"The possibility", className:"insightPoss" },
+    ];
+  }
+
+  function renderSpread(){
+    const spec = spreadSpec(activeSpread);
+
+    spreadSlotsEl.className = "slots " + activeSpread;
+    spreadSlotsEl.innerHTML = "";
+
+    spec.forEach((s, idx) => {
+      const wrap = document.createElement("div");
+      if (s.className) wrap.className = s.className;
+
+      const slot = document.createElement("div");
+      slot.className = "slot";
+
+      const label = document.createElement("div");
+      label.className = "slotLabel tarotFont";
+      label.textContent = s.label;
+
+      // Fill if dealt
+      const dealtIndex = spreadDealt[idx];
+      if (typeof dealtIndex === "number" && deck.cards[dealtIndex]){
+        const c = deck.cards[dealtIndex];
+        const img = document.createElement("img");
+        img.src = c.url;
+        slot.appendChild(img);
+
+        const n = document.createElement("div");
+        n.className = "slotNum tarotFont";
+        n.textContent = String(c.number);
+
+        const tt = document.createElement("div");
+        tt.className = "slotTitle tarotFont";
+        tt.textContent = c.title;
+
+        slot.appendChild(n);
+        slot.appendChild(tt);
+
+        // hover meaning
+        slot.title = c.meaning;
+      } else {
+        // faint placeholders: no background box text, just hint on hover
+        slot.title = "Deal to place a card here";
+      }
+
+      wrap.appendChild(slot);
+      wrap.appendChild(label);
+      spreadSlotsEl.appendChild(wrap);
+    });
+
+    resetSpreadBtn.disabled = spreadDealt.length === 0;
+  }
+
+  function deal(){
+    if (deck.cards.length === 0) return;
+
+    const needed = spreadSpec(activeSpread).length;
+    spreadDealt = [];
+
+    // If not enough unique cards, allow repeats by reshuffling pile as needed
+    for (let i=0;i<needed;i++){
+      if (drawPile.length === 0) resetDrawPile();
+      const idx = drawPile.pop();
+      spreadDealt.push(idx);
+    }
+    renderSpread();
+    updateDeckUI();
+  }
+
+  dealBtn.addEventListener("click", deal);
+  resetSpreadBtn.addEventListener("click", () => {
+    spreadDealt = [];
+    renderSpread();
+    updateDeckUI();
+  });
+
+  renderSpread();
+  updateDeckUI();
+
+  // -----------------------------
+  // Build per-section generators
+  // -----------------------------
+  const decksRoot = document.getElementById("decks");
+
+  function buildDeckSection(section){
     const panel = document.createElement("section");
     panel.className = "panel";
-    panel.id = "panel_" + deck.id;
+    panel.id = "panel_" + section.id;
 
     const hd = document.createElement("div");
     hd.className = "hd";
 
     const left = document.createElement("div");
     left.className = "label";
-    left.innerHTML = `${deck.emoji} <span style="color:var(--text);font-weight:750">${deck.label}</span>`;
+    left.innerHTML = `${section.emoji} <span style="color:var(--text);font-weight:750">${section.label}</span>`;
 
     const status = document.createElement("div");
     status.className = "label";
@@ -805,7 +1309,6 @@
 
     const row = document.createElement("div");
     row.className = "row";
-    row.style.margin = "0 0 12px";
 
     const previewWrap = document.createElement("div");
     const preview = document.createElement("div");
@@ -814,7 +1317,7 @@
     const pCtx = pCanvas.getContext("2d", { willReadFrequently: true });
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.textContent = deck.hint;
+    empty.textContent = section.hint;
 
     preview.appendChild(pCanvas);
     preview.appendChild(empty);
@@ -829,10 +1332,10 @@
     const info = document.createElement("div");
     info.innerHTML = `
       <div class="mini">
-        <div class="tag"><b>${deck.count}</b> cards per upload</div>
-        <div class="tag">Card number at top center</div>
-        <div class="tag">Title at bottom</div>
-        <div class="tag">Meanings included in downloads</div>
+        <div class="tag"><b>${section.count}</b> cards per upload</div>
+        <div class="tag">Number top-center</div>
+        <div class="tag">Title bottom</div>
+        <div class="tag">Send 5 cards to deck</div>
       </div>
     `;
 
@@ -849,44 +1352,38 @@
     panel.appendChild(bd);
     decksRoot.appendChild(panel);
 
-    // Deck state
+    // Section state
     const state = {
       img: null,
       off: document.createElement("canvas"),
       offCtx: null,
-      candidates: null,
       rects: null,
-      cardCanvases: [], // full-res canvases (for downloads)
-      cardMeta: [],     // {n,title,desc, fileBase}
+      cardFullCanvases: [],
+      cardMeta: [],
       lastBlobUrls: [],
     };
     state.offCtx = state.off.getContext("2d", { willReadFrequently: true });
 
     function setStatus(t){ status.textContent = t; }
-
-    function revokeAllUrls(){
+    function revokeSectionUrls(){
       for (const u of state.lastBlobUrls){
         try{ URL.revokeObjectURL(u); }catch(e){}
       }
       state.lastBlobUrls = [];
     }
-
     function clearGrid(){
-      revokeAllUrls();
+      revokeSectionUrls();
       grid.innerHTML = "";
-      state.cardCanvases = [];
+      state.cardFullCanvases = [];
       state.cardMeta = [];
     }
 
     function drawPreview(){
       if (!state.img) return;
-
       const rect = pCanvas.getBoundingClientRect();
       const w = Math.max(1, Math.floor(rect.width * devicePixelRatio));
       const h = Math.max(1, Math.floor(rect.height * devicePixelRatio));
-      if (pCanvas.width !== w || pCanvas.height !== h){
-        pCanvas.width = w; pCanvas.height = h;
-      }
+      if (pCanvas.width !== w || pCanvas.height !== h){ pCanvas.width=w; pCanvas.height=h; }
       pCtx.clearRect(0,0,w,h);
 
       const iw = state.img.width, ih = state.img.height;
@@ -899,9 +1396,7 @@
       pCtx.lineWidth = Math.max(1, Math.floor(devicePixelRatio));
       pCtx.strokeRect(dx + 0.5, dy + 0.5, dw - 1, dh - 1);
     }
-
-    const ro = new ResizeObserver(() => drawPreview());
-    ro.observe(preview);
+    new ResizeObserver(drawPreview).observe(preview);
 
     async function buildCards(){
       if (!state.img) return;
@@ -909,15 +1404,34 @@
       setStatus("Selecting details…");
       clearGrid();
 
-      // candidates cache invalidates on zoom/overlap changes (we regenerate each time for “reshuffle” variety)
-      state.candidates = generateCandidates(state.off);
-      state.rects = pickRects(state.candidates, deck.count);
+      const candidates = generateCandidates(state.off);
+      state.rects = pickRects(candidates, section.count);
 
-      for (let i=0;i<deck.count;i++){
-        const cinfo = deck.cards[i];
+      for (let i=0;i<section.count;i++){
+        const cinfo = section.cards[i];
         const rect = state.rects[i];
 
-        // Create display card
+        // Full-res crop canvas
+        const full = document.createElement("canvas");
+        full.width = rect.w;
+        full.height = rect.h;
+        const fctx = full.getContext("2d");
+        fctx.imageSmoothingEnabled = true;
+        fctx.imageSmoothingQuality = "high";
+        fctx.drawImage(state.off, rect.x, rect.y, rect.w, rect.h, 0, 0, rect.w, rect.h);
+
+        state.cardFullCanvases.push(full);
+
+        const fileBase = `${section.id}_${String(cinfo.n).padStart(2,"0")}_${safeFileName(cinfo.title)}`;
+        state.cardMeta.push({
+          number: cinfo.n,
+          title: cinfo.title,
+          meaning: cinfo.desc,
+          fileBase,
+          sourceLabel: section.label
+        });
+
+        // UI card
         const cardEl = document.createElement("div");
         cardEl.className = "card";
 
@@ -926,12 +1440,13 @@
 
         const cnv = document.createElement("canvas");
         const ctx = cnv.getContext("2d");
+
         const num = document.createElement("div");
-        num.className = "num";
+        num.className = "num tarotFont";
         num.textContent = String(cinfo.n);
 
         const title = document.createElement("div");
-        title.className = "titleUnder";
+        title.className = "titleUnder tarotFont";
         title.textContent = cinfo.title;
 
         const overlay = document.createElement("div");
@@ -953,33 +1468,18 @@
         btnOne.type = "button";
         btnOne.textContent = "⬇️ Download card (ZIP)";
 
-        const btnOpen = document.createElement("button");
-        btnOpen.className = "smallBtn";
-        btnOpen.type = "button";
-        btnOpen.textContent = "🔎 Open image";
+        const btnDeck = document.createElement("button");
+        btnDeck.className = "smallBtn";
+        btnDeck.type = "button";
+        btnDeck.textContent = "🂠 Send to Tarotdeck";
 
         actions.appendChild(btnOne);
-        actions.appendChild(btnOpen);
+        actions.appendChild(btnDeck);
 
         cardEl.appendChild(inner);
         cardEl.appendChild(actions);
         grid.appendChild(cardEl);
 
-        // Full-res crop canvas (for downloads)
-        const full = document.createElement("canvas");
-        full.width = rect.w;
-        full.height = rect.h;
-        const fctx = full.getContext("2d");
-        fctx.imageSmoothingEnabled = true;
-        fctx.imageSmoothingQuality = "high";
-        fctx.drawImage(state.off, rect.x, rect.y, rect.w, rect.h, 0, 0, rect.w, rect.h);
-
-        state.cardCanvases.push(full);
-
-        const fileBase = `${deck.id}_${String(cinfo.n).padStart(2,"0")}_${safeFileName(cinfo.title)}`;
-        state.cardMeta.push({ n: cinfo.n, title: cinfo.title, desc: cinfo.desc, fileBase });
-
-        // Render on-screen
         function renderDisplay(){
           const cssW = inner.clientWidth;
           const cssH = inner.clientHeight;
@@ -995,25 +1495,30 @@
         new ResizeObserver(renderDisplay).observe(inner);
 
         async function downloadOneZip(){
+          const meta = state.cardMeta[i];
           const zip = new ZipStore();
+
           const pngU8 = await canvasToPngU8(full);
+          zip.addFile(`${meta.fileBase}.png`, pngU8);
+
           const txt = [
-            `Deck: ${deck.label}`,
-            `Number: ${cinfo.n}`,
-            `Title: ${cinfo.title}`,
+            `Deck: ${meta.sourceLabel}`,
+            `Number: ${meta.number}`,
+            `Title: ${meta.title}`,
             ``,
             `Meaning:`,
-            `${cinfo.desc}`,
+            `${meta.meaning}`,
             ``
           ].join("\n");
-          const txtU8 = new TextEncoder().encode(txt);
+          zip.addFile(`${meta.fileBase}.txt`, new TextEncoder().encode(txt));
 
-          zip.addFile(`${fileBase}.png`, pngU8);
-          zip.addFile(`${fileBase}.txt`, txtU8);
-
-          // small manifest entry
-          const json = JSON.stringify({ deck: deck.id, number: cinfo.n, title: cinfo.title, meaning: cinfo.desc }, null, 2);
-          zip.addFile(`${fileBase}.json`, new TextEncoder().encode(json));
+          const json = JSON.stringify({
+            source: meta.sourceLabel,
+            number: meta.number,
+            title: meta.title,
+            meaning: meta.meaning
+          }, null, 2);
+          zip.addFile(`${meta.fileBase}.json`, new TextEncoder().encode(json));
 
           const blob = zip.toBlob();
           const url = URL.createObjectURL(blob);
@@ -1021,27 +1526,43 @@
 
           const a = document.createElement("a");
           a.href = url;
-          a.download = `${fileBase}.zip`;
+          a.download = `${meta.fileBase}.zip`;
           document.body.appendChild(a);
           a.click();
           a.remove();
         }
 
-        async function openImage(){
-          const pngU8 = await canvasToPngU8(full);
-          const blob = new Blob([pngU8], { type: "image/png" });
-          const url = URL.createObjectURL(blob);
-          state.lastBlobUrls.push(url);
-          window.open(url, "_blank", "noopener,noreferrer");
+        async function sendToTarotdeck(){
+          if (deck.cards.length >= 5) return;
+
+          const meta = state.cardMeta[i];
+          const { blob, url } = await canvasToBlobUrl(full);
+
+          deck.cards.push({
+            pngBlob: blob,
+            url,
+            number: meta.number,
+            title: meta.title,
+            meaning: meta.meaning,
+            sourceLabel: meta.sourceLabel,
+            fileBase: meta.fileBase
+          });
+
+          // disable button if full
+          btnDeck.disabled = deck.cards.length >= 5;
+          updateDeckUI();
         }
 
-        // Click image area = download ZIP (as requested: meaning included)
+        // Click image = download (as before)
         inner.addEventListener("click", downloadOneZip);
         btnOne.addEventListener("click", downloadOneZip);
-        btnOpen.addEventListener("click", openImage);
+
+        // Send to deck (max 5)
+        btnDeck.disabled = deck.cards.length >= 5;
+        btnDeck.addEventListener("click", sendToTarotdeck);
       }
 
-      setStatus(`Ready — ${deck.count} cards generated.`);
+      setStatus(`Ready — ${section.count} cards generated.`);
     }
 
     async function loadFile(file){
@@ -1058,7 +1579,7 @@
         let im;
         if ("createImageBitmap" in window){
           im = await createImageBitmap(file);
-        }else{
+        } else {
           im = await new Promise((resolve,reject)=>{
             const img = new Image();
             img.onload = () => resolve(img);
@@ -1093,46 +1614,49 @@
     }
 
     async function downloadAllZip(){
-      if (!state.img || !state.cardCanvases.length) return;
+      if (!state.img || !state.cardFullCanvases.length) return;
 
       setStatus("Building ZIP…");
 
       const zip = new ZipStore();
-
-      // A small README with meanings
       const lines = [];
-      lines.push(deck.label);
+      lines.push(section.label);
       lines.push("");
       lines.push("This ZIP contains:");
       lines.push("- One PNG per card");
       lines.push("- One TXT + JSON per card containing its meaning");
       lines.push("");
 
-      for (let i=0;i<state.cardCanvases.length;i++){
+      for (let i=0;i<state.cardFullCanvases.length;i++){
         const meta = state.cardMeta[i];
-        const cnv = state.cardCanvases[i];
+        const cnv = state.cardFullCanvases[i];
 
         const pngU8 = await canvasToPngU8(cnv);
         zip.addFile(`${meta.fileBase}.png`, pngU8);
 
         const txt = [
-          `Deck: ${deck.label}`,
-          `Number: ${meta.n}`,
+          `Deck: ${meta.sourceLabel}`,
+          `Number: ${meta.number}`,
           `Title: ${meta.title}`,
           ``,
           `Meaning:`,
-          `${meta.desc}`,
+          `${meta.meaning}`,
           ``
         ].join("\n");
         zip.addFile(`${meta.fileBase}.txt`, new TextEncoder().encode(txt));
 
-        const json = JSON.stringify({ deck: deck.id, number: meta.n, title: meta.title, meaning: meta.desc }, null, 2);
+        const json = JSON.stringify({
+          source: meta.sourceLabel,
+          number: meta.number,
+          title: meta.title,
+          meaning: meta.meaning
+        }, null, 2);
         zip.addFile(`${meta.fileBase}.json`, new TextEncoder().encode(json));
 
-        lines.push(`${meta.n} — ${meta.title}: ${meta.desc}`);
+        lines.push(`${meta.number} — ${meta.title}: ${meta.meaning}`);
       }
 
-      zip.addFile(`README_${deck.id}.txt`, new TextEncoder().encode(lines.join("\n")));
+      zip.addFile(`README_${section.id}.txt`, new TextEncoder().encode(lines.join("\n")));
 
       const blob = zip.toBlob();
       const url = URL.createObjectURL(blob);
@@ -1140,12 +1664,12 @@
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${deck.id}_all_cards.zip`;
+      a.download = `${section.id}_all_cards.zip`;
       document.body.appendChild(a);
       a.click();
       a.remove();
 
-      setStatus(`Ready — downloaded ${deck.count} cards.`);
+      setStatus(`Ready — downloaded ${section.count} cards.`);
     }
 
     // events
@@ -1157,30 +1681,23 @@
     reshuffleBtn.addEventListener("click", reshuffle);
     dlAllBtn.addEventListener("click", downloadAllZip);
 
-    // hotkey R reshuffles last interacted deck (simple: if it has an image, reshuffle)
+    // hotkey R reshuffles any loaded sections (this section only)
     window.addEventListener("keydown", (e) => {
       if ((e.key === "r" || e.key === "R") && state.img && !reshuffleBtn.disabled){
         reshuffle();
       }
     });
 
-    // react to global sliders
+    // rebuild on slider change if loaded
     function onGlobalChange(){
-      // only rebuild if loaded
       if (state.img) reshuffle();
     }
     zoomEl.addEventListener("input", onGlobalChange);
     overlapEl.addEventListener("input", onGlobalChange);
-
-    return panel;
   }
 
-  // Build all sections
-  for (const d of DECKS) buildDeckSection(d);
-
-  // Global label updates
-  zoomEl.addEventListener("input", updateLabels);
-  overlapEl.addEventListener("input", updateLabels);
+  // Build sections
+  DECKS.forEach(buildDeckSection);
 })();
 </script>
 </body>
