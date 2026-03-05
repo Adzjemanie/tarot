@@ -51,19 +51,35 @@
   @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
   .tcard.exiting { animation:cardOut .2s ease forwards; }
   @keyframes cardOut { to{opacity:0;transform:translateY(-8px) scale(.97)} }
-  .tcard-num { text-align:center; padding:8px 6px 2px; font-family:'IM Fell English',Georgia,serif; font-size:16px; font-weight:400; letter-spacing:.06em; color:#c8d0ff; text-shadow:0 0 14px rgba(100,120,255,.5); }
-  .tcard-img { position:relative; overflow:hidden; margin:0 8px; border-radius:8px; aspect-ratio:1; background:#0f1420; }
+
+  /* Image fills the card, overlays baked in */
+  .tcard-num { display:none; }
+  .tcard-img {
+    position:relative; overflow:hidden;
+    margin:0; border-radius:14px 14px 0 0;
+    aspect-ratio:3/4; background:#0f1420;
+  }
   .tcard-img canvas { width:100%; height:100%; object-fit:cover; display:block; transition:transform .3s ease; }
-  .tcard:hover .tcard-img canvas { transform:scale(1.05); }
-  .tcard-tip { position:absolute; inset:0; border-radius:8px; background:linear-gradient(to top,rgba(11,14,20,.97) 52%,rgba(11,14,20,.6) 82%,transparent); padding:.7rem .65rem .6rem; display:flex; flex-direction:column; justify-content:flex-end; opacity:0; transition:opacity .25s; pointer-events:none; }
+  .tcard:hover .tcard-img canvas { transform:scale(1.04); }
+
+  /* Hover full-text tooltip */
+  .tcard-tip {
+    position:absolute; inset:0; border-radius:14px 14px 0 0;
+    background:linear-gradient(to top,rgba(11,14,20,.98) 55%,rgba(11,14,20,.5) 85%,transparent);
+    padding:.8rem .7rem .7rem; display:flex; flex-direction:column; justify-content:flex-end;
+    opacity:0; transition:opacity .28s; pointer-events:none;
+  }
   .tcard:hover .tcard-tip { opacity:1; }
-  .tcard-tip .tip-name { font-size:10px; font-weight:600; color:#d6dcff; margin-bottom:3px; font-family:'Cinzel',serif; letter-spacing:.05em; }
-  .tcard-tip p { font-size:11px; color:#b9c2d3; line-height:1.5; margin:0; font-family:'Cormorant Garamond',serif; }
-  .tcard-body { padding:7px 8px 4px; text-align:center; background:transparent; }
-  .tcard-title { font-family:'Cormorant Garamond',serif; font-size:14px; font-weight:600; color:#f0f2ff; line-height:1.3; text-shadow:0 1px 8px rgba(0,0,0,1),0 2px 16px rgba(0,0,0,.8); }
-  .tcard-kw { font-size:11px; color:#8fa0bf; margin-top:2px; line-height:1.3; font-family:'Cormorant Garamond',serif; font-style:italic; }
-  .tcard-el { font-size:9px; color:#3a4a6a; margin-top:1px; font-family:ui-monospace,monospace; }
-  .tcard-footer { padding:4px 8px 8px; display:flex; justify-content:center; }
+  .tcard-tip .tip-name { font-size:11px; font-weight:600; color:#d6dcff; margin-bottom:4px; font-family:'Cinzel',serif; letter-spacing:.05em; }
+  .tcard-tip p { font-size:11px; color:#b9c2d3; line-height:1.55; margin:0; font-family:'Cormorant Garamond',serif; }
+
+  /* Body below image: hidden — info is baked into canvas */
+  .tcard-body { display:none; }
+  .tcard-title { display:none; }
+  .tcard-kw    { display:none; }
+  .tcard-el    { display:none; }
+
+  .tcard-footer { padding:5px 8px 8px; display:flex; justify-content:center; }
   .btn-dl-sm { font-size:10px; padding:3px 10px; border-radius:7px; background:#0f1420; border:1px solid #27344d; color:#b9c2d3; cursor:pointer; transition:filter .15s; width:auto; }
   .btn-dl-sm:hover { filter:brightness(1.15); }
 
@@ -360,8 +376,8 @@ function buildMinorCards(suitKey) {
     cards.push({
       num: n, index: i+1,
       name: label,
-      kw: descs[n].split('.')[0],
-      full: descs[n],
+      kw: (descs[n]||'').split('·').slice(0,2).map(s=>s.trim()).join(' · ') || s.element,
+      full: descs[n]||'',
       suit: suitKey,
       suitName: s.name,
       element: s.element,
@@ -485,7 +501,7 @@ function renderGAGrid(){
   gaGrid.innerHTML='';
   gaRegions.forEach((reg,i)=>{
     const a=ARCANA[arcanaOrder[i]];
-    const dispCvs=makeDispCanvas(reg.hiResCvs);
+    const dispCvs=makeDispCanvas(reg.hiResCvs,a.roman,a.name,a.kw);
     const card=makeTCard(a.roman,a.sym,dispCvs,a.name,a.kw,a.el,a.full,
       ()=>dlComposed(reg.hiResCvs,a.roman,a.name,a.el,'groot'),i);
     gaGrid.appendChild(card);
@@ -539,7 +555,7 @@ function renderSuitGrid(suit){
   gridEl.innerHTML='';
   regions.forEach((reg,i)=>{
     const c=cards[i];
-    const dispCvs=makeDispCanvas(reg.hiResCvs);
+    const dispCvs=makeDispCanvas(reg.hiResCvs,c.num,c.name,c.kw||c.element);
     const card=makeTCard(c.num,c.icon,dispCvs,c.name,c.element,c.suitName,c.full,
       ()=>dlComposed(reg.hiResCvs,c.num,c.name,c.element,suit),i);
     gridEl.appendChild(card);
@@ -774,9 +790,73 @@ function wrapTextSimple(ctx,text,x,y,maxW,lineH){
 /* ══════════════════════════════════════════════
    CARD FACTORY
 ══════════════════════════════════════════════ */
-function makeDispCanvas(hiRes){
-  const c=document.createElement('canvas'); c.width=200; c.height=200;
-  c.getContext('2d').drawImage(hiRes,0,0,200,200); return c;
+function makeDispCanvas(hiRes, numLabel, title, kw){
+  // 3:4 portrait canvas with overlaid text
+  const W=240, H=320;
+  const cvs=document.createElement('canvas'); cvs.width=W; cvs.height=H;
+  const ctx=cvs.getContext('2d');
+
+  // Draw image square in top portion, stretched to fill width
+  ctx.drawImage(hiRes, 0, 0, W, H);
+
+  // ── Top: number centered, no background ──
+  ctx.textAlign='center';
+  ctx.font='italic 17px Georgia,serif';
+  ctx.shadowColor='rgba(0,0,0,0.95)'; ctx.shadowBlur=10; ctx.shadowOffsetY=1;
+  ctx.fillStyle='rgba(210,218,255,0.95)';
+  ctx.fillText(numLabel||'', W/2, 26);
+  ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+
+  // ── Bottom gradient (only lower 40%) ──
+  const gradH = H * 0.42;
+  const grad = ctx.createLinearGradient(0, H - gradH, 0, H);
+  grad.addColorStop(0, 'rgba(10,13,20,0)');
+  grad.addColorStop(0.35, 'rgba(10,13,20,0.75)');
+  grad.addColorStop(1, 'rgba(10,13,20,0.96)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, H - gradH, W, gradH);
+
+  // ── Title — Cormorant Garamond style, elegant, lower third ──
+  ctx.textAlign='center';
+  ctx.shadowColor='rgba(0,0,0,1)'; ctx.shadowBlur=14; ctx.shadowOffsetY=1;
+  ctx.font='600 15px "Cormorant Garamond",Georgia,serif';
+  ctx.fillStyle='#f0f3ff';
+  wrapTextCanvas(ctx, title||'', W/2, H - 44, W - 24, 18);
+  ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+
+  // ── Hint: first 3 words of kw ──
+  const hint = getHint(kw);
+  if(hint){
+    ctx.font='italic 11px "Cormorant Garamond",Georgia,serif';
+    ctx.fillStyle='rgba(160,180,220,0.82)';
+    ctx.shadowColor='rgba(0,0,0,0.9)'; ctx.shadowBlur=8;
+    ctx.fillText(hint, W/2, H - 14);
+    ctx.shadowBlur=0;
+  }
+
+  return cvs;
+}
+
+function getHint(kw){
+  if(!kw) return '';
+  // kw format: "Word · Word · Word" or "Word · Word" — return first 2 items
+  const parts = kw.split(/[·\·\-–—,]/);
+  const words = parts.slice(0,2).map(s=>s.trim()).filter(Boolean);
+  return words.join(' · ');
+}
+
+function wrapTextCanvas(ctx, text, x, y, maxW, lineH){
+  const words=text.split(' '); let line='';
+  const lines=[];
+  for(const w of words){
+    const test=line?line+' '+w:w;
+    if(ctx.measureText(test).width>maxW && line){ lines.push(line); line=w; }
+    else line=test;
+  }
+  if(line) lines.push(line);
+  // Draw from bottom up
+  const startY = y - (lines.length-1)*lineH;
+  lines.forEach((l,i) => ctx.fillText(l, x, startY + i*lineH));
 }
 
 function makeTCard(numLabel,sym,dispCvs,title,kw,sub,fullText,dlFn,animIdx){
@@ -850,50 +930,63 @@ function extractRegions(img,count){
 /* ══════════════════════════════════════════════
    COMPOSE CARD — bake title + number into PNG
 ══════════════════════════════════════════════ */
-function composeCard(hiResCvs, numLabel, title, subtitle){
-  const W=400, H=480;
+function composeCard(hiResCvs, numLabel, title, kw){
+  const W=400, H=530;
   renderCvs.width=W; renderCvs.height=H;
   const ctx=renderCtx;
 
   // Background
-  ctx.fillStyle='#121826';
-  ctx.beginPath(); roundRect(ctx,0,0,W,H,14); ctx.fill();
+  ctx.fillStyle='#0d1220';
+  ctx.beginPath(); roundRect(ctx,0,0,W,H,16); ctx.fill();
 
-  // Number area top
-  ctx.fillStyle='rgba(214,220,255,0.06)';
-  ctx.fillRect(0,0,W,48);
-
-  // Number text — Cinzel style via measureText fallback
-  ctx.textAlign='center';
-  ctx.fillStyle='#d6dcff';
-  ctx.font='bold 20px "Cinzel", Georgia, serif';
-  ctx.fillText(numLabel, W/2, 32);
-
-  // Image (square, padded)
-  const pad=10, imgY=48, imgSize=W-pad*2;
+  // Image fills full width, 3:4 ish ratio
+  const imgH = 400;
   ctx.save();
-  ctx.beginPath(); roundRect(ctx,pad,imgY,imgSize,imgSize,8); ctx.clip();
-  ctx.drawImage(hiResCvs,pad,imgY,imgSize,imgSize);
+  ctx.beginPath(); roundRect(ctx,0,0,W,imgH,16); ctx.clip();
+  ctx.drawImage(hiResCvs,0,0,W,imgH);
   ctx.restore();
 
-  // Border on image
-  ctx.strokeStyle='rgba(31,42,61,0.8)'; ctx.lineWidth=1;
-  ctx.beginPath(); roundRect(ctx,pad,imgY,imgSize,imgSize,8); ctx.stroke();
-
-  // Title area
-  const titleY=imgY+imgSize+8;
-  ctx.fillStyle='#e7eaf0';
-  ctx.font='bold 15px system-ui, Arial, sans-serif';
+  // ── Number — top center, no background ──
   ctx.textAlign='center';
-  wrapText(ctx, title, W/2, titleY+16, W-24, 20);
+  ctx.font='italic 22px Georgia,serif';
+  ctx.shadowColor='rgba(0,0,0,0.95)'; ctx.shadowBlur=14; ctx.shadowOffsetY=1;
+  ctx.fillStyle='rgba(210,218,255,0.95)';
+  ctx.fillText(numLabel||'', W/2, 34);
+  ctx.shadowBlur=0; ctx.shadowOffsetY=0;
 
-  ctx.fillStyle='#8fa0bf';
-  ctx.font='11px system-ui, Arial, sans-serif';
-  ctx.fillText(subtitle, W/2, titleY+42);
+  // ── Bottom gradient over image (lower 45%) ──
+  const gradStart = imgH * 0.55;
+  const grad = ctx.createLinearGradient(0, gradStart, 0, imgH);
+  grad.addColorStop(0, 'rgba(10,13,20,0)');
+  grad.addColorStop(0.4, 'rgba(10,13,20,0.8)');
+  grad.addColorStop(1, 'rgba(10,13,20,0.97)');
+  ctx.fillStyle=grad; ctx.fillRect(0, gradStart, W, imgH - gradStart);
 
-  // Bottom border line
-  ctx.strokeStyle='#1f2a3d'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(20,H-18); ctx.lineTo(W-20,H-18); ctx.stroke();
+  // ── Title inside image, lower area ──
+  ctx.textAlign='center';
+  ctx.font='600 22px Georgia,serif';
+  ctx.shadowColor='rgba(0,0,0,1)'; ctx.shadowBlur=16; ctx.shadowOffsetY=1;
+  ctx.fillStyle='#f0f3ff';
+  wrapText(ctx, title, W/2, imgH - 52, W - 48, 26);
+  ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+
+  // ── Hint line inside image ──
+  const hint = getHint(kw);
+  if(hint){
+    ctx.font='italic 14px Georgia,serif';
+    ctx.fillStyle='rgba(160,185,225,0.85)';
+    ctx.shadowColor='rgba(0,0,0,0.9)'; ctx.shadowBlur=10;
+    ctx.fillText(hint, W/2, imgH - 18);
+    ctx.shadowBlur=0;
+  }
+
+  // ── Below image: element line ──
+  ctx.fillStyle='rgba(31,42,61,0.6)';
+  ctx.fillRect(0, imgH, W, H - imgH);
+  ctx.font='11px monospace';
+  ctx.fillStyle='#3a4a6a';
+  ctx.textAlign='center';
+  ctx.fillText(kw||'', W/2, imgH + 18);
 
   return renderCvs;
 }
