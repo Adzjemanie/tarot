@@ -185,53 +185,79 @@
   .suit-lucht  .tcard-el, .suit-lucht  .tcard-num { color:#b0a0d0; }
   .suit-groot  .tcard-num { color:#d6dcff; }
 
-  /* ── Upload grid (5 drop zones on top) ── */
-  .upload-grid{
-    display:grid;
-    grid-template-columns:repeat(5, 1fr);
-    gap:10px;
-    margin-top:10px;
+  /* ── Upload zones row ── */
+  .upload-zones-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
   }
-  @media(max-width:1100px){ .upload-grid{ grid-template-columns:repeat(3,1fr);} }
-  @media(max-width:720px){  .upload-grid{ grid-template-columns:repeat(2,1fr);} }
-  @media(max-width:520px){  .upload-grid{ grid-template-columns:1fr;} }
+  @media(max-width:860px){ .upload-zones-row { grid-template-columns: repeat(3,1fr); } }
+  @media(max-width:540px){ .upload-zones-row { grid-template-columns: repeat(2,1fr); } }
 
-  .upload-tile{
-    background:#0f1420;
-    border:1px solid #27344d;
-    border-radius:14px;
-    padding:12px;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    min-height:140px;
+  .upload-zone {
+    border: 1.5px dashed #27344d;
+    border-radius: 14px;
+    background: #0b1020;
+    padding: 14px 8px 12px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    cursor: pointer;
+    transition: border-color .18s, background .18s, box-shadow .18s;
+    position: relative;
+    min-height: 130px;
+    justify-content: center;
+    text-align: center;
   }
-  .upload-tile h3{ margin:0; }
-  .upload-row{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: #4a7aff;
+    background: #0d1428;
+    box-shadow: 0 0 0 3px rgba(74,122,255,.1);
   }
-  .upload-status{
-    font-size:11px; color:#8fa0bf;
-    white-space:nowrap;
+  .upload-zone.loaded {
+    border-style: solid;
+    border-color: #2b3a59;
   }
-  .upload-status.done{ color:#6fcf97; }
-  .upload-status.working{ color:#7fa8ff; }
-  .dropbox{
-    flex:1;
-    border:1px dashed #27344d;
-    border-radius:12px;
-    padding:14px 10px;
-    text-align:center;
-    cursor:pointer;
-    background:#0b1020;
-    transition:border-color .15s, filter .15s;
-    user-select:none;
-  }
-  .dropbox:hover{ border-color:#4a7aff; filter:brightness(1.05); }
-  .dropbox.drag{ border-color:#4a7aff; }
-  .drop-title{ font-size:13px; font-weight:600; color:#d6dcff; }
-  .drop-hint{ font-size:11px; color:#8fa0bf; margin-top:4px; line-height:1.35; }
+  .upload-zone.loaded.groot { border-color: #4a5a8a; }
+  .upload-zone.loaded.vuur  { border-color: #8a5030; }
+  .upload-zone.loaded.water { border-color: #306090; }
+  .upload-zone.loaded.aarde { border-color: #3a6a3a; }
+  .upload-zone.loaded.lucht { border-color: #6050a0; }
 
+  .uz-icon { font-size: 1.6rem; line-height: 1; }
+  .uz-label { font-family: 'Cinzel', Georgia, serif; font-size: 11px; font-weight: 600; color: #d6dcff; letter-spacing: .06em; }
+  .uz-sub   { font-size: 10px; color: #8fa0bf; line-height: 1.3; }
+  .uz-status { font-size: 10px; font-weight: 600; color: #8fa0bf; margin-top: 2px; }
+  .uz-status.done  { color: #6fcf97; }
+  .uz-status.working { color: #7fa8ff; }
+
+  .uz-preview {
+    width: 56px; height: 56px; border-radius: 8px; overflow: hidden;
+    border: 1px solid #27344d; flex-shrink: 0;
+  }
+  .uz-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* ── Download deck button ── */
+  .btn-deck-dl {
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Cinzel', Georgia, serif;
+    letter-spacing: .06em;
+    background: linear-gradient(135deg, #1a2d5a 0%, #0f1c3d 100%);
+    border: 1px solid #3a5080;
+    color: #d6dcff;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: filter .15s, box-shadow .15s;
+    box-shadow: 0 4px 16px rgba(74,122,255,.12);
+    margin-bottom: 18px;
+  }
+  .btn-deck-dl:hover:not(:disabled) {
+    filter: brightness(1.15);
+    box-shadow: 0 6px 24px rgba(74,122,255,.22);
+  }
+  .btn-deck-dl:disabled { opacity: .3; cursor: not-allowed; filter: none; box-shadow: none; }
 </style>
 </head>
 <body>
@@ -240,82 +266,105 @@
 <!-- ══ HEADER CARD ══ -->
 <div class="card">
   <h1>Tarot Extractor</h1>
-  <p>Upload afbeeldingen voor de Grote Arcana en de vier suits van de Kleine Arcana. Elke kaart wordt als PNG gedownload met nummer en titel erin gebakken. Werkt volledig offline.</p>
+  <p>Sleep of klik op een vakje om een afbeelding te laden. De app extraheert automatisch alle kaarten. Werkt volledig offline.</p>
 
-  <div class="section-title">Uploads — sleep of klik (5 vakjes)</div>
+  <!-- ── 5 Upload zones in één rij ── -->
+  <div class="section-title">Sleep afbeeldingen in de vakjes</div>
 
-  <div class="upload-grid">
+  <div class="upload-zones-row">
+
     <!-- Grote Arcana -->
-    <div class="upload-tile">
-      <div class="upload-row">
-        <h3>Grote Arcana</h3>
-        <span class="upload-status" id="status-top-ga">Geen afbeeldingen</span>
-      </div>
-      <button id="ga-upload-btn">＋ Bestanden kiezen</button>
-      <input type="file" id="ga-file-input" accept="image/*" multiple style="display:none">
-      <div id="ga-drop-zone" class="dropbox">
-        <div class="drop-title">Sleep afbeeldingen hiernaartoe</div>
-        <div class="drop-hint">JPG · PNG · WEBP · meerdere tegelijk</div>
-      </div>
+    <div class="upload-zone groot" id="uz-groot" title="Grote Arcana — 22 kaarten">
+      <div class="uz-icon">🌟</div>
+      <div class="uz-label">Grote Arcana</div>
+      <div class="uz-sub">22 kaarten</div>
+      <div class="uz-status" id="uz-status-groot">Geen afbeelding</div>
+      <div class="uz-preview" id="uz-prev-groot" style="display:none;"></div>
     </div>
 
-    <!-- Staven -->
-    <div class="upload-tile">
-      <div class="upload-row">
-        <h3>Staven (Vuur)</h3>
-        <span class="upload-status" id="status-top-vuur">Geen afbeelding</span>
-      </div>
-      <input type="file" id="file-vuur" accept="image/*" style="display:none" onchange="loadSuit('vuur',this)">
-      <div class="dropbox" id="drop-vuur">
-        <div class="drop-title">Sleep afbeelding hiernaartoe</div>
-        <div class="drop-hint">1 afbeelding · maakt 14 kaarten</div>
-      </div>
-</div>
-      <div class="thumbs-row" id="thumb-vuur" style="display:none;"></div>
-      <div class="tgrid suit-vuur" id="grid-vuur" style="display:none;"></div>
+    <!-- Vuur -->
+    <div class="upload-zone vuur" id="uz-vuur" title="Staven — Vuur">
+      <div class="uz-icon">🔥</div>
+      <div class="uz-label">Staven</div>
+      <div class="uz-sub">Vuur · 14 kaarten</div>
+      <div class="uz-status" id="uz-status-vuur">Geen afbeelding</div>
+      <div class="uz-preview" id="uz-prev-vuur" style="display:none;"></div>
     </div>
 
     <!-- Water -->
-    <div class="suit-section" data-suit="water">
-      <div class="suit-header">
-        <span class="suit-icon">🌊</span>
-        <div>
-          <div class="suit-name">Bekers — Water</div>
-          <div class="suit-sub">Emotie · Intuïtie · Relaties</div>
-        </div>
-        <span class="suit-status" id="status-bottom-water">Geen afbeelding</span>
-</div>
-      <div class="thumbs-row" id="thumb-water" style="display:none;"></div>
-      <div class="tgrid suit-water" id="grid-water" style="display:none;"></div>
+    <div class="upload-zone water" id="uz-water" title="Bekers — Water">
+      <div class="uz-icon">🌊</div>
+      <div class="uz-label">Bekers</div>
+      <div class="uz-sub">Water · 14 kaarten</div>
+      <div class="uz-status" id="uz-status-water">Geen afbeelding</div>
+      <div class="uz-preview" id="uz-prev-water" style="display:none;"></div>
     </div>
 
     <!-- Aarde -->
-    <div class="suit-section" data-suit="aarde">
-      <div class="suit-header">
-        <span class="suit-icon">🌿</span>
-        <div>
-          <div class="suit-name">Schijven — Aarde</div>
-          <div class="suit-sub">Materie · Lichaam · Rijkdom</div>
-        </div>
-        <span class="suit-status" id="status-bottom-aarde">Geen afbeelding</span>
-</div>
-      <div class="thumbs-row" id="thumb-aarde" style="display:none;"></div>
-      <div class="tgrid suit-aarde" id="grid-aarde" style="display:none;"></div>
+    <div class="upload-zone aarde" id="uz-aarde" title="Schijven — Aarde">
+      <div class="uz-icon">🌿</div>
+      <div class="uz-label">Schijven</div>
+      <div class="uz-sub">Aarde · 14 kaarten</div>
+      <div class="uz-status" id="uz-status-aarde">Geen afbeelding</div>
+      <div class="uz-preview" id="uz-prev-aarde" style="display:none;"></div>
     </div>
 
     <!-- Lucht -->
-    <div class="suit-section" data-suit="lucht">
-      <div class="suit-header">
-        <span class="suit-icon">💨</span>
-        <div>
-          <div class="suit-name">Zwaarden — Lucht</div>
-          <div class="suit-sub">Verstand · Conflict · Waarheid</div>
-        </div>
-        <span class="suit-status" id="status-bottom-lucht">Geen afbeelding</span>
-</div>
-      <div class="thumbs-row" id="thumb-lucht" style="display:none;"></div>
-      <div class="tgrid suit-lucht" id="grid-lucht" style="display:none;"></div>
+    <div class="upload-zone lucht" id="uz-lucht" title="Zwaarden — Lucht">
+      <div class="uz-icon">💨</div>
+      <div class="uz-label">Zwaarden</div>
+      <div class="uz-sub">Lucht · 14 kaarten</div>
+      <div class="uz-status" id="uz-status-lucht">Geen afbeelding</div>
+      <div class="uz-preview" id="uz-prev-lucht" style="display:none;"></div>
     </div>
+
+  </div>
+
+  <!-- hidden file inputs -->
+  <input type="file" id="ga-file-input"    accept="image/*" multiple style="display:none">
+  <input type="file" id="file-vuur"  accept="image/*" style="display:none" onchange="loadSuit('vuur',this)">
+  <input type="file" id="file-water" accept="image/*" style="display:none" onchange="loadSuit('water',this)">
+  <input type="file" id="file-aarde" accept="image/*" style="display:none" onchange="loadSuit('aarde',this)">
+  <input type="file" id="file-lucht" accept="image/*" style="display:none" onchange="loadSuit('lucht',this)">
+
+  <!-- ── Download deck knop ── -->
+  <button id="all-export-btn" class="btn-deck-dl" disabled>⬇ Download volledig deck als ZIP</button>
+
+  <div id="main-status"></div>
+
+  <details>
+    <summary>Uitleg werkwijze</summary>
+    <div style="font-size:13px;color:#b9c2d3;margin-top:8px;line-height:1.5;">
+      De app analyseert de afbeelding op variantie, randenergie en kleurverzadiging en kiest de meest interessante zones.
+      Grote Arcana: 22 kaarten. Kleine Arcana per suit: 14 kaarten (Aas t/m 10, Knave, Ridder, Koningin, Koning).
+      <br><br>Elke download-PNG heeft het nummer en de titel <b>in de afbeelding gebakken</b>.
+      De ZIP bevat alle kaarten in submappen per suit, plus een <code>uitleg.txt</code> per kaart.
+    </div>
+  </details>
+</div>
+
+<!-- ══ GROTE ARCANA GRID ══ -->
+<div class="card" id="ga-grid-card" style="display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <h2 style="margin:0;">De 22 Grote Arcana</h2>
+    <button id="reshuffle-btn" style="width:auto;padding:6px 14px;font-size:12px;" disabled>🔀 Reshuffle</button>
+  </div>
+  <div class="tgrid suit-groot" id="ga-grid"></div>
+</div>
+
+<!-- ══ KLEINE ARCANA GRIDS ══ -->
+<div id="suits-container">
+  <div class="suit-section" data-suit="vuur">
+    <div class="tgrid suit-vuur" id="grid-vuur" style="display:none;"></div>
+  </div>
+  <div class="suit-section" data-suit="water">
+    <div class="tgrid suit-water" id="grid-water" style="display:none;"></div>
+  </div>
+  <div class="suit-section" data-suit="aarde">
+    <div class="tgrid suit-aarde" id="grid-aarde" style="display:none;"></div>
+  </div>
+  <div class="suit-section" data-suit="lucht">
+    <div class="tgrid suit-lucht" id="grid-lucht" style="display:none;"></div>
   </div>
 </div>
 
@@ -421,80 +470,52 @@ const renderCvs = document.getElementById('render-canvas');
 const renderCtx = renderCvs.getContext('2d');
 
 /* ══════════════════════════════════════════════
-   GROTE ARCANA — upload & analyse
+   DOM REFS
 ══════════════════════════════════════════════ */
-const gaUploadBtn  = document.getElementById('ga-upload-btn');
 const gaFileInput  = document.getElementById('ga-file-input');
-const gaDropZone   = document.getElementById('ga-drop-zone');
-const gaLibrary    = document.getElementById('ga-library');
-const gaThumbs     = document.getElementById('ga-thumbs');
 const gaGrid       = document.getElementById('ga-grid');
 const gaGridCard   = document.getElementById('ga-grid-card');
 const reshuffleBtn = document.getElementById('reshuffle-btn');
 const allExportBtn = document.getElementById('all-export-btn');
 const statusEl     = document.getElementById('main-status');
 
-gaUploadBtn.addEventListener('click',()=>gaFileInput.click());
-gaFileInput.addEventListener('change',e=>{[...e.target.files].forEach(loadGAFile);gaFileInput.value='';});
-gaDropZone.addEventListener('click',()=>gaFileInput.click());
-
-gaDropZone.addEventListener('dragover',e=>{e.preventDefault();gaDropZone.classList.add('drag');});
-gaDropZone.addEventListener('dragleave',()=>{gaDropZone.classList.remove('drag');});
-gaDropZone.addEventListener('drop',e=>{
-  e.preventDefault();
-  gaDropZone.classList.remove('drag');
-  [...e.dataTransfer.files].filter(f=>f.type.startsWith('image/')).forEach(loadGAFile);
-});
-
-function wireSuitDrop(suit){
-  const dz=document.getElementById('drop-'+suit);
-  if(!dz) return;
-  dz.addEventListener('click',()=>triggerSuitUpload(suit));
-  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
-  dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
-  dz.addEventListener('drop',e=>{
-    e.preventDefault(); dz.classList.remove('drag');
-    const file=[...e.dataTransfer.files].find(f=>f.type && f.type.startsWith('image/'));
-    if(!file) return;
-    // Load directly (bypass input)
-    loadSuitFromFile(suit,file);
+/* ══════════════════════════════════════════════
+   UPLOAD ZONE SETUP — alle 5 vakjes
+══════════════════════════════════════════════ */
+function setupUploadZone(zoneId, onFiles){
+  const zone = document.getElementById(zoneId);
+  zone.addEventListener('click', () => {
+    const key = zoneId.replace('uz-','');
+    if(key === 'groot') gaFileInput.click();
+    else document.getElementById('file-'+key).click();
+  });
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    const files = [...e.dataTransfer.files].filter(f=>f.type.startsWith('image/'));
+    if(files.length) onFiles(files);
   });
 }
 
-function loadSuitFromFile(suit,file){
-  if(!file) return;
-  const url=URL.createObjectURL(file);
-  const img=new Image();
-  img.onload=()=>{
-    setSuitStatus(suit,'Analyseren…','working');
-    const regions=extractRegions(img,14);
-    const cards=buildMinorCards(suit);
-    suitState[suit]={img,regions,cards};
+setupUploadZone('uz-groot', files => files.forEach(loadGAFile));
+setupUploadZone('uz-vuur',  files => loadSuitFromFile('vuur',  files[0]));
+setupUploadZone('uz-water', files => loadSuitFromFile('water', files[0]));
+setupUploadZone('uz-aarde', files => loadSuitFromFile('aarde', files[0]));
+setupUploadZone('uz-lucht', files => loadSuitFromFile('lucht', files[0]));
 
-    // show thumb
-    const thumbEl=document.getElementById('thumb-'+suit);
-    thumbEl.style.display='flex';
-    thumbEl.innerHTML='';
-    const tw=document.createElement('div'); tw.className='thumb active';
-    const ti=document.createElement('img'); ti.src=url; tw.appendChild(ti);
-    thumbEl.appendChild(tw);
-    const newBtn=document.createElement('div'); newBtn.className='thumb-add';
-    newBtn.innerHTML='<span class="thumb-add-plus">↺</span><span style="font-size:10px">Ander</span>';
-    newBtn.addEventListener('click',()=>triggerSuitUpload(suit));
-    thumbEl.appendChild(newBtn);
-
-    renderSuitGrid(suit);
-    setSuitStatus(suit,'✓ 14 kaarten','done');
-    checkAllExport();
-  };
-  img.src=url;
-}
-
-// wire all suit dropzones
-['vuur','water','aarde','lucht'].forEach(wireSuitDrop);
-
+gaFileInput.addEventListener('change',e=>{[...e.target.files].forEach(loadGAFile);gaFileInput.value='';});
 reshuffleBtn.addEventListener('click',reshuffle);
 allExportBtn.addEventListener('click',exportAllZip);
+
+function updateUploadZone(key, previewUrl, statusText, isDone){
+  const zone = document.getElementById('uz-'+key);
+  const st = document.getElementById('uz-status-'+key);
+  const prev = document.getElementById('uz-prev-'+key);
+  if(zone) zone.classList.add('loaded');
+  if(st){ st.textContent = statusText; st.className = 'uz-status '+(isDone?'done':'working'); }
+  if(prev && previewUrl){ prev.style.display='block'; prev.innerHTML=`<img src="${previewUrl}">`; }
+}
 
 function loadGAFile(file){
   const url=URL.createObjectURL(file);
@@ -502,40 +523,19 @@ function loadGAFile(file){
   img.onload=()=>{
     const id=Date.now()+Math.random();
     gaImages.push({id,name:file.name,img,url});
-    const stGA=document.getElementById('status-top-ga');
-    if(stGA){ stGA.textContent = gaImages.length===1 ? '1 afbeelding' : (gaImages.length+' afbeeldingen'); }
-    if(gaImages.length===1){gaLibrary.style.display='block';}
-    renderGAThumbs();
+    updateUploadZone('groot', url, 'Analyseren…', false);
     selectGAImage(id);
   };
   img.src=url;
 }
 
 function renderGAThumbs(){
-  gaThumbs.innerHTML='';
-  if(gaImages.length===0){ gaLibrary.style.display='none'; }
-  gaImages.forEach(im=>{
-    const w=document.createElement('div');
-    w.className='thumb'+(im.id===gaActiveId?' active':'');
-    const ig=document.createElement('img'); ig.src=im.url; w.appendChild(ig);
-    const xb=document.createElement('button'); xb.className='thumb-x'; xb.textContent='✕';
-    xb.addEventListener('click',e=>{e.stopPropagation();gaImages=gaImages.filter(i=>i.id!==im.id);
-      const stGA=document.getElementById('status-top-ga');
-      if(stGA){ stGA.textContent = gaImages.length===0 ? 'Geen afbeeldingen' : (gaImages.length===1?'1 afbeelding':(gaImages.length+' afbeeldingen')); }
-      if(gaImages.length===0){gaActiveId=null;gaDropZone.style.display='block';gaLibrary.style.display='none';}else if(gaActiveId===im.id){gaActiveId=null;selectGAImage(gaImages[0].id);}renderGAThumbs();});
-    w.appendChild(xb);
-    w.addEventListener('click',()=>selectGAImage(im.id));
-    gaThumbs.appendChild(w);
-  });
-  const ab=document.createElement('div'); ab.className='thumb-add';
-  ab.innerHTML='<span class="thumb-add-plus">+</span><span style="font-size:10px">Meer</span>';
-  ab.addEventListener('click',()=>gaFileInput.click());
-  gaThumbs.appendChild(ab);
+  // thumbs library removed — upload zone handles preview
 }
 
 function selectGAImage(id){
   if(gaActiveId===id) return;
-  gaActiveId=id; renderGAThumbs();
+  gaActiveId=id;
   const f=gaImages.find(i=>i.id===id);
   if(f) analyseGA(f.img);
 }
@@ -550,6 +550,8 @@ function analyseGA(img){
   reshuffleBtn.disabled=false;
   checkAllExport();
   setStatus('22 details gevonden','done');
+  const activeImg = gaImages.find(i=>i.id===gaActiveId);
+  if(activeImg) updateUploadZone('groot', activeImg.url, '✓ 22 kaarten', true);
   gaGridCard.style.display='block';
   setTimeout(()=>gaGridCard.scrollIntoView({behavior:'smooth',block:'start'}),80);
 }
@@ -573,29 +575,50 @@ function renderGAGrid(){
   });
 }
 
-
-function setSuitStatus(suit, text, cls=''){
-  const top = document.getElementById('status-top-'+suit);
-  const bot = document.getElementById('status-bottom-'+suit);
-  if(top){ top.textContent = text; top.className = 'upload-status ' + cls; }
-  if(bot){ bot.textContent = text; bot.className = 'suit-status ' + cls; }
-}
-
 /* ══════════════════════════════════════════════
    MINOR ARCANA — suits
 ══════════════════════════════════════════════ */
 function triggerSuitUpload(suit){ document.getElementById('file-'+suit).click(); }
+function loadSuitFromFile(suit, file){ if(!file) return; loadSuitFromUrl(suit, URL.createObjectURL(file)); }
 
 function loadSuit(suit,input){
   const file=input.files[0]; if(!file) return;
   input.value='';
-  loadSuitFromFile(suit,file);
+  loadSuitFromUrl(suit, URL.createObjectURL(file));
+}
+
+function loadSuitFromUrl(suit, url){
+  const img=new Image();
+  img.onload=()=>{
+    updateUploadZone(suit, url, 'Analyseren…', false);
+    const regions=extractRegions(img,14);
+    const cards=buildMinorCards(suit);
+    suitState[suit]={img,regions,cards};
+
+    renderSuitGrid(suit);
+    updateUploadZone(suit, url, '✓ 14 kaarten', true);
+    checkAllExport();
+  };
+  img.src=url;
 }
 
 function renderSuitGrid(suit){
   const {regions,cards}=suitState[suit];
   const gridEl=document.getElementById('grid-'+suit);
+  const s=SUITS[suit];
   gridEl.style.display='grid';
+  // wrap in card if not already
+  const parent=gridEl.parentElement;
+  if(!parent.classList.contains('card')){
+    const wrapper=document.createElement('div');
+    wrapper.className='card';
+    parent.insertBefore(wrapper,gridEl);
+    const hdr=document.createElement('h2');
+    hdr.style.margin='0 0 10px';
+    hdr.textContent=`${s.icon} ${s.name} — ${s.element}`;
+    wrapper.appendChild(hdr);
+    wrapper.appendChild(gridEl);
+  }
   gridEl.innerHTML='';
   regions.forEach((reg,i)=>{
     const c=cards[i];
@@ -643,10 +666,13 @@ function makeTCard(numLabel,sym,dispCvs,title,kw,sub,fullText,dlFn,animIdx){
   body.innerHTML=`<div class="tcard-title">${esc(title)}</div><div class="tcard-kw">${esc(kw)}</div><div class="tcard-el">${esc(sub)}</div>`;
   card.appendChild(body);
 
-  // Footer verwijderd (geen individuele downloads)
+  // Footer
+  const footer=document.createElement('div'); footer.className='tcard-footer';
+  const btn=document.createElement('button'); btn.className='btn-dl-sm'; btn.textContent='⬇ Download';
+  btn.addEventListener('click',dlFn);
+  footer.appendChild(btn); card.appendChild(footer);
   return card;
 }
-
 
 /* ══════════════════════════════════════════════
    EXTRACT REGIONS
