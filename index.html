@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tarot Detail Cutter — Major + 4 Suits + Deck Builder</title>
+  <title>Tarot Detail Cutter — Major + Suits + Deck Builder</title>
   <style>
     :root{
-      --bg:#0b0d12;          /* no gradients */
+      --bg:#0b0d12;
       --panel:#121724;
       --text:#e9ecf2;
       --muted:#a9b0c2;
@@ -19,7 +19,6 @@
       --cardRadius: 16px;
       --ratioW: 2;
       --ratioH: 3;
-      --ink: rgba(0,0,0,.88);
     }
 
     *{ box-sizing:border-box; }
@@ -55,7 +54,7 @@
       color:var(--muted);
       font-size: 13px;
       line-height:1.35;
-      max-width: 90ch;
+      max-width: 95ch;
     }
 
     .panel{
@@ -168,7 +167,25 @@
       color: var(--muted);
       font-size: 13px;
       line-height: 1.45;
+      pointer-events:none;
     }
+    .dropHint{
+      position:absolute;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding: 18px;
+      color: rgba(233,236,242,.95);
+      font-size: 13px;
+      line-height: 1.45;
+      background: rgba(122,162,255,.12);
+      border: 2px dashed rgba(122,162,255,.45);
+      border-radius: 16px;
+      pointer-events:none;
+    }
+    .preview.dragover .dropHint{ display:flex; }
 
     .hint{
       margin:10px 0 0;
@@ -216,6 +233,7 @@
       width:100%;
       aspect-ratio: calc(var(--ratioW) / var(--ratioH));
       background: rgba(0,0,0,.2);
+      cursor:pointer; /* click = download zip */
     }
     .card canvas{
       position:absolute;
@@ -225,12 +243,12 @@
       display:block;
     }
 
-    /* Tarot-ish look: no label backgrounds, just shadowed text */
     .tarotFont{
       font-family: ui-serif, Georgia, "Times New Roman", serif;
-      letter-spacing: .5px;
+      letter-spacing: .7px;
       text-transform: uppercase;
     }
+
     .num{
       position:absolute;
       top: 10px;
@@ -238,24 +256,21 @@
       transform: translateX(-50%);
       font-size: 13px;
       font-weight: 800;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,.95);
-      text-shadow:
-        0 2px 10px rgba(0,0,0,.75),
-        0 1px 0 rgba(0,0,0,.75);
+      letter-spacing: 1.7px;
+      color: rgba(255,255,255,.96);
+      text-shadow: 0 2px 12px rgba(0,0,0,.85), 0 1px 0 rgba(0,0,0,.9);
       pointer-events:none;
     }
+    /* title almost touching bottom */
     .titleUnder{
       position:absolute;
-      bottom: 10px;
+      bottom: 5px;
       left: 10px;
       right: 10px;
       font-size: 12px;
-      font-weight: 800;
-      color: rgba(255,255,255,.95);
-      text-shadow:
-        0 2px 12px rgba(0,0,0,.85),
-        0 1px 0 rgba(0,0,0,.8);
+      font-weight: 850;
+      color: rgba(255,255,255,.96);
+      text-shadow: 0 2px 14px rgba(0,0,0,.90), 0 1px 0 rgba(0,0,0,.9);
       text-align:center;
       overflow:hidden;
       text-overflow: ellipsis;
@@ -263,7 +278,6 @@
       pointer-events:none;
     }
 
-    /* Hover meaning (no box, just readable shadow) */
     .overlay{
       position:absolute;
       inset:0;
@@ -279,7 +293,7 @@
       font-size: 12px;
       line-height: 1.35;
       color: rgba(255,255,255,.96);
-      text-shadow: 0 2px 10px rgba(0,0,0,.85);
+      text-shadow: 0 2px 12px rgba(0,0,0,.9);
     }
     .card:hover .overlay{ opacity:1; }
 
@@ -313,10 +327,6 @@
       transform: translateY(-1px);
       border-color: rgba(124,255,178,.35);
       background: rgba(124,255,178,.10);
-    }
-    .smallBtn.secondary:hover{
-      border-color: rgba(122,162,255,.40);
-      background: rgba(122,162,255,.10);
     }
     .smallBtn:active{ transform: translateY(0px); }
     .smallBtn[disabled]{ opacity:.45; cursor:not-allowed; transform:none; }
@@ -357,6 +367,10 @@
       overflow:hidden;
       box-shadow: 0 12px 30px rgba(0,0,0,.35);
     }
+    .stack.dragover{
+      border-color: rgba(122,162,255,.55);
+      background: rgba(122,162,255,.10);
+    }
     .stack .stackCard{
       position:absolute;
       inset:0;
@@ -382,6 +396,7 @@
       font-size: 12px;
       text-align:center;
       padding: 14px;
+      pointer-events:none;
     }
 
     .thumbs{
@@ -411,12 +426,22 @@
       font-size: 11px;
       font-weight: 800;
     }
-
-    /* Spreads area */
-    .spreads{
-      display:grid;
-      gap: 12px;
+    .thumb .drag{
+      position:absolute;
+      left:6px; top:6px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.45);
+      color: rgba(255,255,255,.92);
+      border-radius: 10px;
+      padding: 4px 6px;
+      cursor:grab;
+      font-size: 11px;
+      font-weight: 900;
+      user-select:none;
     }
+
+    /* Spreads */
+    .spreads{ display:grid; gap: 12px; }
     .spreadTabs{
       display:flex;
       gap:10px;
@@ -450,8 +475,6 @@
       align-items:end;
       justify-items:center;
     }
-
-    /* specific layouts */
     .slots.day{ grid-template-columns: 1fr; }
     .slots.choice{ grid-template-columns: repeat(2, 1fr); }
     .slots.insight{
@@ -469,12 +492,12 @@
       position:relative;
       overflow:hidden;
     }
-    .slot img{
-      width:100%;
-      height:100%;
-      object-fit: cover;
-      display:block;
+    .slot.dragover{
+      border-color: rgba(122,162,255,.55);
+      background: rgba(122,162,255,.10);
     }
+    .slot img{ width:100%; height:100%; object-fit: cover; display:block; }
+
     .slot .slotNum{
       position:absolute;
       top: 10px;
@@ -482,26 +505,27 @@
       transform: translateX(-50%);
       font-size: 13px;
       font-weight: 800;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,.95);
-      text-shadow: 0 2px 10px rgba(0,0,0,.75), 0 1px 0 rgba(0,0,0,.75);
+      letter-spacing: 1.7px;
+      color: rgba(255,255,255,.96);
+      text-shadow: 0 2px 12px rgba(0,0,0,.85), 0 1px 0 rgba(0,0,0,.9);
       pointer-events:none;
     }
     .slot .slotTitle{
       position:absolute;
-      bottom: 10px;
+      bottom: 5px;
       left: 10px;
       right: 10px;
       font-size: 12px;
-      font-weight: 800;
-      color: rgba(255,255,255,.95);
-      text-shadow: 0 2px 12px rgba(0,0,0,.85), 0 1px 0 rgba(0,0,0,.8);
+      font-weight: 850;
+      color: rgba(255,255,255,.96);
+      text-shadow: 0 2px 14px rgba(0,0,0,.90), 0 1px 0 rgba(0,0,0,.9);
       text-align:center;
       overflow:hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       pointer-events:none;
     }
+
     .slotLabel{
       margin-top:8px;
       font-size: 12px;
@@ -511,12 +535,7 @@
       letter-spacing:.3px;
     }
 
-    .insightTop{
-      grid-column: 3 / 4;
-      grid-row: 1 / 2;
-      align-self:start;
-      justify-self:center;
-    }
+    .insightTop{  grid-column: 3 / 4; grid-row: 1 / 2; align-self:start; }
     .insightPast{ grid-column: 1 / 2; grid-row: 2 / 3; }
     .insightNow{  grid-column: 2 / 3; grid-row: 2 / 3; }
     .insightPoss{ grid-column: 3 / 4; grid-row: 2 / 3; }
@@ -536,9 +555,9 @@
       <div>
         <h1>Tarot Detail Cutter — Major + Suits + Deck Builder</h1>
         <p class="sub">
-          Generate tarot-style crops from images. Hover a card to read its meaning.
-          Download single cards (PNG + meaning) or whole sections as one ZIP.
-          Use <b>Send to Tarotdeck</b> to collect up to <b>5</b> cards, then draw spreads: <b>Card of the Day</b>, <b>Choice</b>, and <b>Insight</b>.
+          Drag & drop an image onto each section preview (or click Upload). Cards are auto-cropped into tarot format.
+          Hover a card for meaning. Click the card image to download (ZIP includes PNG + meaning).
+          Use <b>Send to Tarotdeck</b> (max 5) and then deal spreads (or drag cards onto spread slots).
         </p>
       </div>
       <div class="pill" title="Selection method"><b>Selector</b> edge+variance</div>
@@ -576,9 +595,9 @@
         </div>
 
         <div class="mini" style="margin-top:12px;">
-          <div class="tag">Click card image = download ZIP (PNG + meaning)</div>
-          <div class="tag">“Download all” creates 1 ZIP for that section</div>
-          <div class="tag">Everything runs locally (GitHub Pages friendly)</div>
+          <div class="tag">Drag & drop images onto each preview area</div>
+          <div class="tag">Click a card image = download ZIP</div>
+          <div class="tag">Line-art overlay is drawn per card</div>
         </div>
       </div>
     </section>
@@ -586,7 +605,7 @@
     <!-- DECK BUILDER + SPREADS -->
     <section class="panel" id="deckPanel">
       <div class="hd">
-        <div class="label">🂠 Tarotdeck Builder (max 5 cards)</div>
+        <div class="label">🂠 Tarotdeck (max 5 cards)</div>
         <div class="controls">
           <button class="btn" id="deckShuffle" disabled>🔀 Shuffle deck</button>
           <button class="btn" id="deckDownload" disabled>⬇️ Download deck (ZIP)</button>
@@ -603,7 +622,7 @@
               <div>
                 <div class="pill" id="deckCountPill"><b>Deck</b> 0/5</div>
                 <p class="hint" style="margin-top:10px;">
-                  You’re building a tiny custom deck from your own image details. When ready, draw spreads on the right.
+                  Drag the small deck thumbnails onto spread slots to place them manually.
                 </p>
                 <div class="thumbs" id="deckThumbs" style="margin-top:10px;"></div>
               </div>
@@ -615,7 +634,7 @@
               <button class="tab active" data-spread="day">Card of the Day</button>
               <button class="tab" data-spread="choice">Choice</button>
               <button class="tab" data-spread="insight">Insight</button>
-              <span class="pill" id="spreadHint"><b>Draw</b> from your deck</span>
+              <span class="pill"><b>Tip</b> drag cards onto slots</span>
               <button class="btn" id="dealBtn" disabled style="margin-left:auto;">🃏 Deal</button>
               <button class="btn" id="resetSpread" disabled>↩ Reset</button>
             </div>
@@ -623,7 +642,7 @@
             <div class="spreadBoard">
               <div id="spreadSlots" class="slots day"></div>
               <p class="hint" style="margin:12px 0 0;">
-                Tip: Deal uses random cards from your deck (like drawing from the top). Build the deck first.
+                Deal draws from your deck (random top). Or drag thumbnails onto the slots to place them.
               </p>
             </div>
           </div>
@@ -631,19 +650,18 @@
       </div>
     </section>
 
-    <!-- DECKS OUTPUT -->
+    <!-- GENERATORS -->
     <div id="decks"></div>
 
     <footer>
-      Court cards are numbered <span class="kbd">11–14</span> (Page, Knight, Queen, King).<br/>
-      Meanings are included inside every download (TXT + JSON).
+      Everything runs locally, works on GitHub Pages. Meanings are included in every download (TXT + JSON).
     </footer>
   </div>
 
 <script>
 (() => {
   // -----------------------------
-  // Major Arcana (0–21) meanings
+  // Card data
   // -----------------------------
   const MAJOR = [
     { n: 0,  title: "The Fool",          desc: "Beginnings, spontaneity, trust. Step forward with open curiosity." },
@@ -673,14 +691,14 @@
   function makeMinorSuit(suitName){
     const s = suitName;
     const flavor = {
-      "Wands":       { add:"passion, will, creative drive" },
-      "Cups":        { add:"emotion, intuition, connection" },
-      "Pentacles":   { add:"work, resources, the physical world" },
-      "Swords":      { add:"thought, truth, communication" }
+      "Wands":       "passion, will, creative drive",
+      "Cups":        "emotion, intuition, connection",
+      "Pentacles":   "work, resources, the physical world",
+      "Swords":      "thought, truth, communication"
     }[s];
 
     const base = [
-      {n:1,  t:`Ace of ${s}`,    d:`A new spark opens: ${flavor.add}.`},
+      {n:1,  t:`Ace of ${s}`,    d:`A new spark opens: ${flavor}.`},
       {n:2,  t:`Two of ${s}`,    d:`Planning and choices. Weigh options and commit.`},
       {n:3,  t:`Three of ${s}`,  d:`Momentum and expansion. Early results and growth.`},
       {n:4,  t:`Four of ${s}`,   d:`Stability and rest. Create a safe base; recover.`},
@@ -698,16 +716,16 @@
     return base.map(x => ({ n:x.n, title:x.t, desc:x.d }));
   }
 
-  const DECKS = [
-    { id:"major", label:"Major Arcana (0–21)", emoji:"🃏", count:22, cards: MAJOR, hint:"Upload 1 image → 22 Major Arcana crops." },
-    { id:"wands", label:"Wands (Fire) — 14 cards", emoji:"🔥", count:14, cards: makeMinorSuit("Wands"), hint:"Upload 1 image → 14 Wands crops (1–10, Page, Knight, Queen, King)." },
-    { id:"cups",  label:"Cups (Water) — 14 cards", emoji:"💧", count:14, cards: makeMinorSuit("Cups"), hint:"Upload 1 image → 14 Cups crops (1–10, Page, Knight, Queen, King)." },
-    { id:"pents", label:"Pentacles (Earth) — 14 cards", emoji:"🌿", count:14, cards: makeMinorSuit("Pentacles"), hint:"Upload 1 image → 14 Pentacles crops (1–10, Page, Knight, Queen, King)." },
-    { id:"swords",label:"Swords (Air) — 14 cards", emoji:"🌬️", count:14, cards: makeMinorSuit("Swords"), hint:"Upload 1 image → 14 Swords crops (1–10, Page, Knight, Queen, King)." },
+  const SECTIONS = [
+    { id:"major", label:"Major Arcana (0–21)", emoji:"🃏", count:22, cards: MAJOR, hint:"Drop an image here → 22 Major Arcana crops." },
+    { id:"wands", label:"Wands (Fire) — 14 cards", emoji:"🔥", count:14, cards: makeMinorSuit("Wands"), hint:"Drop an image here → 14 Wands crops." },
+    { id:"cups",  label:"Cups (Water) — 14 cards", emoji:"💧", count:14, cards: makeMinorSuit("Cups"), hint:"Drop an image here → 14 Cups crops." },
+    { id:"pents", label:"Pentacles (Earth) — 14 cards", emoji:"🌿", count:14, cards: makeMinorSuit("Pentacles"), hint:"Drop an image here → 14 Pentacles crops." },
+    { id:"swords",label:"Swords (Air) — 14 cards", emoji:"🌬️", count:14, cards: makeMinorSuit("Swords"), hint:"Drop an image here → 14 Swords crops." },
   ];
 
   // -----------------------------
-  // Tiny ZIP builder (store/no compression)
+  // ZIP (store, no compression)
   // -----------------------------
   function crc32Table(){
     const tbl = new Uint32Array(256);
@@ -726,6 +744,7 @@
     }
     return (c ^ 0xFFFFFFFF) >>> 0;
   }
+  const te = new TextEncoder();
   function u16(n){ return new Uint8Array([n & 255, (n>>>8) & 255]); }
   function u32(n){ return new Uint8Array([n & 255, (n>>>8)&255, (n>>>16)&255, (n>>>24)&255]); }
   function concatU8(parts){
@@ -739,9 +758,9 @@
   class ZipStore {
     constructor(){ this.files = []; }
     addFile(name, dataU8){
-      const nameU8 = new TextEncoder().encode(name);
+      const nameU8 = te.encode(name);
       const crc = crc32(dataU8);
-      this.files.push({ name, nameU8, dataU8, crc });
+      this.files.push({ nameU8, dataU8, crc });
     }
     toBlob(){
       const localParts = [];
@@ -750,10 +769,7 @@
 
       for (const f of this.files){
         const localHeader = concatU8([
-          u32(0x04034b50),
-          u16(20),
-          u16(0),
-          u16(0),
+          u32(0x04034b50), u16(20), u16(0), u16(0),
           u16(0), u16(0),
           u32(f.crc),
           u32(f.dataU8.length),
@@ -765,19 +781,14 @@
 
         const centralHeader = concatU8([
           u32(0x02014b50),
-          u16(20),
-          u16(20),
-          u16(0),
-          u16(0),
+          u16(20), u16(20),
+          u16(0), u16(0),
           u16(0), u16(0),
           u32(f.crc),
           u32(f.dataU8.length),
           u32(f.dataU8.length),
           u16(f.nameU8.length),
-          u16(0),
-          u16(0),
-          u16(0),
-          u16(0),
+          u16(0), u16(0), u16(0), u16(0),
           u32(0),
           u32(offset)
         ]);
@@ -800,13 +811,26 @@
         u16(0)
       ]);
 
-      const zipU8 = concatU8([...localParts, centralData, endRecord]);
-      return new Blob([zipU8], { type: "application/zip" });
+      return new Blob([concatU8([...localParts, centralData, endRecord])], { type: "application/zip" });
     }
   }
 
+  function safeFileName(s){
+    return s.replace(/[^\w\-]+/g, "_").replace(/_+/g,"_").replace(/^_+|_+$/g,"");
+  }
+
+  async function canvasToPngU8(canvas){
+    const blob = await new Promise(res => canvas.toBlob(res, "image/png", 1.0));
+    return new Uint8Array(await blob.arrayBuffer());
+  }
+  async function canvasToBlobAndUrl(canvas){
+    const blob = await new Promise(res => canvas.toBlob(res, "image/png", 1.0));
+    const url = URL.createObjectURL(blob);
+    return { blob, url };
+  }
+
   // -----------------------------
-  // Global settings
+  // Global settings UI
   // -----------------------------
   const zoomEl = document.getElementById("zoom");
   const overlapEl = document.getElementById("overlap");
@@ -824,15 +848,16 @@
     return            { name: "Strict",  iouMax: 0.14 };
   }
   function updateLabels(){
-    const z = zoomPreset(+zoomEl.value);
-    const o = overlapPreset(+overlapEl.value);
-    zoomLabelEl.innerHTML = "<b>" + z.name + "</b>";
-    overlapLabelEl.innerHTML = "<b>" + o.name + "</b>";
+    zoomLabelEl.innerHTML = "<b>" + zoomPreset(+zoomEl.value).name + "</b>";
+    overlapLabelEl.innerHTML = "<b>" + overlapPreset(+overlapEl.value).name + "</b>";
   }
   updateLabels();
   zoomEl.addEventListener("input", updateLabels);
   overlapEl.addEventListener("input", updateLabels);
 
+  // -----------------------------
+  // Crop selection
+  // -----------------------------
   function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
   function iou(a,b){
     const x1 = Math.max(a.x, b.x);
@@ -845,8 +870,6 @@
     const uni = a.w*a.h + b.w*b.h - inter;
     return uni <= 0 ? 0 : inter / uni;
   }
-
-  // score: variance + edges
   function computeScore(offCanvas, rect){
     const patchW = 48, patchH = 72;
     const tmp = document.createElement("canvas");
@@ -965,28 +988,392 @@
     return picked.slice(0,count);
   }
 
-  function safeFileName(s){
-    return s.replace(/[^\w\-]+/g, "_").replace(/_+/g,"_").replace(/^_+|_+$/g,"");
+  // -----------------------------
+  // Tarot line-art overlay (procedural)
+  // -----------------------------
+  function seededRand(seed){
+    // deterministic-ish for repeatable patterns
+    let t = seed >>> 0;
+    return () => {
+      t += 0x6D2B79F5;
+      let x = Math.imul(t ^ (t >>> 15), 1 | t);
+      x ^= x + Math.imul(x ^ (x >>> 7), 61 | x);
+      return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+    };
   }
 
-  async function canvasToPngU8(canvas){
-    const blob = await new Promise(res => canvas.toBlob(res, "image/png", 1.0));
-    const buf = await blob.arrayBuffer();
-    return new Uint8Array(buf);
+  function drawFrame(ctx, w, h){
+    const pad = Math.max(10, Math.floor(Math.min(w,h) * 0.06));
+    const r = Math.max(8, Math.floor(Math.min(w,h) * 0.05));
+
+    ctx.lineWidth = Math.max(2, Math.floor(Math.min(w,h) * 0.008));
+    ctx.beginPath();
+    roundedRect(ctx, pad, pad, w - pad*2, h - pad*2, r);
+    ctx.stroke();
+
+    // corner accents
+    const a = pad + r*0.35;
+    const b = pad + r*1.15;
+    ctx.lineWidth = Math.max(1, Math.floor(Math.min(w,h) * 0.006));
+    // top-left
+    line(ctx, a, b, b, b); line(ctx, b, a, b, b);
+    // top-right
+    line(ctx, w-a, b, w-b, b); line(ctx, w-b, a, w-b, b);
+    // bottom-left
+    line(ctx, a, h-b, b, h-b); line(ctx, b, h-a, b, h-b);
+    // bottom-right
+    line(ctx, w-a, h-b, w-b, h-b); line(ctx, w-b, h-a, w-b, h-b);
   }
-  async function canvasToBlobUrl(canvas){
-    const blob = await new Promise(res => canvas.toBlob(res, "image/png", 1.0));
-    const url = URL.createObjectURL(blob);
-    return { blob, url };
+
+  function roundedRect(ctx, x, y, w, h, r){
+    const rr = Math.min(r, w/2, h/2);
+    ctx.moveTo(x+rr, y);
+    ctx.arcTo(x+w, y, x+w, y+h, rr);
+    ctx.arcTo(x+w, y+h, x, y+h, rr);
+    ctx.arcTo(x, y+h, x, y, rr);
+    ctx.arcTo(x, y, x+w, y, rr);
+    ctx.closePath();
+  }
+
+  function line(ctx, x1,y1,x2,y2){ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
+  function circle(ctx, cx, cy, r){ ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke(); }
+
+  function drawSuitSymbol(ctx, suit, cx, cy, s){
+    // simple line icons
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+
+    if (suit === "Wands"){
+      // wand = staff with leaves
+      line(ctx, -s*0.05, -s*0.55, s*0.05, s*0.55);
+      circle(ctx, 0, -s*0.62, s*0.06);
+      // leaves
+      ctx.beginPath();
+      ctx.moveTo(0, -s*0.15);
+      ctx.quadraticCurveTo(s*0.28, -s*0.30, s*0.18, -s*0.02);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, s*0.10);
+      ctx.quadraticCurveTo(-s*0.28, -s*0.02, -s*0.16, s*0.25);
+      ctx.stroke();
+    } else if (suit === "Cups"){
+      // cup bowl + stem
+      ctx.beginPath();
+      ctx.moveTo(-s*0.38, -s*0.10);
+      ctx.quadraticCurveTo(-s*0.10, s*0.25, 0, s*0.25);
+      ctx.quadraticCurveTo(s*0.10, s*0.25, s*0.38, -s*0.10);
+      ctx.lineTo(s*0.30, -s*0.45);
+      ctx.quadraticCurveTo(0, -s*0.30, -s*0.30, -s*0.45);
+      ctx.closePath();
+      ctx.stroke();
+      line(ctx, 0, s*0.25, 0, s*0.40);
+      line(ctx, -s*0.18, s*0.48, s*0.18, s*0.48);
+    } else if (suit === "Pentacles"){
+      // circle + pentagram
+      circle(ctx, 0, 0, s*0.48);
+      // star
+      ctx.beginPath();
+      for (let i=0;i<5;i++){
+        const a = -Math.PI/2 + i*(Math.PI*2/5);
+        const x = Math.cos(a)*s*0.46;
+        const y = Math.sin(a)*s*0.46;
+        if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      // connect star points (pentagram)
+      const pts = [];
+      for (let i=0;i<5;i++){
+        const a = -Math.PI/2 + i*(Math.PI*2/5);
+        pts.push([Math.cos(a)*s*0.42, Math.sin(a)*s*0.42]);
+      }
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      ctx.lineTo(pts[2][0], pts[2][1]);
+      ctx.lineTo(pts[4][0], pts[4][1]);
+      ctx.lineTo(pts[1][0], pts[1][1]);
+      ctx.lineTo(pts[3][0], pts[3][1]);
+      ctx.closePath();
+      ctx.stroke();
+    } else if (suit === "Swords"){
+      // sword blade + hilt
+      line(ctx, 0, -s*0.55, 0, s*0.40);
+      line(ctx, 0, -s*0.55, -s*0.10, -s*0.40);
+      line(ctx, 0, -s*0.55, s*0.10, -s*0.40);
+      line(ctx, -s*0.25, s*0.12, s*0.25, s*0.12);
+      line(ctx, 0, s*0.12, 0, s*0.32);
+      circle(ctx, 0, s*0.44, s*0.06);
+    }
+
+    ctx.restore();
+  }
+
+  function drawMajorMotif(ctx, n, w, h){
+    const cx = w/2, cy = h*0.50;
+    const s = Math.min(w,h) * 0.22;
+
+    // very simple symbolic motifs (all line-based)
+    ctx.save();
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+
+    const motif = (k) => {
+      if (k === 0){ // Fool: circle + cliff
+        circle(ctx, cx, cy - s*0.15, s*0.45);
+        line(ctx, cx - s*0.65, cy + s*0.45, cx + s*0.65, cy + s*0.45);
+        line(ctx, cx + s*0.30, cy + s*0.45, cx + s*0.65, cy + s*0.15);
+      } else if (k === 1){ // Magician: infinity + wand
+        // infinity
+        ctx.beginPath();
+        ctx.moveTo(cx - s*0.55, cy - s*0.35);
+        ctx.bezierCurveTo(cx - s*0.15, cy - s*0.70, cx + s*0.15, cy, cx - s*0.05, cy - s*0.12);
+        ctx.bezierCurveTo(cx - s*0.25, cy - s*0.30, cx - s*0.15, cy - s*0.70, cx + s*0.15, cy - s*0.35);
+        ctx.bezierCurveTo(cx + s*0.55, cy, cx + s*0.15, cy - s*0.70, cx + s*0.05, cy - s*0.12);
+        ctx.bezierCurveTo(cx - s*0.15, cy, cx + s*0.15, cy - s*0.70, cx + s*0.55, cy - s*0.35);
+        ctx.stroke();
+        // wand
+        line(ctx, cx, cy + s*0.15, cx, cy + s*0.75);
+      } else if (k === 2){ // High Priestess: moon
+        circle(ctx, cx, cy, s*0.55);
+        ctx.beginPath();
+        ctx.arc(cx + s*0.20, cy, s*0.55, -Math.PI/2, Math.PI/2);
+        ctx.stroke();
+      } else if (k === 3){ // Empress: venus-ish
+        circle(ctx, cx, cy - s*0.10, s*0.45);
+        line(ctx, cx, cy + s*0.35, cx, cy + s*0.75);
+        line(ctx, cx - s*0.20, cy + s*0.55, cx + s*0.20, cy + s*0.55);
+      } else if (k === 4){ // Emperor: square + crown
+        ctx.strokeRect(cx - s*0.55, cy - s*0.35, s*1.10, s*0.95);
+        // crown points
+        line(ctx, cx - s*0.45, cy - s*0.50, cx - s*0.25, cy - s*0.75);
+        line(ctx, cx - s*0.25, cy - s*0.75, cx, cy - s*0.55);
+        line(ctx, cx, cy - s*0.55, cx + s*0.25, cy - s*0.75);
+        line(ctx, cx + s*0.25, cy - s*0.75, cx + s*0.45, cy - s*0.50);
+      } else if (k === 5){ // Hierophant: keys
+        circle(ctx, cx - s*0.20, cy - s*0.05, s*0.18);
+        circle(ctx, cx + s*0.20, cy - s*0.05, s*0.18);
+        line(ctx, cx - s*0.20, cy + s*0.12, cx - s*0.20, cy + s*0.60);
+        line(ctx, cx + s*0.20, cy + s*0.12, cx + s*0.20, cy + s*0.60);
+        line(ctx, cx - s*0.20, cy + s*0.55, cx - s*0.05, cy + s*0.55);
+        line(ctx, cx + s*0.20, cy + s*0.48, cx + s*0.05, cy + s*0.48);
+      } else if (k === 6){ // Lovers: two circles + bridge
+        circle(ctx, cx - s*0.35, cy, s*0.32);
+        circle(ctx, cx + s*0.35, cy, s*0.32);
+        line(ctx, cx - s*0.05, cy - s*0.15, cx + s*0.05, cy - s*0.15);
+      } else if (k === 7){ // Chariot: wheel + reins
+        circle(ctx, cx, cy + s*0.25, s*0.30);
+        line(ctx, cx, cy - s*0.55, cx, cy + s*0.10);
+        line(ctx, cx - s*0.35, cy - s*0.20, cx, cy - s*0.05);
+        line(ctx, cx + s*0.35, cy - s*0.20, cx, cy - s*0.05);
+      } else if (k === 8){ // Strength: lion-ish arc
+        circle(ctx, cx, cy - s*0.05, s*0.38);
+        ctx.beginPath();
+        ctx.arc(cx, cy + s*0.15, s*0.48, Math.PI*0.10, Math.PI*0.90);
+        ctx.stroke();
+      } else if (k === 9){ // Hermit: lantern
+        ctx.strokeRect(cx - s*0.20, cy - s*0.45, s*0.40, s*0.55);
+        line(ctx, cx, cy - s*0.55, cx, cy - s*0.45);
+        line(ctx, cx, cy + s*0.10, cx, cy + s*0.75);
+      } else if (k === 10){ // Wheel: circle + spokes
+        circle(ctx, cx, cy, s*0.55);
+        for (let i=0;i<6;i++){
+          const a = i*(Math.PI*2/6);
+          line(ctx, cx, cy, cx + Math.cos(a)*s*0.55, cy + Math.sin(a)*s*0.55);
+        }
+      } else if (k === 11){ // Justice: scales
+        line(ctx, cx, cy - s*0.55, cx, cy + s*0.65);
+        line(ctx, cx - s*0.45, cy - s*0.35, cx + s*0.45, cy - s*0.35);
+        // pans
+        circle(ctx, cx - s*0.30, cy - s*0.10, s*0.16);
+        circle(ctx, cx + s*0.30, cy - s*0.10, s*0.16);
+        line(ctx, cx - s*0.30, cy - s*0.35, cx - s*0.30, cy - s*0.26);
+        line(ctx, cx + s*0.30, cy - s*0.35, cx + s*0.30, cy - s*0.26);
+      } else if (k === 12){ // Hanged Man: inverted triangle
+        ctx.beginPath();
+        ctx.moveTo(cx, cy + s*0.60);
+        ctx.lineTo(cx - s*0.50, cy - s*0.30);
+        ctx.lineTo(cx + s*0.50, cy - s*0.30);
+        ctx.closePath();
+        ctx.stroke();
+        circle(ctx, cx, cy - s*0.05, s*0.18);
+      } else if (k === 13){ // Death: scythe curve
+        line(ctx, cx - s*0.10, cy - s*0.55, cx - s*0.10, cy + s*0.65);
+        ctx.beginPath();
+        ctx.arc(cx + s*0.20, cy - s*0.25, s*0.45, Math.PI*0.70, Math.PI*1.55);
+        ctx.stroke();
+      } else if (k === 14){ // Temperance: two cups
+        drawSuitSymbol(ctx, "Cups", cx - s*0.35, cy, s*0.65);
+        drawSuitSymbol(ctx, "Cups", cx + s*0.35, cy, s*0.65);
+        // flow line
+        ctx.beginPath();
+        ctx.moveTo(cx - s*0.05, cy - s*0.05);
+        ctx.bezierCurveTo(cx, cy + s*0.05, cx, cy + s*0.05, cx + s*0.05, cy - s*0.05);
+        ctx.stroke();
+      } else if (k === 15){ // Devil: horns
+        circle(ctx, cx, cy, s*0.40);
+        ctx.beginPath();
+        ctx.arc(cx - s*0.18, cy - s*0.35, s*0.20, Math.PI*0.10, Math.PI*1.20);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx + s*0.18, cy - s*0.35, s*0.20, Math.PI*1.80, Math.PI*0.90, true);
+        ctx.stroke();
+      } else if (k === 16){ // Tower: bolt
+        ctx.strokeRect(cx - s*0.35, cy - s*0.35, s*0.70, s*0.95);
+        ctx.beginPath();
+        ctx.moveTo(cx + s*0.05, cy - s*0.60);
+        ctx.lineTo(cx - s*0.10, cy - s*0.25);
+        ctx.lineTo(cx + s*0.10, cy - s*0.25);
+        ctx.lineTo(cx - s*0.05, cy + s*0.10);
+        ctx.stroke();
+      } else if (k === 17){ // Star: 8-point star
+        for (let i=0;i<8;i++){
+          const a = i*(Math.PI*2/8);
+          line(ctx, cx, cy, cx + Math.cos(a)*s*0.60, cy + Math.sin(a)*s*0.60);
+        }
+        circle(ctx, cx, cy, s*0.18);
+      } else if (k === 18){ // Moon: crescent + ripples
+        circle(ctx, cx, cy - s*0.05, s*0.55);
+        ctx.beginPath();
+        ctx.arc(cx + s*0.22, cy - s*0.05, s*0.55, -Math.PI/2, Math.PI/2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx - s*0.55, cy + s*0.55);
+        ctx.quadraticCurveTo(cx, cy + s*0.35, cx + s*0.55, cy + s*0.55);
+        ctx.stroke();
+      } else if (k === 19){ // Sun: rays
+        circle(ctx, cx, cy, s*0.35);
+        for (let i=0;i<12;i++){
+          const a = i*(Math.PI*2/12);
+          line(ctx, cx + Math.cos(a)*s*0.45, cy + Math.sin(a)*s*0.45,
+                   cx + Math.cos(a)*s*0.70, cy + Math.sin(a)*s*0.70);
+        }
+      } else if (k === 20){ // Judgement: trumpet
+        ctx.beginPath();
+        ctx.moveTo(cx - s*0.55, cy - s*0.15);
+        ctx.lineTo(cx + s*0.10, cy - s*0.15);
+        ctx.lineTo(cx + s*0.35, cy - s*0.30);
+        ctx.lineTo(cx + s*0.35, cy);
+        ctx.lineTo(cx + s*0.10, cy - s*0.15);
+        ctx.stroke();
+        line(ctx, cx - s*0.55, cy - s*0.15, cx - s*0.55, cy + s*0.45);
+      } else if (k === 21){ // World: wreath circle
+        circle(ctx, cx, cy, s*0.55);
+        for (let i=0;i<8;i++){
+          const a = i*(Math.PI*2/8);
+          circle(ctx, cx + Math.cos(a)*s*0.55, cy + Math.sin(a)*s*0.55, s*0.05);
+        }
+      } else {
+        circle(ctx, cx, cy, s*0.50);
+      }
+    };
+
+    motif(n);
+    ctx.restore();
+  }
+
+  function drawMinorMotif(ctx, suit, number, w, h){
+    const cx = w/2, cy = h*0.52;
+    const s = Math.min(w,h) * 0.25;
+
+    // center suit
+    drawSuitSymbol(ctx, suit, cx, cy, s*1.35);
+
+    // pips for 1..10 only
+    if (number >= 1 && number <= 10){
+      const count = number;
+      const ringR = s*1.20;
+      const dots = Math.min(count, 10);
+
+      for (let i=0;i<dots;i++){
+        const a = -Math.PI/2 + i*(Math.PI*2/dots);
+        const px = cx + Math.cos(a)*ringR;
+        const py = cy + Math.sin(a)*ringR;
+        circle(ctx, px, py, s*0.10);
+      }
+    } else {
+      // court cards: crown + suit
+      const topY = h*0.28;
+      line(ctx, cx - s*0.60, topY, cx + s*0.60, topY);
+      line(ctx, cx - s*0.60, topY, cx - s*0.30, topY - s*0.30);
+      line(ctx, cx - s*0.30, topY - s*0.30, cx, topY - s*0.12);
+      line(ctx, cx, topY - s*0.12, cx + s*0.30, topY - s*0.30);
+      line(ctx, cx + s*0.30, topY - s*0.30, cx + s*0.60, topY);
+      circle(ctx, cx, topY - s*0.12, s*0.06);
+    }
+  }
+
+  function drawTarotLineArt(ctx, meta, w, h){
+    // meta: { sectionId, number, title }
+    // Draw both black and white strokes for contrast
+    ctx.save();
+    ctx.globalAlpha = 0.85;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+
+    // black stroke (under)
+    ctx.strokeStyle = "rgba(0,0,0,.85)";
+    drawFrame(ctx, w, h);
+
+    // white stroke (top)
+    ctx.strokeStyle = "rgba(255,255,255,.85)";
+    drawFrame(ctx, w, h);
+
+    // motif with a bit less opacity
+    ctx.globalAlpha = 0.65;
+
+    // black motif under
+    ctx.strokeStyle = "rgba(0,0,0,.75)";
+    ctx.lineWidth = Math.max(1.5, Math.min(w,h) * 0.010);
+
+    if (meta.sectionId === "major"){
+      drawMajorMotif(ctx, meta.number, w, h);
+    } else {
+      const suit = (
+        meta.sectionId === "wands" ? "Wands" :
+        meta.sectionId === "cups" ? "Cups" :
+        meta.sectionId === "pents" ? "Pentacles" :
+        "Swords"
+      );
+      drawMinorMotif(ctx, suit, meta.number, w, h);
+    }
+
+    // white motif on top
+    ctx.strokeStyle = "rgba(255,255,255,.75)";
+    if (meta.sectionId === "major"){
+      drawMajorMotif(ctx, meta.number, w, h);
+    } else {
+      const suit = (
+        meta.sectionId === "wands" ? "Wands" :
+        meta.sectionId === "cups" ? "Cups" :
+        meta.sectionId === "pents" ? "Pentacles" :
+        "Swords"
+      );
+      drawMinorMotif(ctx, suit, meta.number, w, h);
+    }
+
+    // subtle random scratches (deterministic)
+    ctx.globalAlpha = 0.22;
+    const seed = (meta.sectionId.length * 131) ^ (meta.number * 997) ^ (meta.title.length * 733);
+    const rnd = seededRand(seed);
+    ctx.lineWidth = Math.max(1, Math.min(w,h) * 0.004);
+    for (let i=0;i<10;i++){
+      const x1 = w * (0.12 + rnd()*0.76);
+      const y1 = h * (0.12 + rnd()*0.76);
+      const x2 = x1 + (rnd()-0.5) * w * 0.20;
+      const y2 = y1 + (rnd()-0.5) * h * 0.20;
+      ctx.strokeStyle = rnd() > 0.5 ? "rgba(255,255,255,.55)" : "rgba(0,0,0,.55)";
+      line(ctx, x1,y1,x2,y2);
+    }
+
+    ctx.restore();
   }
 
   // -----------------------------
-  // Tarotdeck (max 5) + spreads
+  // Tarotdeck (max 5) + drag/drop to spread slots
   // -----------------------------
-  const deck = {
-    cards: [], // {pngBlob, url, number, title, meaning, sourceLabel, fileBase}
-  };
-
+  const deck = { cards: [] }; // { pngBlob, url, number, title, meaning, sourceLabel, fileBase }
   const deckStackEl = document.getElementById("deckStack");
   const deckThumbsEl = document.getElementById("deckThumbs");
   const deckEmptyEl = document.getElementById("deckEmpty");
@@ -1001,8 +1388,16 @@
   const resetSpreadBtn = document.getElementById("resetSpread");
 
   let activeSpread = "day";
-  let spreadDealt = []; // indices into deck.cards (or card objects)
-  let drawPile = [];    // shuffled indices
+  let spreadPlaced = []; // each slot stores deck index or null
+  let drawPile = [];
+
+  function resetDrawPile(){
+    drawPile = deck.cards.map((_, i) => i);
+    for (let i=drawPile.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [drawPile[i], drawPile[j]] = [drawPile[j], drawPile[i]];
+    }
+  }
 
   function updateDeckUI(){
     deckCountPill.innerHTML = `<b>Deck</b> ${deck.cards.length}/5`;
@@ -1011,9 +1406,8 @@
     deckClearBtn.disabled = deck.cards.length < 1;
 
     dealBtn.disabled = deck.cards.length < 1;
-    resetSpreadBtn.disabled = spreadDealt.length === 0;
+    resetSpreadBtn.disabled = spreadPlaced.every(v => v == null);
 
-    // stack visual
     deckStackEl.querySelectorAll(".stackCard").forEach(n => n.remove());
     if (deck.cards.length === 0){
       deckEmptyEl.style.display = "";
@@ -1028,7 +1422,6 @@
         img.src = c.url;
         layer.appendChild(img);
 
-        // slight fanning
         const rot = (i - (maxShow-1)/2) * 1.2;
         const dy = i * 1.5;
         const dx = i * 0.8;
@@ -1038,13 +1431,24 @@
       }
     }
 
-    // thumbs
     deckThumbsEl.innerHTML = "";
     deck.cards.forEach((c, idx) => {
       const t = document.createElement("div");
       t.className = "thumb";
+
       const img = document.createElement("img");
       img.src = c.url;
+
+      const drag = document.createElement("div");
+      drag.className = "drag";
+      drag.textContent = "↕";
+      drag.title = "Drag onto a spread slot";
+      drag.draggable = true;
+      drag.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", String(idx));
+        e.dataTransfer.effectAllowed = "copyMove";
+      });
+
       const x = document.createElement("button");
       x.textContent = "×";
       x.title = "Remove from deck";
@@ -1052,29 +1456,21 @@
         e.stopPropagation();
         removeDeckCard(idx);
       });
+
       t.appendChild(img);
+      t.appendChild(drag);
       t.appendChild(x);
       deckThumbsEl.appendChild(t);
     });
 
-    // reset draw pile when deck changes
     resetDrawPile();
-  }
-
-  function resetDrawPile(){
-    drawPile = deck.cards.map((_, i) => i);
-    // Fisher-Yates
-    for (let i=drawPile.length-1;i>0;i--){
-      const j = Math.floor(Math.random()*(i+1));
-      [drawPile[i], drawPile[j]] = [drawPile[j], drawPile[i]];
-    }
   }
 
   function removeDeckCard(idx){
     const [c] = deck.cards.splice(idx, 1);
     try{ URL.revokeObjectURL(c.url); }catch(e){}
-    // If removed card was in spread, reset spread
-    spreadDealt = [];
+    // reset spread because indices shift
+    spreadPlaced = spreadPlaced.map(() => null);
     renderSpread();
     updateDeckUI();
   }
@@ -1082,19 +1478,17 @@
   function clearDeck(){
     deck.cards.forEach(c => { try{ URL.revokeObjectURL(c.url); }catch(e){} });
     deck.cards = [];
-    spreadDealt = [];
+    spreadPlaced = spreadPlaced.map(() => null);
     renderSpread();
     updateDeckUI();
   }
 
   function shuffleDeck(){
-    // reorder deck.cards
     for (let i=deck.cards.length-1;i>0;i--){
       const j = Math.floor(Math.random()*(i+1));
       [deck.cards[i], deck.cards[j]] = [deck.cards[j], deck.cards[i]];
     }
-    resetDrawPile();
-    spreadDealt = [];
+    spreadPlaced = spreadPlaced.map(() => null);
     renderSpread();
     updateDeckUI();
   }
@@ -1104,11 +1498,10 @@
     const manifest = [];
 
     for (const c of deck.cards){
-      const pngBuf = await c.pngBlob.arrayBuffer();
-      zip.addFile(`${c.fileBase}.png`, new Uint8Array(pngBuf));
+      zip.addFile(`${c.fileBase}.png`, new Uint8Array(await c.pngBlob.arrayBuffer()));
 
       const txt = [
-        `Custom Tarotdeck (5 cards max)`,
+        `Custom Tarotdeck (max 5 cards)`,
         `Source: ${c.sourceLabel}`,
         `Number: ${c.number}`,
         `Title: ${c.title}`,
@@ -1117,7 +1510,7 @@
         `${c.meaning}`,
         ``
       ].join("\n");
-      zip.addFile(`${c.fileBase}.txt`, new TextEncoder().encode(txt));
+      zip.addFile(`${c.fileBase}.txt`, te.encode(txt));
 
       const json = JSON.stringify({
         source: c.sourceLabel,
@@ -1125,12 +1518,12 @@
         title: c.title,
         meaning: c.meaning
       }, null, 2);
-      zip.addFile(`${c.fileBase}.json`, new TextEncoder().encode(json));
+      zip.addFile(`${c.fileBase}.json`, te.encode(json));
 
       manifest.push({ file: `${c.fileBase}.png`, number: c.number, title: c.title, meaning: c.meaning, source: c.sourceLabel });
     }
 
-    zip.addFile("DECK_MANIFEST.json", new TextEncoder().encode(JSON.stringify(manifest, null, 2)));
+    zip.addFile("DECK_MANIFEST.json", te.encode(JSON.stringify(manifest, null, 2)));
 
     const blob = zip.toBlob();
     const url = URL.createObjectURL(blob);
@@ -1148,60 +1541,64 @@
   deckClearBtn.addEventListener("click", clearDeck);
 
   // -----------------------------
-  // Spreads rendering + dealing
+  // Spreads (with drop targets)
   // -----------------------------
-  function setActiveSpread(name){
-    activeSpread = name;
-    tabs.forEach(t => t.classList.toggle("active", t.dataset.spread === name));
-    spreadDealt = [];
-    renderSpread();
-    updateDeckUI();
-  }
-
-  tabs.forEach(t => t.addEventListener("click", () => setActiveSpread(t.dataset.spread)));
-
   function spreadSpec(name){
     if (name === "day"){
-      return [
-        { key:"1", label:"Card of the Day" }
-      ];
+      return [{ label:"Card of the Day" }];
     }
     if (name === "choice"){
-      return [
-        { key:"1", label:"Situation A" },
-        { key:"2", label:"Situation B" }
-      ];
+      return [{ label:"Situation A" }, { label:"Situation B" }];
     }
-    // insight
     return [
-      { key:"4", label:"What needs awareness", className:"insightTop" },
-      { key:"2", label:"The past", className:"insightPast" },
-      { key:"1", label:"The situation", className:"insightNow" },
-      { key:"3", label:"The possibility", className:"insightPoss" },
+      { label:"What needs awareness", className:"insightTop" },
+      { label:"The past", className:"insightPast" },
+      { label:"The situation", className:"insightNow" },
+      { label:"The possibility", className:"insightPoss" },
     ];
   }
 
+  function setActiveSpread(name){
+    activeSpread = name;
+    tabs.forEach(t => t.classList.toggle("active", t.dataset.spread === name));
+    spreadPlaced = spreadSpec(activeSpread).map(() => null);
+    renderSpread();
+    updateDeckUI();
+  }
+  tabs.forEach(t => t.addEventListener("click", () => setActiveSpread(t.dataset.spread)));
+
   function renderSpread(){
     const spec = spreadSpec(activeSpread);
+    if (!spreadPlaced || spreadPlaced.length !== spec.length){
+      spreadPlaced = spec.map(() => null);
+    }
 
     spreadSlotsEl.className = "slots " + activeSpread;
     spreadSlotsEl.innerHTML = "";
 
-    spec.forEach((s, idx) => {
+    spec.forEach((s, slotIndex) => {
       const wrap = document.createElement("div");
       if (s.className) wrap.className = s.className;
 
       const slot = document.createElement("div");
       slot.className = "slot";
 
-      const label = document.createElement("div");
-      label.className = "slotLabel tarotFont";
-      label.textContent = s.label;
+      slot.addEventListener("dragenter", (e) => { e.preventDefault(); slot.classList.add("dragover"); });
+      slot.addEventListener("dragover", (e) => { e.preventDefault(); });
+      slot.addEventListener("dragleave", () => slot.classList.remove("dragover"));
+      slot.addEventListener("drop", (e) => {
+        e.preventDefault();
+        slot.classList.remove("dragover");
+        const idx = parseInt(e.dataTransfer.getData("text/plain"), 10);
+        if (!Number.isFinite(idx) || !deck.cards[idx]) return;
+        spreadPlaced[slotIndex] = idx;
+        renderSpread();
+        updateDeckUI();
+      });
 
-      // Fill if dealt
-      const dealtIndex = spreadDealt[idx];
-      if (typeof dealtIndex === "number" && deck.cards[dealtIndex]){
-        const c = deck.cards[dealtIndex];
+      const placedIdx = spreadPlaced[slotIndex];
+      if (typeof placedIdx === "number" && deck.cards[placedIdx]){
+        const c = deck.cards[placedIdx];
         const img = document.createElement("img");
         img.src = c.url;
         slot.appendChild(img);
@@ -1217,56 +1614,77 @@
         slot.appendChild(n);
         slot.appendChild(tt);
 
-        // hover meaning
         slot.title = c.meaning;
+
+        // click to clear slot
+        slot.style.cursor = "pointer";
+        slot.addEventListener("click", () => {
+          spreadPlaced[slotIndex] = null;
+          renderSpread();
+          updateDeckUI();
+        }, { once:true });
       } else {
-        // faint placeholders: no background box text, just hint on hover
-        slot.title = "Deal to place a card here";
+        slot.title = "Drop a deck card here (or Deal)";
       }
+
+      const label = document.createElement("div");
+      label.className = "slotLabel tarotFont";
+      label.textContent = s.label;
 
       wrap.appendChild(slot);
       wrap.appendChild(label);
       spreadSlotsEl.appendChild(wrap);
     });
 
-    resetSpreadBtn.disabled = spreadDealt.length === 0;
+    resetSpreadBtn.disabled = spreadPlaced.every(v => v == null);
   }
 
   function deal(){
     if (deck.cards.length === 0) return;
-
     const needed = spreadSpec(activeSpread).length;
-    spreadDealt = [];
+    spreadPlaced = new Array(needed).fill(null);
 
-    // If not enough unique cards, allow repeats by reshuffling pile as needed
     for (let i=0;i<needed;i++){
       if (drawPile.length === 0) resetDrawPile();
-      const idx = drawPile.pop();
-      spreadDealt.push(idx);
+      spreadPlaced[i] = drawPile.pop();
     }
     renderSpread();
     updateDeckUI();
   }
 
-  dealBtn.addEventListener("click", deal);
-  resetSpreadBtn.addEventListener("click", () => {
-    spreadDealt = [];
+  document.getElementById("dealBtn").addEventListener("click", deal);
+  document.getElementById("resetSpread").addEventListener("click", () => {
+    spreadPlaced = spreadPlaced.map(() => null);
     renderSpread();
     updateDeckUI();
   });
 
-  renderSpread();
-  updateDeckUI();
+  // deck stack drag feedback (optional)
+  deckStackEl.addEventListener("dragenter", (e)=>{ e.preventDefault(); deckStackEl.classList.add("dragover"); });
+  deckStackEl.addEventListener("dragover", (e)=>{ e.preventDefault(); });
+  deckStackEl.addEventListener("dragleave", ()=> deckStackEl.classList.remove("dragover"));
+  deckStackEl.addEventListener("drop", (e)=>{ e.preventDefault(); deckStackEl.classList.remove("dragover"); });
 
   // -----------------------------
-  // Build per-section generators
+  // Build generator sections (drag&drop per preview)
   // -----------------------------
   const decksRoot = document.getElementById("decks");
 
-  function buildDeckSection(section){
+  function attachDropzone(el, onFile){
+    el.addEventListener("dragenter", (e) => { e.preventDefault(); el.classList.add("dragover"); });
+    el.addEventListener("dragover", (e) => { e.preventDefault(); });
+    el.addEventListener("dragleave", () => el.classList.remove("dragover"));
+    el.addEventListener("drop", (e) => {
+      e.preventDefault();
+      el.classList.remove("dragover");
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f && f.type && f.type.startsWith("image/")) onFile(f);
+    });
+  }
+
+  function buildSection(section){
     const panel = document.createElement("section");
     panel.className = "panel";
-    panel.id = "panel_" + section.id;
 
     const hd = document.createElement("div");
     hd.className = "hd";
@@ -1284,12 +1702,12 @@
 
     const fileLabel = document.createElement("label");
     fileLabel.className = "file";
-    fileLabel.innerHTML = `📷 Upload image <input type="file" accept="image/*" style="display:none" />`;
+    fileLabel.innerHTML = `📷 Upload <input type="file" accept="image/*" style="display:none" />`;
 
     const reshuffleBtn = document.createElement("button");
     reshuffleBtn.className = "btn";
     reshuffleBtn.disabled = true;
-    reshuffleBtn.textContent = "🔀 Reshuffle details";
+    reshuffleBtn.textContent = "🔀 Reshuffle";
 
     const dlAllBtn = document.createElement("button");
     dlAllBtn.className = "btn";
@@ -1311,20 +1729,27 @@
     row.className = "row";
 
     const previewWrap = document.createElement("div");
+
     const preview = document.createElement("div");
     preview.className = "preview";
     const pCanvas = document.createElement("canvas");
-    const pCtx = pCanvas.getContext("2d", { willReadFrequently: true });
+    const pCtx = pCanvas.getContext("2d", { willReadFrequently:true });
+
     const empty = document.createElement("div");
     empty.className = "empty";
     empty.textContent = section.hint;
 
+    const dropHint = document.createElement("div");
+    dropHint.className = "dropHint";
+    dropHint.textContent = "Drop an image to generate cards";
+
     preview.appendChild(pCanvas);
     preview.appendChild(empty);
+    preview.appendChild(dropHint);
 
     const hint = document.createElement("p");
     hint.className = "hint";
-    hint.innerHTML = `Hover cards → meaning • Click card image → download ZIP (PNG + meaning) • Use <span class="kbd">R</span> to reshuffle`;
+    hint.innerHTML = `Drop image here • Hover cards → meaning • Click card image → download ZIP • <span class="kbd">R</span> reshuffle`;
 
     previewWrap.appendChild(preview);
     previewWrap.appendChild(hint);
@@ -1332,10 +1757,9 @@
     const info = document.createElement("div");
     info.innerHTML = `
       <div class="mini">
-        <div class="tag"><b>${section.count}</b> cards per upload</div>
-        <div class="tag">Number top-center</div>
-        <div class="tag">Title bottom</div>
-        <div class="tag">Send 5 cards to deck</div>
+        <div class="tag"><b>${section.count}</b> cards</div>
+        <div class="tag">Line-art overlay per card</div>
+        <div class="tag">Send up to 5 to deck</div>
       </div>
     `;
 
@@ -1352,30 +1776,30 @@
     panel.appendChild(bd);
     decksRoot.appendChild(panel);
 
-    // Section state
+    // state
     const state = {
       img: null,
       off: document.createElement("canvas"),
       offCtx: null,
       rects: null,
-      cardFullCanvases: [],
-      cardMeta: [],
+      fullCanvases: [],
+      meta: [],
       lastBlobUrls: [],
     };
-    state.offCtx = state.off.getContext("2d", { willReadFrequently: true });
+    state.offCtx = state.off.getContext("2d", { willReadFrequently:true });
 
     function setStatus(t){ status.textContent = t; }
-    function revokeSectionUrls(){
+    function revokeUrls(){
       for (const u of state.lastBlobUrls){
         try{ URL.revokeObjectURL(u); }catch(e){}
       }
       state.lastBlobUrls = [];
     }
     function clearGrid(){
-      revokeSectionUrls();
+      revokeUrls();
       grid.innerHTML = "";
-      state.cardFullCanvases = [];
-      state.cardMeta = [];
+      state.fullCanvases = [];
+      state.meta = [];
     }
 
     function drawPreview(){
@@ -1400,7 +1824,6 @@
 
     async function buildCards(){
       if (!state.img) return;
-
       setStatus("Selecting details…");
       clearGrid();
 
@@ -1408,10 +1831,10 @@
       state.rects = pickRects(candidates, section.count);
 
       for (let i=0;i<section.count;i++){
-        const cinfo = section.cards[i];
+        const cardInfo = section.cards[i];
         const rect = state.rects[i];
 
-        // Full-res crop canvas
+        // Full-res canvas = crop + line-art
         const full = document.createElement("canvas");
         full.width = rect.w;
         full.height = rect.h;
@@ -1420,15 +1843,19 @@
         fctx.imageSmoothingQuality = "high";
         fctx.drawImage(state.off, rect.x, rect.y, rect.w, rect.h, 0, 0, rect.w, rect.h);
 
-        state.cardFullCanvases.push(full);
+        // line art overlay
+        drawTarotLineArt(fctx, { sectionId: section.id, number: cardInfo.n, title: cardInfo.title }, rect.w, rect.h);
 
-        const fileBase = `${section.id}_${String(cinfo.n).padStart(2,"0")}_${safeFileName(cinfo.title)}`;
-        state.cardMeta.push({
-          number: cinfo.n,
-          title: cinfo.title,
-          meaning: cinfo.desc,
-          fileBase,
-          sourceLabel: section.label
+        state.fullCanvases.push(full);
+
+        const fileBase = `${section.id}_${String(cardInfo.n).padStart(2,"0")}_${safeFileName(cardInfo.title)}`;
+        state.meta.push({
+          sectionId: section.id,
+          sourceLabel: section.label,
+          number: cardInfo.n,
+          title: cardInfo.title,
+          meaning: cardInfo.desc,
+          fileBase
         });
 
         // UI card
@@ -1443,16 +1870,16 @@
 
         const num = document.createElement("div");
         num.className = "num tarotFont";
-        num.textContent = String(cinfo.n);
+        num.textContent = String(cardInfo.n);
 
         const title = document.createElement("div");
         title.className = "titleUnder tarotFont";
-        title.textContent = cinfo.title;
+        title.textContent = cardInfo.title;
 
         const overlay = document.createElement("div");
         overlay.className = "overlay";
         const pp = document.createElement("p");
-        pp.textContent = cinfo.desc;
+        pp.textContent = cardInfo.desc;
         overlay.appendChild(pp);
 
         inner.appendChild(cnv);
@@ -1463,17 +1890,13 @@
         const actions = document.createElement("div");
         actions.className = "actions";
 
-        const btnOne = document.createElement("button");
-        btnOne.className = "smallBtn secondary";
-        btnOne.type = "button";
-        btnOne.textContent = "⬇️ Download card (ZIP)";
-
+        // download button removed (per request) — still downloadable by clicking image
         const btnDeck = document.createElement("button");
         btnDeck.className = "smallBtn";
         btnDeck.type = "button";
         btnDeck.textContent = "🂠 Send to Tarotdeck";
+        btnDeck.disabled = deck.cards.length >= 5;
 
-        actions.appendChild(btnOne);
         actions.appendChild(btnDeck);
 
         cardEl.appendChild(inner);
@@ -1489,13 +1912,13 @@
           ctx.clearRect(0,0,w,h);
           ctx.imageSmoothingEnabled = true;
           ctx.imageSmoothingQuality = "high";
-          ctx.drawImage(state.off, rect.x, rect.y, rect.w, rect.h, 0, 0, w, h);
+          ctx.drawImage(full, 0, 0, full.width, full.height, 0, 0, w, h);
         }
         requestAnimationFrame(renderDisplay);
         new ResizeObserver(renderDisplay).observe(inner);
 
-        async function downloadOneZip(){
-          const meta = state.cardMeta[i];
+        async function downloadCardZip(){
+          const meta = state.meta[i];
           const zip = new ZipStore();
 
           const pngU8 = await canvasToPngU8(full);
@@ -1510,7 +1933,7 @@
             `${meta.meaning}`,
             ``
           ].join("\n");
-          zip.addFile(`${meta.fileBase}.txt`, new TextEncoder().encode(txt));
+          zip.addFile(`${meta.fileBase}.txt`, te.encode(txt));
 
           const json = JSON.stringify({
             source: meta.sourceLabel,
@@ -1518,7 +1941,7 @@
             title: meta.title,
             meaning: meta.meaning
           }, null, 2);
-          zip.addFile(`${meta.fileBase}.json`, new TextEncoder().encode(json));
+          zip.addFile(`${meta.fileBase}.json`, te.encode(json));
 
           const blob = zip.toBlob();
           const url = URL.createObjectURL(blob);
@@ -1532,11 +1955,10 @@
           a.remove();
         }
 
-        async function sendToTarotdeck(){
+        async function sendToDeck(){
           if (deck.cards.length >= 5) return;
-
-          const meta = state.cardMeta[i];
-          const { blob, url } = await canvasToBlobUrl(full);
+          const meta = state.meta[i];
+          const { blob, url } = await canvasToBlobAndUrl(full);
 
           deck.cards.push({
             pngBlob: blob,
@@ -1548,18 +1970,12 @@
             fileBase: meta.fileBase
           });
 
-          // disable button if full
           btnDeck.disabled = deck.cards.length >= 5;
           updateDeckUI();
         }
 
-        // Click image = download (as before)
-        inner.addEventListener("click", downloadOneZip);
-        btnOne.addEventListener("click", downloadOneZip);
-
-        // Send to deck (max 5)
-        btnDeck.disabled = deck.cards.length >= 5;
-        btnDeck.addEventListener("click", sendToTarotdeck);
+        inner.addEventListener("click", downloadCardZip);
+        btnDeck.addEventListener("click", sendToDeck);
       }
 
       setStatus(`Ready — ${section.count} cards generated.`);
@@ -1567,7 +1983,6 @@
 
     async function loadFile(file){
       if (!file) return;
-
       setStatus("Loading image…");
       reshuffleBtn.disabled = true;
       dlAllBtn.disabled = true;
@@ -1614,25 +2029,21 @@
     }
 
     async function downloadAllZip(){
-      if (!state.img || !state.cardFullCanvases.length) return;
-
+      if (!state.img || !state.fullCanvases.length) return;
       setStatus("Building ZIP…");
 
       const zip = new ZipStore();
       const lines = [];
       lines.push(section.label);
       lines.push("");
-      lines.push("This ZIP contains:");
-      lines.push("- One PNG per card");
-      lines.push("- One TXT + JSON per card containing its meaning");
+      lines.push("Contains one PNG per card + TXT/JSON meanings.");
       lines.push("");
 
-      for (let i=0;i<state.cardFullCanvases.length;i++){
-        const meta = state.cardMeta[i];
-        const cnv = state.cardFullCanvases[i];
+      for (let i=0;i<state.fullCanvases.length;i++){
+        const meta = state.meta[i];
+        const cnv = state.fullCanvases[i];
 
-        const pngU8 = await canvasToPngU8(cnv);
-        zip.addFile(`${meta.fileBase}.png`, pngU8);
+        zip.addFile(`${meta.fileBase}.png`, await canvasToPngU8(cnv));
 
         const txt = [
           `Deck: ${meta.sourceLabel}`,
@@ -1643,20 +2054,19 @@
           `${meta.meaning}`,
           ``
         ].join("\n");
-        zip.addFile(`${meta.fileBase}.txt`, new TextEncoder().encode(txt));
+        zip.addFile(`${meta.fileBase}.txt`, te.encode(txt));
 
-        const json = JSON.stringify({
+        zip.addFile(`${meta.fileBase}.json`, te.encode(JSON.stringify({
           source: meta.sourceLabel,
           number: meta.number,
           title: meta.title,
           meaning: meta.meaning
-        }, null, 2);
-        zip.addFile(`${meta.fileBase}.json`, new TextEncoder().encode(json));
+        }, null, 2)));
 
         lines.push(`${meta.number} — ${meta.title}: ${meta.meaning}`);
       }
 
-      zip.addFile(`README_${section.id}.txt`, new TextEncoder().encode(lines.join("\n")));
+      zip.addFile(`README_${section.id}.txt`, te.encode(lines.join("\n")));
 
       const blob = zip.toBlob();
       const url = URL.createObjectURL(blob);
@@ -1669,10 +2079,10 @@
       a.click();
       a.remove();
 
-      setStatus(`Ready — downloaded ${section.count} cards.`);
+      setStatus(`Downloaded — ${section.count} cards.`);
     }
 
-    // events
+    // wire events
     fileLabel.querySelector("input").addEventListener("change", (e) => {
       const f = e.target.files && e.target.files[0];
       if (f) loadFile(f);
@@ -1681,7 +2091,10 @@
     reshuffleBtn.addEventListener("click", reshuffle);
     dlAllBtn.addEventListener("click", downloadAllZip);
 
-    // hotkey R reshuffles any loaded sections (this section only)
+    // Dropzone on preview
+    attachDropzone(preview, loadFile);
+
+    // hotkey R reshuffle this section if loaded
     window.addEventListener("keydown", (e) => {
       if ((e.key === "r" || e.key === "R") && state.img && !reshuffleBtn.disabled){
         reshuffle();
@@ -1689,15 +2102,21 @@
     });
 
     // rebuild on slider change if loaded
-    function onGlobalChange(){
-      if (state.img) reshuffle();
-    }
+    function onGlobalChange(){ if (state.img) reshuffle(); }
     zoomEl.addEventListener("input", onGlobalChange);
     overlapEl.addEventListener("input", onGlobalChange);
   }
 
-  // Build sections
-  DECKS.forEach(buildDeckSection);
+  // init spreads & deck
+  setActiveSpread("day");
+  renderSpread();
+  updateDeckUI();
+
+  // build all generator sections
+  SECTIONS.forEach(buildSection);
+
+  // Deal / Reset buttons already wired above
+  resetDrawPile();
 })();
 </script>
 </body>
