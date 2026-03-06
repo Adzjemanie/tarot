@@ -261,9 +261,18 @@
   }
   .card-flip-inner.flipped ~ *::after,
   .card-flip-container:has(.flipped)::after { opacity:0; }
+
+  #version-badge{
+    position:fixed; top:10px; right:12px;
+    font-size:11px; font-family:ui-monospace,monospace; letter-spacing:.06em;
+    background:#0b1326; border:1px solid #2a3c63; color:#8ea9d8;
+    padding:4px 8px; border-radius:6px; opacity:.7; z-index:999;
+  }
+
 </style>
 </head>
 <body>
+<div id="version-badge"></div>
 <div class="wrap">
 
 <!-- ══ HEADER CARD ══ -->
@@ -415,6 +424,7 @@
 <canvas id="render-canvas" style="display:none"></canvas>
 
 <script>
+const APP_VERSION = "3.2.1";
 /* ══════════════════════════════════════════════
    CARD OVERLAYS — extracted from sprite sheet
 ══════════════════════════════════════════════ */
@@ -523,25 +533,11 @@ const statusEl     = document.getElementById('main-status');
 ══════════════════════════════════════════════ */
 function setupUploadZone(zoneId, onFiles){
   const zone = document.getElementById(zoneId);
-
   zone.addEventListener('click', () => {
     const key = zoneId.replace('uz-','');
-    const picker = document.createElement('input');
-    picker.type = 'file';
-    picker.accept = 'image/*';
-    if(key === 'groot') picker.multiple = true;
-    picker.style.display = 'none';
-    document.body.appendChild(picker);
-
-    picker.addEventListener('change', () => {
-      const files = [...(picker.files || [])].filter(f => f.type.startsWith('image/'));
-      if(files.length) onFiles(files);
-      picker.remove();
-    }, { once:true });
-
-    picker.click();
+    if(key === 'groot') gaFileInput.click();
+    else document.getElementById('file-'+key).click();
   });
-
   zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
   zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
   zone.addEventListener('drop', e => {
@@ -590,6 +586,7 @@ document.getElementById('card-back-file').addEventListener('change', function(){
           </div>`;
       }
     }
+    }
   };
   reader.readAsDataURL(file);
   this.value = '';
@@ -600,17 +597,6 @@ setupUploadZone('uz-aarde', files => loadSuitFromFile('aarde', files[0]));
 setupUploadZone('uz-lucht', files => loadSuitFromFile('lucht', files[0]));
 
 gaFileInput.addEventListener('change',e=>{[...e.target.files].forEach(loadGAFile);gaFileInput.value='';});
-['vuur','water','aarde','lucht'].forEach(suit=>{
-  const input = document.getElementById('file-'+suit);
-  if(input){
-    input.addEventListener('change', function(){
-      const file = this.files && this.files[0];
-      if(!file) return;
-      loadSuitFromFile(suit, file);
-      this.value = '';
-    });
-  }
-});
 reshuffleBtn.addEventListener('click',reshuffle);
 allExportBtn.addEventListener('click',exportAllZip);
 
