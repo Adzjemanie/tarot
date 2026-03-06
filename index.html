@@ -3,19 +3,18 @@
 <html lang="nl">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Tarot Extractor</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&amp;family=IM+Fell+English:ital@0;1&amp;family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta content="#0b0e14" name="theme-color"/>
+<title>Tarot Deck Generator</title>
 <style>
-  :root { font-family: 'Cormorant Garamond', Georgia, serif; }
+  :root { font-family: Georgia, 'Times New Roman', serif; }
   body { margin: 0; background: #0b0e14; color: #e7eaf0; }
   .wrap { max-width: 1140px; margin: 0 auto; padding: 24px; }
   .card { background: #121826; border: 1px solid #1f2a3d; border-radius: 16px; padding: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.25); margin-bottom: 14px; }
-  h1 { font-size: 26px; margin: 0 0 6px; font-family:'Cinzel',serif; font-weight:700; letter-spacing:.08em; }
-  h2 { font-size: 15px; margin: 0 0 10px; color: #d6dcff; font-family:'Cinzel',serif; }
+  h1 { font-size: 26px; margin: 0 0 6px; font-family:Georgia, serif; font-weight:700; letter-spacing:.08em; }
+  h2 { font-size: 15px; margin: 0 0 10px; color: #d6dcff; font-family:Georgia, serif; }
   h3 { font-size: 13px; margin: 0 0 8px; color: #b9c2d3; font-weight: 600; letter-spacing: .03em; }
-  p  { margin: 6px 0; color: #b9c2d3; font-size: 14px; font-family:'Cormorant Garamond',serif; }
+  p  { margin: 6px 0; color: #b9c2d3; font-size: 14px; font-family:Georgia, 'Times New Roman', serif; }
   label { display: block; font-size: 12px; color: #b9c2d3; margin-bottom: 6px; }
   input, select, button { width: 100%; box-sizing: border-box; border-radius: 12px; border: 1px solid #27344d; background: #0f1420; color: #e7eaf0; padding: 10px 12px; font-size: 14px; }
   button { cursor: pointer; background: #1a2540; border-color: #2b3a59; transition: filter .15s; }
@@ -31,7 +30,7 @@
   summary::-webkit-details-marker { display:none; }
   summary::before { content: "\25B8 "; font-size: 10px; }
   details[open] summary::before { content: "\25BE "; }
-  .section-title { display: flex; align-items: center; gap: 10px; font-size: 11px; color: #8fa0bf; letter-spacing: .1em; text-transform: uppercase; margin: 18px 0 12px; font-family:'Cinzel',serif; }
+  .section-title { display: flex; align-items: center; gap: 10px; font-size: 11px; color: #8fa0bf; letter-spacing: .1em; text-transform: uppercase; margin: 18px 0 12px; font-family:Georgia, serif; }
   .section-title::after { content:''; flex:1; height:1px; background: linear-gradient(90deg,#1f2a3d,transparent); }
   .thumbs-row { display:flex; gap:8px; flex-wrap:wrap; align-items:flex-start; margin-top:8px; }
   .thumb { position:relative; width:60px; height:60px; border-radius:9px; overflow:hidden; border:2px solid #27344d; cursor:pointer; flex-shrink:0; transition:border-color .15s; }
@@ -76,7 +75,6 @@
   .tcard-img canvas { width:100%; height:100%; object-fit:cover; display:block; transition:transform .3s ease; }
   .tcard:hover .tcard-img canvas { transform:scale(1.04); }
 
-
   /* Hover full-text tooltip overlay */
   .tcard-tip {
     position:absolute; inset:0; border-radius:12px;
@@ -86,8 +84,8 @@
     opacity:0; transition:opacity .28s; pointer-events:none;
   }
   .tcard:hover .tcard-tip { opacity:1; }
-  .tcard-tip .tip-name { font-size:11px; font-weight:600; color:#d6dcff; margin-bottom:4px; font-family:'Cinzel',serif; letter-spacing:.05em; }
-  .tcard-tip p { font-size:11px; color:#b9c2d3; line-height:1.55; margin:0; font-family:'Cormorant Garamond',serif; }
+  .tcard-tip .tip-name { font-size:11px; font-weight:600; color:#d6dcff; margin-bottom:4px; font-family:Georgia, serif; letter-spacing:.05em; }
+  .tcard-tip p { font-size:11px; color:#b9c2d3; line-height:1.55; margin:0; font-family:Georgia, 'Times New Roman', serif; }
 
   /* Download button: small pill bottom-right, appears on hover */
   .btn-dl-overlay {
@@ -108,7 +106,7 @@
   #main-status.done    { color:#6fcf97; }
   #export-overlay { display:none; position:fixed; inset:0; z-index:100; background:rgba(11,14,20,.93); backdrop-filter:blur(8px); align-items:center; justify-content:center; flex-direction:column; gap:12px; }
   #export-overlay.visible { display:flex; }
-  .ex-title { font-size:15px; font-weight:600; color:#d6dcff; font-family:'Cinzel',serif; }
+  .ex-title { font-size:15px; font-weight:600; color:#d6dcff; font-family:Georgia, serif; }
   #exp-track { width:260px; height:4px; background:#1f2a3d; border-radius:2px; overflow:hidden; }
   #exp-fill  { height:100%; background:#4a7aff; border-radius:2px; width:0%; transition:width .1s; }
   #exp-msg   { font-size:12px; color:#8fa0bf; }
@@ -136,7 +134,7 @@
   .upload-zone.loaded.lucht { border-color:#6050a0; }
   .uz-icon { font-size:1.8rem; line-height:1; }
   .upload-zone-groot-wrap .uz-icon { font-size:3rem; }
-  .uz-label { font-family:'Cinzel',Georgia,serif; font-size:11px; font-weight:600; color:#d6dcff; letter-spacing:.06em; }
+  .uz-label { font-family:Georgia, serif; font-size:11px; font-weight:600; color:#d6dcff; letter-spacing:.06em; }
   .upload-zone-groot-wrap .uz-label { font-size:14px; letter-spacing:.1em; }
   .uz-sub   { font-size:10px; color:#8fa0bf; line-height:1.3; }
   .uz-status { font-size:10px; font-weight:600; color:#8fa0bf; margin-top:2px; }
@@ -147,17 +145,17 @@
   .uz-preview img { width:100%; height:100%; object-fit:cover; display:block; }
 
   /* ── Buttons ── */
-  .btn-deck-dl { width:100%; padding:14px; font-size:15px; font-weight:600; font-family:'Cinzel',Georgia,serif; letter-spacing:.06em; background:linear-gradient(135deg,#1a2d5a 0%,#0f1c3d 100%); border:1px solid #3a5080; color:#d6dcff; border-radius:14px; cursor:pointer; transition:filter .15s,box-shadow .15s; box-shadow:0 4px 16px rgba(74,122,255,.12); margin-bottom:8px; }
+  .btn-deck-dl { width:100%; padding:14px; font-size:15px; font-weight:600; font-family:Georgia, serif; letter-spacing:.06em; background:linear-gradient(135deg,#1a2d5a 0%,#0f1c3d 100%); border:1px solid #3a5080; color:#d6dcff; border-radius:14px; cursor:pointer; transition:filter .15s,box-shadow .15s; box-shadow:0 4px 16px rgba(74,122,255,.12); margin-bottom:8px; }
   .btn-deck-dl:hover:not(:disabled) { filter:brightness(1.15); box-shadow:0 6px 24px rgba(74,122,255,.22); }
   .btn-deck-dl:disabled { opacity:.3; cursor:not-allowed; filter:none; box-shadow:none; }
-  .btn-send-deck { width:100%; padding:11px; font-size:13px; font-weight:600; font-family:'Cinzel',Georgia,serif; letter-spacing:.05em; background:#101828; border:1px dashed #3a5080; color:#8fa0bf; border-radius:12px; cursor:pointer; margin-top:8px; transition:all .2s; }
+  .btn-send-deck { width:100%; padding:11px; font-size:13px; font-weight:600; font-family:Georgia, serif; letter-spacing:.05em; background:#101828; border:1px dashed #3a5080; color:#8fa0bf; border-radius:12px; cursor:pointer; margin-top:8px; transition:all .2s; }
   .btn-send-deck:hover:not(:disabled) { border-color:#4a7aff; color:#d6dcff; background:#121e38; }
   .btn-send-deck:disabled { opacity:.3; cursor:not-allowed; }
   .btn-send-deck.loaded { border-style:solid; border-color:#4a7aff; color:#d6dcff; background:#0d1830; }
 
   /* ── Spread tabs ── */
   .spread-tabs { display:flex; gap:8px; margin-bottom:16px; }
-  .spread-tab { flex:1; padding:10px 8px; font-size:12px; font-weight:600; font-family:'Cinzel',serif; letter-spacing:.04em; background:#0b1020; border:1px solid #27344d; color:#8fa0bf; border-radius:10px; cursor:pointer; transition:all .2s; }
+  .spread-tab { flex:1; padding:10px 8px; font-size:12px; font-weight:600; font-family:Georgia, serif; letter-spacing:.04em; background:#0b1020; border:1px solid #27344d; color:#8fa0bf; border-radius:10px; cursor:pointer; transition:all .2s; }
   .spread-tab:hover { border-color:#4a7aff; color:#d6dcff; }
   .spread-tab.active { background:#121e38; border-color:#4a7aff; color:#d6dcff; box-shadow:0 0 0 2px rgba(74,122,255,.15); }
 
@@ -172,10 +170,10 @@
   .spread-card-frame canvas { width:100%; height:100%; object-fit:cover; display:block; }
   .spread-card-frame .spread-card-overlay { position:absolute; inset:0; border-radius:13px; background:linear-gradient(to top,rgba(11,14,20,.95) 38%,transparent); display:flex; flex-direction:column; justify-content:flex-end; padding:10px 8px; opacity:0; transition:opacity .25s; pointer-events:none; }
   .spread-card-frame:hover .spread-card-overlay { opacity:1; }
-  .spread-card-overlay .ov-name { font-size:10px; font-family:'Cinzel',serif; color:#d6dcff; font-weight:600; text-align:center; line-height:1.3; }
+  .spread-card-overlay .ov-name { font-size:10px; font-family:Georgia, serif; color:#d6dcff; font-weight:600; text-align:center; line-height:1.3; }
   .spread-card-overlay .ov-kw  { font-size:9px; color:#8fa0bf; text-align:center; margin-top:3px; line-height:1.3; font-style:italic; }
-  .spread-slot-label { font-size:10px; color:#8fa0bf; text-align:center; max-width:140px; line-height:1.4; font-family:'Cinzel',serif; letter-spacing:.03em; }
-  .spread-slot-num   { font-size:13px; color:#4a5a8a; text-align:center; font-family:'IM Fell English',serif; }
+  .spread-slot-label { font-size:10px; color:#8fa0bf; text-align:center; max-width:140px; line-height:1.4; font-family:Georgia, serif; letter-spacing:.03em; }
+  .spread-slot-num   { font-size:13px; color:#4a5a8a; text-align:center; font-family:Georgia, serif; }
 
   /* Deeper insight grid layout */
   .spread-deeper-grid { display:grid; grid-template-columns:repeat(3,140px); grid-template-rows:auto auto; gap:16px 16px; justify-content:center; }
@@ -186,14 +184,14 @@
 
   /* Sidebar */
   .spread-sidebar { background:#0b1020; border:1px solid #1f2a3d; border-radius:14px; padding:16px; min-height:240px; }
-  .spread-sidebar h3 { font-family:'Cinzel',serif; font-size:11px; letter-spacing:.1em; color:#d6dcff; margin:0 0 14px; text-transform:uppercase; }
+  .spread-sidebar h3 { font-family:Georgia, serif; font-size:11px; letter-spacing:.1em; color:#d6dcff; margin:0 0 14px; text-transform:uppercase; }
   .sidebar-card-entry { margin-bottom:16px; border-bottom:1px solid #1a2438; padding-bottom:14px; }
   .sidebar-card-entry:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
-  .sidebar-entry-slot { font-size:9px; color:#4a5a8a; font-family:'Cinzel',serif; letter-spacing:.1em; text-transform:uppercase; margin-bottom:3px; }
-  .sidebar-entry-name { font-size:16px; font-family:'Cormorant Garamond',serif; font-weight:600; color:#e7eaf0; margin-bottom:3px; line-height:1.2; }
-  .sidebar-entry-kw   { font-size:13px; font-family:'Cormorant Garamond',serif; font-style:italic; color:#8fa0bf; margin-bottom:6px; }
-  .sidebar-entry-text { font-size:12.5px; font-family:'Cormorant Garamond',serif; color:#b9c2d3; line-height:1.65; }
-  .sidebar-empty { font-size:14px; font-family:'Cormorant Garamond',serif; font-style:italic; color:#3a4a6a; text-align:center; margin-top:32px; }
+  .sidebar-entry-slot { font-size:9px; color:#4a5a8a; font-family:Georgia, serif; letter-spacing:.1em; text-transform:uppercase; margin-bottom:3px; }
+  .sidebar-entry-name { font-size:16px; font-family:Georgia, 'Times New Roman', serif; font-weight:600; color:#e7eaf0; margin-bottom:3px; line-height:1.2; }
+  .sidebar-entry-kw   { font-size:13px; font-family:Georgia, 'Times New Roman', serif; font-style:italic; color:#8fa0bf; margin-bottom:6px; }
+  .sidebar-entry-text { font-size:12.5px; font-family:Georgia, 'Times New Roman', serif; color:#b9c2d3; line-height:1.65; }
+  .sidebar-empty { font-size:14px; font-family:Georgia, 'Times New Roman', serif; font-style:italic; color:#3a4a6a; text-align:center; margin-top:32px; }
 
   /* Summary block */
   .sidebar-summary {
@@ -201,11 +199,11 @@
     border-top:1px solid #1f2a3d;
   }
   .sidebar-summary-title {
-    font-family:'Cinzel',serif; font-size:11px; letter-spacing:.1em;
+    font-family:Georgia, serif; font-size:11px; letter-spacing:.1em;
     color:#c8d0ff; margin-bottom:12px; text-transform:uppercase;
   }
   .sidebar-summary-text {
-    font-family:'Cormorant Garamond',serif; font-size:13px;
+    font-family:Georgia, 'Times New Roman', serif; font-size:13px;
     color:#c0cce0; line-height:1.7;
   }
   .sidebar-summary-text p { margin:0 0 8px; }
@@ -215,11 +213,11 @@
   .synthesis-block { display:flex; flex-direction:column; gap:14px; }
   .synth-q { display:flex; flex-direction:column; gap:4px; }
   .synth-label {
-    font-family:'Cinzel',serif; font-size:10px; letter-spacing:.08em;
+    font-family:Georgia, serif; font-size:10px; letter-spacing:.08em;
     text-transform:uppercase; color:#7a8aaa;
   }
   .synth-text {
-    font-family:'Cormorant Garamond',serif; font-size:13.5px;
+    font-family:Georgia, 'Times New Roman', serif; font-size:13.5px;
     color:#c8d4e8; line-height:1.65;
   }
   .synth-text em { color:#d6dcff; font-style:italic; }
@@ -233,7 +231,7 @@
 
   /* Deck pill */
   .deck-pill { display:inline-flex; align-items:center; gap:6px; background:#0d1628; border:1px solid #27344d; border-radius:20px; padding:4px 12px 4px 8px; font-size:11px; color:#8fa0bf; margin-bottom:12px; }
-  .deck-pill .dp-count { font-weight:700; color:#d6dcff; font-family:'Cinzel',serif; }
+  .deck-pill .dp-count { font-weight:700; color:#d6dcff; font-family:Georgia, serif; }
 
   /* ── Flip card (Choices spread) ── */
   .card-flip-container { position:relative; }
@@ -256,20 +254,58 @@
   .card-flip-container::after {
     content:'tap to reveal';
     position:absolute; bottom:6px; left:0; right:0; text-align:center;
-    font-size:9px; color:rgba(255,255,255,.35); font-family:'Cinzel',serif;
+    font-size:9px; color:rgba(255,255,255,.35); font-family:Georgia, serif;
     letter-spacing:.05em; pointer-events:none;
     transition:opacity .3s;
   }
   .card-flip-inner.flipped ~ *::after,
   .card-flip-container:has(.flipped)::after { opacity:0; }
+
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  *, *::before, *::after { box-sizing: border-box; }
+  canvas, img { max-width: 100%; }
+  button, input, select { min-height: 44px; }
+  .card, .out, details, .upload-zone, .spread-sidebar { content-visibility: auto; contain-intrinsic-size: 1px 600px; }
+  @media (max-width: 900px) {
+    .wrap { padding: 16px; }
+    .spread-with-sidebar { grid-template-columns: 1fr; gap: 14px; }
+    .spread-tabs { flex-wrap: wrap; }
+    .spread-tab { min-width: calc(50% - 4px); }
+  }
+  @media (max-width: 600px) {
+    h1 { font-size: 22px; line-height: 1.15; }
+    h2 { font-size: 14px; }
+    p { font-size: 15px; line-height: 1.45; }
+    .wrap { padding: 12px; }
+    .card { padding: 14px; border-radius: 14px; }
+    .tgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .thumb, .thumb-add { width: 54px; height: 54px; }
+    .upload-zone { padding: 12px 8px; }
+    .upload-zone-groot-wrap .upload-zone { min-height: 180px; }
+    .upload-zone-groot-wrap .uz-preview { width: 80px; height: 80px; }
+    .spread-layout { gap: 10px; }
+    .spread-card-frame, .spread-slot-label { width: min(29vw, 132px); max-width: 132px; }
+    .spread-deeper-grid { grid-template-columns: repeat(3, minmax(84px, 1fr)); gap: 10px; }
+    .btn-dl-overlay { opacity: 1; pointer-events: auto; }
+  }
+  @media (max-width: 420px) {
+    .row2, .row3, .upload-zones-wrap, .upload-zone-minor-wrap { grid-template-columns: 1fr; }
+    .spread-tab { min-width: 100%; }
+    .spread-deeper-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .slot-past { grid-column: 1; grid-row: 2; }
+    .slot-present { grid-column: 2; grid-row: 2; }
+    .slot-possible { grid-column: 1 / span 2; grid-row: 3; justify-self: center; width: min(40vw, 132px); }
+    .slot-insight { grid-column: 1 / span 2; grid-row: 1; justify-self: center; width: min(40vw, 132px); }
+  }
+
 </style>
 </head>
 <body>
 <div class="wrap">
 <!-- ══ HEADER CARD ══ -->
 <div class="card">
-<h1>Tarot Extractor</h1>
-<p>Drop or click a zone to load an image. The app automatically extracts all cards. Works fully offline.</p>
+<h1>Tarot Deck Generator</h1>
+<p>Drop of klik op een zone om afbeeldingen te laden. De app haalt automatisch alle kaarten eruit, werkt volledig offline en is geoptimaliseerd voor mobiel.</p>
 <div class="section-title">Drop images into the zones</div>
 <!-- Card back upload -->
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
@@ -278,7 +314,7 @@
 <img id="card-back-preview" style="display:none;width:100%;height:100%;object-fit:cover;"/>
 </div>
 <div>
-<div style="font-family:'Cinzel',serif;font-size:11px;color:#d6dcff;letter-spacing:.06em;margin-bottom:3px;">Card Back</div>
+<div style="font-family:Georgia, serif;font-size:11px;color:#d6dcff;letter-spacing:.06em;margin-bottom:3px;">Card Back</div>
 <div style="font-size:10px;color:#8fa0bf;line-height:1.4;">Upload your card back design.<br/>Shows on top of undrawn card stacks.</div>
 </div>
 </div>
@@ -337,7 +373,7 @@
 <div id="main-status"></div>
 <details>
 <summary>How it works</summary>
-<div style="font-size:13px;color:#b9c2d3;margin-top:8px;line-height:1.6;font-family:'Cormorant Garamond',serif;">
+<div style="font-size:13px;color:#b9c2d3;margin-top:8px;line-height:1.6;font-family:Georgia, 'Times New Roman', serif;">
       The app analyses the image for variance, edge energy and colour saturation, then selects the most visually interesting regions.
       Major Arcana: 22 cards. Minor Arcana per suit: 14 cards (Ace through 10, Page, Knight, Queen, King).
       <br/><br/>Each downloaded PNG has the number and title <b>baked into the image</b>.
@@ -351,11 +387,11 @@
 <!-- Choices: user labels (shown only for choices spread) -->
 <div id="choices-labels-row" style="display:none;gap:8px;margin-bottom:12px;">
 <div style="flex:1;">
-<label style="font-size:10px;color:#8fa0bf;font-family:'Cinzel',serif;letter-spacing:.05em;display:block;margin-bottom:4px;">PATH ONE represents…</label>
+<label style="font-size:10px;color:#8fa0bf;font-family:Georgia, serif;letter-spacing:.05em;display:block;margin-bottom:4px;">PATH ONE represents…</label>
 <input id="choice-label-a" placeholder="e.g. staying, yes, option A…" style="font-size:12px;padding:8px 10px;" type="text"/>
 </div>
 <div style="flex:1;">
-<label style="font-size:10px;color:#8fa0bf;font-family:'Cinzel',serif;letter-spacing:.05em;display:block;margin-bottom:4px;">PATH TWO represents…</label>
+<label style="font-size:10px;color:#8fa0bf;font-family:Georgia, serif;letter-spacing:.05em;display:block;margin-bottom:4px;">PATH TWO represents…</label>
 <input id="choice-label-b" placeholder="e.g. leaving, no, option B…" style="font-size:12px;padding:8px 10px;" type="text"/>
 </div>
 </div>
@@ -366,7 +402,7 @@
 </div>
 <div id="spread-area"></div>
 <div style="display:flex;gap:10px;margin-top:14px;">
-<button id="draw-spread-btn" style="flex:1;font-family:'Cinzel',serif;font-size:13px;letter-spacing:.04em;padding:12px;"> Draw Cards</button>
+<button id="draw-spread-btn" style="flex:1;font-family:Georgia, serif;font-size:13px;letter-spacing:.04em;padding:12px;"> Draw Cards</button>
 <button disabled="" id="clear-spread-btn" style="width:auto;padding:12px 16px;font-size:12px;color:#8fa0bf;">✕ Clear</button>
 </div>
 </div>
@@ -406,7 +442,6 @@
 /* ══════════════════════════════════════════════
    CARD OVERLAYS — extracted from sprite sheet
 ══════════════════════════════════════════════ */
-
 
 /* ══════════════════════════════════════════════
    DATA
@@ -1118,8 +1153,6 @@ function makeTCard(numLabel,sym,dispCvs,title,kw,sub,fullText,dlFn,animIdx,arcan
   const imgWrap=document.createElement('div'); imgWrap.className='tcard-img';
   imgWrap.appendChild(dispCvs);
 
-
-
   // Hover tooltip (full description)
   const tip=document.createElement('div'); tip.className='tcard-tip';
   tip.innerHTML=`<div class="tip-name">${esc(title)}</div><p>${esc(fullText)}</p>`;
@@ -1387,6 +1420,6 @@ function crc32(data){
   return(c^0xffffffff)>>>0;
 }
 </script>
-<div class="version-badge">Tarot Extractor · v3.1 · 2026-03-05</div>
+<div class="version-badge">Tarot Deck Generator · optimized mobile edition · 2026-03-06</div>
 </body>
 </html>
