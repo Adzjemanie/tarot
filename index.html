@@ -268,7 +268,6 @@
     background:#0b1326; border:1px solid #2a3c63; color:#8ea9d8;
     padding:4px 8px; border-radius:6px; opacity:.7; z-index:999;
   }
-
 </style>
 </head>
 <body>
@@ -285,7 +284,7 @@
   <!-- Card back upload -->
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
     <div id="card-back-zone" style="width:52px;height:72px;border:1.5px dashed #27344d;border-radius:8px;background:#0b1020;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;overflow:hidden;transition:border-color .18s;" title="Upload card back image">
-      <span id="card-back-icon" style="font-size:1.4rem;">🂠</span>
+      <span id="card-back-icon" style="font-size:.7rem;letter-spacing:.08em;color:#8fa0bf;">back</span>
       <img id="card-back-preview" style="display:none;width:100%;height:100%;object-fit:cover;" />
     </div>
     <div>
@@ -424,7 +423,7 @@
 <canvas id="render-canvas" style="display:none"></canvas>
 
 <script>
-const APP_VERSION = "3.2.1";
+const APP_VERSION = "3.2.2";
 /* ══════════════════════════════════════════════
    CARD OVERLAYS — extracted from sprite sheet
 ══════════════════════════════════════════════ */
@@ -586,8 +585,8 @@ document.getElementById('card-back-file').addEventListener('change', function(){
           </div>`;
       }
     }
-    }
   };
+
   reader.readAsDataURL(file);
   this.value = '';
 });
