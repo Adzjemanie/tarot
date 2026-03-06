@@ -135,6 +135,15 @@
   .upload-zone.loaded.lucht { border-color:#6050a0; }
   .uz-icon { font-size:1.8rem; line-height:1; }
   .upload-zone-groot-wrap .uz-icon { font-size:3rem; }
+
+  /* ── PNG icons for upload zones ── */
+  .uz-icon img{
+    width:34px;height:34px;object-fit:contain;
+    filter:drop-shadow(0 0 6px rgba(255,215,120,.35));
+    display:block;
+  }
+  .upload-zone-groot-wrap .uz-icon img{ width:56px;height:56px; }
+
   .uz-label { font-family:'Cinzel',Georgia,serif; font-size:11px; font-weight:600; color:#d6dcff; letter-spacing:.06em; }
   .upload-zone-groot-wrap .uz-label { font-size:14px; letter-spacing:.1em; }
   .uz-sub   { font-size:10px; color:#8fa0bf; line-height:1.3; }
@@ -290,7 +299,7 @@
   <div class="upload-zones-wrap">
     <div class="upload-zone-groot-wrap">
       <div class="upload-zone groot" id="uz-groot" title="Major Arcana — 22 cards">
-        <div class="uz-icon">🌟</div>
+        <div class="uz-icon"><img src="great_arcana_optimized.png" alt="Major Arcana"></div>
         <div class="uz-label">Major Arcana</div>
         <div class="uz-sub">What does the situation reveal overall?</div>
         <div class="uz-status" id="uz-status-groot">No image</div>
@@ -299,28 +308,28 @@
     </div>
     <div class="upload-zone-minor-wrap">
       <div class="upload-zone vuur" id="uz-vuur" title="Wands — Fire">
-        <div class="uz-icon">🔥</div>
+        <div class="uz-icon"><img src="wands_optimized.png" alt="Wands"></div>
         <div class="uz-label">Wands</div>
         <div class="uz-sub">What energy &amp; action is at play?</div>
         <div class="uz-status" id="uz-status-vuur">No image</div>
         <div class="uz-preview" id="uz-prev-vuur" style="display:none;"></div>
       </div>
       <div class="upload-zone water" id="uz-water" title="Cups — Water">
-        <div class="uz-icon">🌊</div>
+        <div class="uz-icon"><img src="cups_optimized.png" alt="Cups"></div>
         <div class="uz-label">Cups</div>
         <div class="uz-sub">What feeling is present?</div>
         <div class="uz-status" id="uz-status-water">No image</div>
         <div class="uz-preview" id="uz-prev-water" style="display:none;"></div>
       </div>
       <div class="upload-zone aarde" id="uz-aarde" title="Pentacles — Earth">
-        <div class="uz-icon">🌿</div>
+        <div class="uz-icon"><img src="pentacles_optimized.png" alt="Pentacles"></div>
         <div class="uz-label">Pentacles</div>
         <div class="uz-sub">Where did it take place?</div>
         <div class="uz-status" id="uz-status-aarde">No image</div>
         <div class="uz-preview" id="uz-prev-aarde" style="display:none;"></div>
       </div>
       <div class="upload-zone lucht" id="uz-lucht" title="Swords — Air">
-        <div class="uz-icon">💨</div>
+        <div class="uz-icon"><img src="swords_optimized.png" alt="Swords"></div>
         <div class="uz-label">Swords</div>
         <div class="uz-sub">What thoughts were present?</div>
         <div class="uz-status" id="uz-status-lucht">No image</div>
