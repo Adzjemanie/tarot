@@ -233,6 +233,34 @@
   /* Deck pill */
   .deck-pill { display:inline-flex; align-items:center; gap:6px; background:#0d1628; border:1px solid #27344d; border-radius:20px; padding:4px 12px 4px 8px; font-size:11px; color:#8fa0bf; margin-bottom:12px; }
   .deck-pill .dp-count { font-weight:700; color:#d6dcff; font-family:'Cinzel',serif; }
+
+  /* ── Flip card (Choices spread) ── */
+  .card-flip-container { position:relative; }
+  .card-flip-inner {
+    position:relative; width:100%; height:100%;
+    transition:transform .6s cubic-bezier(.4,0,.2,1);
+    transform-style:preserve-3d;
+  }
+  .card-flip-inner.flipped { transform:rotateY(180deg); }
+  .card-flip-back, .card-flip-front {
+    position:absolute; inset:0;
+    backface-visibility:hidden; -webkit-backface-visibility:hidden;
+    border-radius:12px; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    background:#0d1020;
+  }
+  .card-flip-front { transform:rotateY(180deg); }
+  .card-flip-back { background:#0d1020; }
+  /* Tap hint */
+  .card-flip-container::after {
+    content:'tap to reveal';
+    position:absolute; bottom:6px; left:0; right:0; text-align:center;
+    font-size:9px; color:rgba(255,255,255,.35); font-family:'Cinzel',serif;
+    letter-spacing:.05em; pointer-events:none;
+    transition:opacity .3s;
+  }
+  .card-flip-inner.flipped ~ *::after,
+  .card-flip-container:has(.flipped)::after { opacity:0; }
 </style>
 </head>
 <body>
@@ -245,13 +273,26 @@
 
   <div class="section-title">Drop images into the zones</div>
 
+  <!-- Card back upload -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+    <div id="card-back-zone" style="width:52px;height:72px;border:1.5px dashed #27344d;border-radius:8px;background:#0b1020;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;overflow:hidden;transition:border-color .18s;" title="Upload card back image">
+      <span id="card-back-icon" style="font-size:1.4rem;">🂠</span>
+      <img id="card-back-preview" style="display:none;width:100%;height:100%;object-fit:cover;" />
+    </div>
+    <div>
+      <div style="font-family:'Cinzel',serif;font-size:11px;color:#d6dcff;letter-spacing:.06em;margin-bottom:3px;">Card Back</div>
+      <div style="font-size:10px;color:#8fa0bf;line-height:1.4;">Upload your card back design.<br>Shows on top of undrawn card stacks.</div>
+    </div>
+  </div>
+  <input type="file" id="card-back-file" accept="image/*" style="display:none">
+
   <!-- 1 large Major Arcana + 2x2 minor suits -->
   <div class="upload-zones-wrap">
     <div class="upload-zone-groot-wrap">
       <div class="upload-zone groot" id="uz-groot" title="Major Arcana — 22 cards">
         <div class="uz-icon">🌟</div>
         <div class="uz-label">Major Arcana</div>
-        <div class="uz-sub">22 cards</div>
+        <div class="uz-sub">What does the situation reveal overall?</div>
         <div class="uz-status" id="uz-status-groot">No image</div>
         <div class="uz-preview" id="uz-prev-groot" style="display:none;"></div>
       </div>
@@ -260,28 +301,28 @@
       <div class="upload-zone vuur" id="uz-vuur" title="Wands — Fire">
         <div class="uz-icon">🔥</div>
         <div class="uz-label">Wands</div>
-        <div class="uz-sub">Fire · 14 cards</div>
+        <div class="uz-sub">What energy &amp; action is at play?</div>
         <div class="uz-status" id="uz-status-vuur">No image</div>
         <div class="uz-preview" id="uz-prev-vuur" style="display:none;"></div>
       </div>
       <div class="upload-zone water" id="uz-water" title="Cups — Water">
         <div class="uz-icon">🌊</div>
         <div class="uz-label">Cups</div>
-        <div class="uz-sub">Water · 14 cards</div>
+        <div class="uz-sub">What feeling is present?</div>
         <div class="uz-status" id="uz-status-water">No image</div>
         <div class="uz-preview" id="uz-prev-water" style="display:none;"></div>
       </div>
       <div class="upload-zone aarde" id="uz-aarde" title="Pentacles — Earth">
         <div class="uz-icon">🌿</div>
         <div class="uz-label">Pentacles</div>
-        <div class="uz-sub">Earth · 14 cards</div>
+        <div class="uz-sub">Where did it take place?</div>
         <div class="uz-status" id="uz-status-aarde">No image</div>
         <div class="uz-preview" id="uz-prev-aarde" style="display:none;"></div>
       </div>
       <div class="upload-zone lucht" id="uz-lucht" title="Swords — Air">
         <div class="uz-icon">💨</div>
         <div class="uz-label">Swords</div>
-        <div class="uz-sub">Air · 14 cards</div>
+        <div class="uz-sub">What thoughts were present?</div>
         <div class="uz-status" id="uz-status-lucht">No image</div>
         <div class="uz-preview" id="uz-prev-lucht" style="display:none;"></div>
       </div>
@@ -295,8 +336,8 @@
   <input type="file" id="file-aarde" accept="image/*" style="display:none" onchange="loadSuit('aarde',this)">
   <input type="file" id="file-lucht" accept="image/*" style="display:none" onchange="loadSuit('lucht',this)">
 
-  <button id="all-export-btn" class="btn-deck-dl" disabled>⬇ Download Full Deck as ZIP</button>
   <button id="send-to-deck-btn" class="btn-send-deck" disabled>🃏 Send All Cards to Deck</button>
+  <button id="all-export-btn" class="btn-deck-dl" disabled>⬇ Download Full Deck as ZIP</button>
   <div id="deck-count-label" style="font-size:11px;color:#8fa0bf;text-align:center;margin-top:6px;min-height:16px;"></div>
 
   <div id="main-status"></div>
@@ -316,6 +357,17 @@
 <div class="card" id="spread-card" style="display:none;">
   <h2 style="margin:0 0 14px;">✦ Tarot Spreads</h2>
 
+  <!-- Choices: user labels (shown only for choices spread) -->
+  <div id="choices-labels-row" style="display:none;gap:8px;margin-bottom:12px;">
+    <div style="flex:1;">
+      <label style="font-size:10px;color:#8fa0bf;font-family:'Cinzel',serif;letter-spacing:.05em;display:block;margin-bottom:4px;">PATH ONE represents…</label>
+      <input type="text" id="choice-label-a" placeholder="e.g. staying, yes, option A…" style="font-size:12px;padding:8px 10px;">
+    </div>
+    <div style="flex:1;">
+      <label style="font-size:10px;color:#8fa0bf;font-family:'Cinzel',serif;letter-spacing:.05em;display:block;margin-bottom:4px;">PATH TWO represents…</label>
+      <input type="text" id="choice-label-b" placeholder="e.g. leaving, no, option B…" style="font-size:12px;padding:8px 10px;">
+    </div>
+  </div>
   <div class="spread-tabs" id="spread-tabs">
     <button class="spread-tab active" data-spread="daycard">☀ Card of the Day</button>
     <button class="spread-tab" data-spread="choices">⚖ Choices</button>
@@ -491,6 +543,38 @@ function setupUploadZone(zoneId, onFiles){
 }
 
 setupUploadZone('uz-groot', files => files.forEach(loadGAFile));
+
+// Card back upload
+document.getElementById('card-back-zone').addEventListener('click', () => {
+  document.getElementById('card-back-file').click();
+});
+document.getElementById('card-back-file').addEventListener('change', function(){
+  const file = this.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    cardBackDataUrl = e.target.result;
+    document.getElementById('card-back-icon').style.display = 'none';
+    const prev = document.getElementById('card-back-preview');
+    prev.src = cardBackDataUrl;
+    prev.style.display = 'block';
+    document.getElementById('card-back-zone').style.borderColor = '#4a7aff';
+    // Refresh groot zone preview to show back on top
+    const grootPrev = document.getElementById('uz-prev-groot');
+    if(grootPrev && grootPrev.style.display !== 'none'){
+      const existImg = grootPrev.querySelector('img');
+      if(existImg){
+        const src = existImg.src;
+        grootPrev.innerHTML=`
+          <div style="position:relative;width:100%;height:100%;">
+            <img src="${src}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:10px;">
+            <img src="${cardBackDataUrl}" style="position:absolute;inset:0;width:88%;height:88%;object-fit:cover;border-radius:8px;margin:6% auto 0;display:block;box-shadow:0 4px 12px rgba(0,0,0,.6);">
+          </div>`;
+      }
+    }
+  };
+  reader.readAsDataURL(file);
+  this.value = '';
+});
 setupUploadZone('uz-vuur',  files => loadSuitFromFile('vuur',  files[0]));
 setupUploadZone('uz-water', files => loadSuitFromFile('water', files[0]));
 setupUploadZone('uz-aarde', files => loadSuitFromFile('aarde', files[0]));
@@ -506,7 +590,19 @@ function updateUploadZone(key, previewUrl, statusText, isDone){
   const prev = document.getElementById('uz-prev-'+key);
   if(zone) zone.classList.add('loaded');
   if(st){ st.textContent = statusText; st.className = 'uz-status '+(isDone?'done':'working'); }
-  if(prev && previewUrl){ prev.style.display='block'; prev.innerHTML=`<img src="${previewUrl}">`; }
+  if(prev && previewUrl){
+    prev.style.display='block';
+    if(key === 'groot' && cardBackDataUrl){
+      // Show card back stacked on top of the deck preview
+      prev.innerHTML=`
+        <div style="position:relative;width:100%;height:100%;">
+          <img src="${previewUrl}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:10px;">
+          <img src="${cardBackDataUrl}" style="position:absolute;inset:0;width:88%;height:88%;object-fit:cover;border-radius:8px;margin:6% auto 0;display:block;box-shadow:0 4px 12px rgba(0,0,0,.6);">
+        </div>`;
+    } else {
+      prev.innerHTML=`<img src="${previewUrl}">`;
+    }
+  }
 }
 
 function loadGAFile(file){
@@ -668,16 +764,17 @@ function buildMasterDeck(){
    SPREADS
 ══════════════════════════════════════════════ */
 let activeSpread = 'daycard';
+let cardBackDataUrl = null; // uploaded card back image
 let drawnCards = [];
 
 const SPREADS = {
   daycard: {
-    slots: [{ num:'I', label:'Card of the Day', sub:'Your message for today', key:'daycard' }]
+    slots: [{ num:'I', label:'The Energy of the Day', sub:'What you can become conscious of today', key:'daycard' }]
   },
   choices: {
     slots: [
-      { num:'I',  label:'Situation A', sub:'First path or choice', key:'choiceA' },
-      { num:'II', label:'Situation B', sub:'Second path or choice', key:'choiceB' }
+      { num:'I',  label:()=>(document.getElementById('choice-label-a')?.value?.trim()||'Path One'), sub:'Tap to reveal', key:'choiceA', flipReveal:true },
+      { num:'II', label:()=>(document.getElementById('choice-label-b')?.value?.trim()||'Path Two'), sub:'Tap to reveal', key:'choiceB', flipReveal:true }
     ]
   },
   deeper: {
@@ -697,6 +794,7 @@ document.querySelectorAll('.spread-tab').forEach(tab => {
     tab.classList.add('active');
     activeSpread = tab.dataset.spread;
     drawnCards = [];
+    document.getElementById('choices-labels-row').style.display = activeSpread==='choices' ? 'flex' : 'none';
     renderSpreadArea();
   });
 });
@@ -803,22 +901,62 @@ function makeSpreadSlot(slot, card, animate, idx){
   if(animate) slotEl.style.cssText=`animation:fadeUp .4s ease ${idx*.12}s both`;
 
   const frame = document.createElement('div');
-  frame.className = 'spread-card-frame' + (card?' filled':'');
+  const useFlip = slot.flipReveal && card;
 
-  if(card){
+  if(useFlip){
+    // Flip card: shows back first, click to reveal front
+    frame.className = 'spread-card-frame filled card-flip-container';
+    frame.style.cssText = 'perspective:800px;cursor:pointer;';
+
+    const inner = document.createElement('div');
+    inner.className = 'card-flip-inner';
+
+    // Back face
+    const backFace = document.createElement('div');
+    backFace.className = 'card-flip-back';
+    if(cardBackDataUrl){
+      const bImg = document.createElement('img');
+      bImg.src = cardBackDataUrl;
+      bImg.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:12px;';
+      backFace.appendChild(bImg);
+    } else {
+      backFace.innerHTML = `<span style="font-size:2.4rem;opacity:.5">🂠</span>`;
+    }
+
+    // Front face
+    const frontFace = document.createElement('div');
+    frontFace.className = 'card-flip-front';
     const cvs = makeDispCanvas(card.hiResCvs, card.numLabel, card.name, card.kw);
-    frame.appendChild(cvs);
-
+    frontFace.appendChild(cvs);
     const ov=document.createElement('div'); ov.className='spread-card-overlay';
     ov.innerHTML=`<div class="ov-name">${esc(card.name)}</div><div class="ov-kw">${esc(card.kw)}</div>`;
-    frame.appendChild(ov);
+    frontFace.appendChild(ov);
+
+    inner.appendChild(backFace);
+    inner.appendChild(frontFace);
+    frame.appendChild(inner);
+
+    // Click to flip
+    frame.addEventListener('click', () => {
+      inner.classList.toggle('flipped');
+    });
   } else {
-    frame.innerHTML=`<span style="font-size:1.6rem;opacity:.2">🂠</span>`;
+    frame.className = 'spread-card-frame' + (card?' filled':'');
+    if(card){
+      const cvs = makeDispCanvas(card.hiResCvs, card.numLabel, card.name, card.kw);
+      frame.appendChild(cvs);
+      const ov=document.createElement('div'); ov.className='spread-card-overlay';
+      ov.innerHTML=`<div class="ov-name">${esc(card.name)}</div><div class="ov-kw">${esc(card.kw)}</div>`;
+      frame.appendChild(ov);
+    } else {
+      frame.innerHTML=`<span style="font-size:1.6rem;opacity:.2">🂠</span>`;
+    }
   }
 
   const numEl=document.createElement('div'); numEl.className='spread-slot-num'; numEl.textContent=slot.num;
   const labelEl=document.createElement('div'); labelEl.className='spread-slot-label';
-  labelEl.innerHTML=`<strong>${esc(slot.label)}</strong><br><span style="font-size:9px;font-family:system-ui,sans-serif;font-style:normal;">${esc(slot.sub)}</span>`;
+  const slotLabel = typeof slot.label === 'function' ? slot.label() : slot.label;
+  labelEl.innerHTML=`<strong>${esc(slotLabel)}</strong><br><span style="font-size:9px;font-family:system-ui,sans-serif;font-style:normal;">${esc(slot.sub)}</span>`;
 
   slotEl.appendChild(numEl);
   slotEl.appendChild(frame);
@@ -1266,6 +1404,6 @@ function crc32(data){
   return(c^0xffffffff)>>>0;
 }
 </script>
-<div class="version-badge">Tarot Extractor · v3.0 · 2026-03-05</div>
+<div class="version-badge">Tarot Extractor · v3.1 · 2026-03-05</div>
 </body>
 </html>
