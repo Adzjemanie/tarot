@@ -423,7 +423,7 @@
 <canvas id="render-canvas" style="display:none"></canvas>
 
 <script>
-const APP_VERSION = "3.2.2";
+const APP_VERSION = "3.2.3";
 /* ══════════════════════════════════════════════
    CARD OVERLAYS — extracted from sprite sheet
 ══════════════════════════════════════════════ */
@@ -572,6 +572,7 @@ document.getElementById('card-back-file').addEventListener('change', function(){
     prev.src = cardBackDataUrl;
     prev.style.display = 'block';
     document.getElementById('card-back-zone').style.borderColor = '#4a7aff';
+
     // Refresh groot zone preview to show back on top
     const grootPrev = document.getElementById('uz-prev-groot');
     if(grootPrev && grootPrev.style.display !== 'none'){
@@ -586,7 +587,6 @@ document.getElementById('card-back-file').addEventListener('change', function(){
       }
     }
   };
-
   reader.readAsDataURL(file);
   this.value = '';
 });
