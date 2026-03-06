@@ -149,6 +149,8 @@
   .btn-deck-dl { width:100%; padding:7px 12px; font-size:11px; font-weight:600; font-family:'Cinzel',Georgia,serif; letter-spacing:.05em; background:#0a1630; border:1px solid #3e5f92; color:#cfe4ff; border-radius:10px; cursor:pointer; transition:filter .15s,box-shadow .15s,border-color .15s,color .15s; box-shadow:none; margin-bottom:6px; }
   .btn-deck-dl:hover:not(:disabled) { filter:brightness(1.08); color:#ffffff; border-color:#7ea8e6; }
   .btn-deck-dl:disabled { opacity:.3; cursor:not-allowed; filter:none; box-shadow:none; }
+  .btn-suit-dl { margin-top:5px; padding:3px 8px; font-size:10px; font-weight:600; font-family:'Cinzel',Georgia,serif; background:#0a1630; border:1px solid #3e5f92; color:#cfe4ff; border-radius:6px; cursor:pointer; transition:filter .15s,border-color .15s; }
+  .btn-suit-dl:hover { filter:brightness(1.2); border-color:#7ea8e6; }
   .btn-send-deck { width:100%; padding:11px; font-size:13px; font-weight:600; font-family:'Cinzel',Georgia,serif; letter-spacing:.05em; background:#0d2a4a; border:1px solid #4a9eff; color:#a8d8ff; border-radius:12px; cursor:pointer; margin-top:8px; transition:all .2s; }
   .btn-send-deck:hover:not(:disabled) { border-color:#7ac4ff; color:#dff0ff; background:#0f3560; }
   .btn-send-deck:disabled { opacity:.3; cursor:not-allowed; }
@@ -310,24 +312,28 @@
         <div class="uz-sub">What energy &amp; action is at play?</div>
         <div class="uz-status" id="uz-status-vuur">No image</div>
         <div class="uz-preview" id="uz-prev-vuur" style="display:none;"></div>
+        <button class="btn-suit-dl" id="dl-btn-vuur" style="display:none;" onclick="event.stopPropagation();dlSuitZip('vuur')" title="Download Wands as ZIP">⬇ ZIP</button>
       </div>
       <div class="upload-zone water" id="uz-water" title="Cups — Water">
         <div class="uz-label">cups</div>
         <div class="uz-sub">What feeling is present?</div>
         <div class="uz-status" id="uz-status-water">No image</div>
         <div class="uz-preview" id="uz-prev-water" style="display:none;"></div>
+        <button class="btn-suit-dl" id="dl-btn-water" style="display:none;" onclick="event.stopPropagation();dlSuitZip('water')" title="Download Cups as ZIP">⬇ ZIP</button>
       </div>
       <div class="upload-zone aarde" id="uz-aarde" title="Pentacles — Earth">
         <div class="uz-label">pentacles</div>
         <div class="uz-sub">Where did it take place?</div>
         <div class="uz-status" id="uz-status-aarde">No image</div>
         <div class="uz-preview" id="uz-prev-aarde" style="display:none;"></div>
+        <button class="btn-suit-dl" id="dl-btn-aarde" style="display:none;" onclick="event.stopPropagation();dlSuitZip('aarde')" title="Download Pentacles as ZIP">⬇ ZIP</button>
       </div>
       <div class="upload-zone lucht" id="uz-lucht" title="Swords — Air">
         <div class="uz-label">swords</div>
         <div class="uz-sub">What thoughts were present?</div>
         <div class="uz-status" id="uz-status-lucht">No image</div>
         <div class="uz-preview" id="uz-prev-lucht" style="display:none;"></div>
+        <button class="btn-suit-dl" id="dl-btn-lucht" style="display:none;" onclick="event.stopPropagation();dlSuitZip('lucht')" title="Download Swords as ZIP">⬇ ZIP</button>
       </div>
     </div>
   </div>
@@ -423,7 +429,7 @@
 <canvas id="render-canvas" style="display:none"></canvas>
 
 <script>
-const APP_VERSION = "3.2.4";
+const APP_VERSION = "3.2.3";
 /* ══════════════════════════════════════════════
    CARD OVERLAYS — extracted from sprite sheet
 ══════════════════════════════════════════════ */
@@ -595,7 +601,25 @@ setupUploadZone('uz-water', files => loadSuitFromFile('water', files[0]));
 setupUploadZone('uz-aarde', files => loadSuitFromFile('aarde', files[0]));
 setupUploadZone('uz-lucht', files => loadSuitFromFile('lucht', files[0]));
 
-gaFileInput.addEventListener('change',e=>{[...e.target.files].forEach(loadGAFile);gaFileInput.value='';});
+gaFileInput.addEventListener('change',e=>{
+  [...e.target.files].forEach(f=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const dataUrl=ev.target.result;
+      const img=new Image();
+      img.onload=()=>{
+        const id=Date.now()+Math.random();
+        gaImages.push({id,name:f.name,img,url:dataUrl});
+        updateUploadZone('groot', dataUrl, 'Analysing…', false);
+        selectGAImage(id);
+      };
+      img.onerror=()=>{ setStatus('Fout: afbeelding kon niet worden geladen',''); };
+      img.src=dataUrl;
+    };
+    reader.readAsDataURL(f);
+  });
+  gaFileInput.value='';
+});;
 reshuffleBtn.addEventListener('click',reshuffle);
 allExportBtn.addEventListener('click',exportAllZip);
 
@@ -621,15 +645,21 @@ function updateUploadZone(key, previewUrl, statusText, isDone){
 }
 
 function loadGAFile(file){
-  const url=URL.createObjectURL(file);
-  const img=new Image();
-  img.onload=()=>{
-    const id=Date.now()+Math.random();
-    gaImages.push({id,name:file.name,img,url});
-    updateUploadZone('groot', url, 'Analysing…', false);
-    selectGAImage(id);
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const dataUrl=e.target.result;
+    const img=new Image();
+    img.onload=()=>{
+      const id=Date.now()+Math.random();
+      gaImages.push({id,name:file.name,img,url:dataUrl});
+      updateUploadZone('groot', dataUrl, 'Analysing…', false);
+      selectGAImage(id);
+    };
+    img.onerror=()=>{ setStatus('Fout: afbeelding kon niet worden geladen',''); };
+    img.src=dataUrl;
   };
-  img.src=url;
+  reader.onerror=()=>{ setStatus('Fout: bestand kon niet worden gelezen',''); };
+  reader.readAsDataURL(file);
 }
 
 function renderGAThumbs(){
@@ -683,12 +713,21 @@ function renderGAGrid(){
    MINOR ARCANA — suits
 ══════════════════════════════════════════════ */
 function triggerSuitUpload(suit){ document.getElementById('file-'+suit).click(); }
-function loadSuitFromFile(suit, file){ if(!file) return; loadSuitFromUrl(suit, URL.createObjectURL(file)); }
+function loadSuitFromFile(suit, file){
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>loadSuitFromUrl(suit, e.target.result);
+  reader.onerror=()=>{ setStatus('Fout: bestand kon niet worden gelezen',''); };
+  reader.readAsDataURL(file);
+}
 
 function loadSuit(suit,input){
   const file=input.files[0]; if(!file) return;
   input.value='';
-  loadSuitFromUrl(suit, URL.createObjectURL(file));
+  const reader=new FileReader();
+  reader.onload=e=>loadSuitFromUrl(suit, e.target.result);
+  reader.onerror=()=>{ setStatus('Fout: bestand kon niet worden gelezen',''); };
+  reader.readAsDataURL(file);
 }
 
 function loadSuitFromUrl(suit, url){
@@ -701,9 +740,26 @@ function loadSuitFromUrl(suit, url){
 
     renderSuitGrid(suit);
     updateUploadZone(suit, url, '✓ 14 cards', true);
+    // Show download button
+    const dlBtn=document.getElementById('dl-btn-'+suit);
+    if(dlBtn) dlBtn.style.display='inline-block';
     checkAllExport();
   };
   img.src=url;
+}
+
+async function dlSuitZip(suit){
+  const state=suitState[suit];
+  if(!state) return;
+  const s=SUITS[suit];
+  const files=[];
+  state.regions.forEach((reg,i)=>{
+    const c=state.cards[i];
+    const cvs=makeDispCanvas(reg.hiResCvs,c.num,c.name,c.kw||c.element);
+    const safe=c.name.replace(/[^a-z0-9]/gi,'_');
+    files.push({name:`${c.num}-${safe}.png`, canvas:cvs});
+  });
+  await doZipDownload(files, `tarot-${s.name.toLowerCase()}.zip`);
 }
 
 function renderSuitGrid(suit){
@@ -1257,54 +1313,14 @@ function wrapText(ctx,text,x,y,maxW,lineH){
 /* ══════════════════════════════════════════════
    DOWNLOAD SINGLE — composed
 ══════════════════════════════════════════════ */
-function dlComposed(hiResCvs,numLabel,name,sub,suit){
-  const safe = (name||'card').replace(/[^a-z0-9]+/gi,'_').replace(/^_+|_+$/g,'');
-  const filename = `${String(suit||'card')}_${safe || 'card'}.png`;
-
-  function triggerDownload(url){
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(e){} }, 1500);
-  }
-
-  function fallbackDataUrlDownload(){
-    try{
-      const dataUrl = hiResCvs.toDataURL('image/png');
-      const a = document.createElement('a');
-      a.href = dataUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      return true;
-    }catch(err){
-      console.error('Fallback download failed:', err);
-      alert('Download failed in this browser.');
-      return false;
-    }
-  }
-
-  try{
-    if(hiResCvs.toBlob){
-      hiResCvs.toBlob(blob=>{
-        if(blob){
-          const url = URL.createObjectURL(blob);
-          triggerDownload(url);
-        }else{
-          fallbackDataUrlDownload();
-        }
-      }, 'image/png');
-    }else{
-      fallbackDataUrlDownload();
-    }
-  }catch(err){
-    console.error('Download error:', err);
-    fallbackDataUrlDownload();
-  }
+function dlComposed(hiResCvs, numLabel, title, subtitle, suitKey){
+  const composed=composeCard(hiResCvs,numLabel,title,subtitle);
+  const safe=title.replace(/[^a-zA-Z0-9\-_]/g,'-').replace(/-+/g,'-');
+  composed.toBlob(blob=>{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=`${numLabel}-${safe}.png`; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+  },'image/png');
 }
 
 /* ══════════════════════════════════════════════
@@ -1459,6 +1475,6 @@ function crc32(data){
   return(c^0xffffffff)>>>0;
 }
 </script>
-<div class="version-badge">Tarot Extractor · v3.2 · 2026-03-06</div>
+<div class="version-badge">Tarot Extractor · v3.2.4 · 2026-03-06</div>
 </body>
 </html>
