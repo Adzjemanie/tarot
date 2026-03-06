@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Tarot Extractor</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&amp;family=IM+Fell+English:ital@0;1&amp;family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet"/>
 <style>
   :root { font-family: 'Cormorant Garamond', Georgia, serif; }
   body { margin: 0; background: #0b0e14; color: #e7eaf0; }
@@ -133,8 +134,8 @@
   .upload-zone.loaded.water { border-color:#306090; }
   .upload-zone.loaded.aarde { border-color:#3a6a3a; }
   .upload-zone.loaded.lucht { border-color:#6050a0; }
-  .uz-icon { display:none; }
-  .upload-zone-groot-wrap .uz-icon { display:none; }
+  .uz-icon { font-size:1.8rem; line-height:1; }
+  .upload-zone-groot-wrap .uz-icon { font-size:3rem; }
   .uz-label { font-family:'Cinzel',Georgia,serif; font-size:11px; font-weight:600; color:#d6dcff; letter-spacing:.06em; }
   .upload-zone-groot-wrap .uz-label { font-size:14px; letter-spacing:.1em; }
   .uz-sub   { font-size:10px; color:#8fa0bf; line-height:1.3; }
@@ -265,155 +266,142 @@
 </head>
 <body>
 <div class="wrap">
-
 <!-- ══ HEADER CARD ══ -->
 <div class="card">
-  <h1>Tarot Extractor</h1>
-  <p>Drop or click a zone to load an image. The app automatically extracts all cards. Works fully offline.</p>
-
-  <div class="section-title">Drop images into the zones</div>
-
-  <!-- Card back upload -->
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-    <div id="card-back-zone" style="width:52px;height:72px;border:1.5px dashed #27344d;border-radius:8px;background:#0b1020;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;overflow:hidden;transition:border-color .18s;" title="Upload card back image">
-      <span id="card-back-icon" style="font-size:1.4rem;">🂠</span>
-      <img id="card-back-preview" style="display:none;width:100%;height:100%;object-fit:cover;" />
-    </div>
-    <div>
-      <div style="font-family:'Cinzel',serif;font-size:11px;color:#d6dcff;letter-spacing:.06em;margin-bottom:3px;">Card Back</div>
-      <div style="font-size:10px;color:#8fa0bf;line-height:1.4;">Upload your card back design.<br>Shows on top of undrawn card stacks.</div>
-    </div>
-  </div>
-  <input type="file" id="card-back-file" accept="image/*" style="display:none">
-
-  <!-- 1 large Major Arcana + 2x2 minor suits -->
-  <div class="upload-zones-wrap">
-    <div class="upload-zone-groot-wrap">
-      <div class="upload-zone groot" id="uz-groot" title="Major Arcana — 22 cards">
-                <div class="uz-label">Major Arcana</div>
-        <div class="uz-sub">What does the situation reveal overall?</div>
-        <div class="uz-status" id="uz-status-groot">No image</div>
-        <div class="uz-preview" id="uz-prev-groot" style="display:none;"></div>
-      </div>
-    </div>
-    <div class="upload-zone-minor-wrap">
-      <div class="upload-zone vuur" id="uz-vuur" title="Wands — Fire">
-                <div class="uz-label">Wands</div>
-        <div class="uz-sub">What energy &amp; action is at play?</div>
-        <div class="uz-status" id="uz-status-vuur">No image</div>
-        <div class="uz-preview" id="uz-prev-vuur" style="display:none;"></div>
-      </div>
-      <div class="upload-zone water" id="uz-water" title="Cups — Water">
-                <div class="uz-label">Cups</div>
-        <div class="uz-sub">What feeling is present?</div>
-        <div class="uz-status" id="uz-status-water">No image</div>
-        <div class="uz-preview" id="uz-prev-water" style="display:none;"></div>
-      </div>
-      <div class="upload-zone aarde" id="uz-aarde" title="Pentacles — Earth">
-                <div class="uz-label">Pentacles</div>
-        <div class="uz-sub">Where did it take place?</div>
-        <div class="uz-status" id="uz-status-aarde">No image</div>
-        <div class="uz-preview" id="uz-prev-aarde" style="display:none;"></div>
-      </div>
-      <div class="upload-zone lucht" id="uz-lucht" title="Swords — Air">
-                <div class="uz-label">Swords</div>
-        <div class="uz-sub">What thoughts were present?</div>
-        <div class="uz-status" id="uz-status-lucht">No image</div>
-        <div class="uz-preview" id="uz-prev-lucht" style="display:none;"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- hidden file inputs -->
-  <input type="file" id="ga-file-input" accept="image/*" multiple style="display:none">
-  <input type="file" id="file-vuur"  accept="image/*" style="display:none" onchange="loadSuit('vuur',this)">
-  <input type="file" id="file-water" accept="image/*" style="display:none" onchange="loadSuit('water',this)">
-  <input type="file" id="file-aarde" accept="image/*" style="display:none" onchange="loadSuit('aarde',this)">
-  <input type="file" id="file-lucht" accept="image/*" style="display:none" onchange="loadSuit('lucht',this)">
-
-  <button id="send-to-deck-btn" class="btn-send-deck" disabled>🃏 Send All Cards to Deck</button>
-  <button id="all-export-btn" class="btn-deck-dl" disabled>⬇ Download Full Deck as ZIP</button>
-  <div id="deck-count-label" style="font-size:11px;color:#8fa0bf;text-align:center;margin-top:6px;min-height:16px;"></div>
-
-  <div id="main-status"></div>
-
-  <details>
-    <summary>How it works</summary>
-    <div style="font-size:13px;color:#b9c2d3;margin-top:8px;line-height:1.6;font-family:'Cormorant Garamond',serif;">
+<h1>Tarot Extractor</h1>
+<p>Drop or click a zone to load an image. The app automatically extracts all cards. Works fully offline.</p>
+<div class="section-title">Drop images into the zones</div>
+<!-- Card back upload -->
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+<div id="card-back-zone" style="width:52px;height:72px;border:1.5px dashed #27344d;border-radius:8px;background:#0b1020;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;overflow:hidden;transition:border-color .18s;" title="Upload card back image">
+<span id="card-back-icon" style="font-size:1.4rem;"></span>
+<img id="card-back-preview" style="display:none;width:100%;height:100%;object-fit:cover;"/>
+</div>
+<div>
+<div style="font-family:'Cinzel',serif;font-size:11px;color:#d6dcff;letter-spacing:.06em;margin-bottom:3px;">Card Back</div>
+<div style="font-size:10px;color:#8fa0bf;line-height:1.4;">Upload your card back design.<br/>Shows on top of undrawn card stacks.</div>
+</div>
+</div>
+<input accept="image/*" id="card-back-file" style="display:none" type="file"/>
+<!-- 1 large Major Arcana + 2x2 minor suits -->
+<div class="upload-zones-wrap">
+<div class="upload-zone-groot-wrap">
+<div class="upload-zone groot" id="uz-groot" title="Major Arcana — 22 cards">
+<div class="uz-icon"></div>
+<div class="uz-label">Major Arcana</div>
+<div class="uz-sub">What does the situation reveal overall?</div>
+<div class="uz-status" id="uz-status-groot">No image</div>
+<div class="uz-preview" id="uz-prev-groot" style="display:none;"></div>
+</div>
+</div>
+<div class="upload-zone-minor-wrap">
+<div class="upload-zone vuur" id="uz-vuur" title="Wands — Fire">
+<div class="uz-icon"></div>
+<div class="uz-label">Wands</div>
+<div class="uz-sub">What energy &amp; action is at play?</div>
+<div class="uz-status" id="uz-status-vuur">No image</div>
+<div class="uz-preview" id="uz-prev-vuur" style="display:none;"></div>
+</div>
+<div class="upload-zone water" id="uz-water" title="Cups — Water">
+<div class="uz-icon"></div>
+<div class="uz-label">Cups</div>
+<div class="uz-sub">What feeling is present?</div>
+<div class="uz-status" id="uz-status-water">No image</div>
+<div class="uz-preview" id="uz-prev-water" style="display:none;"></div>
+</div>
+<div class="upload-zone aarde" id="uz-aarde" title="Pentacles — Earth">
+<div class="uz-icon"></div>
+<div class="uz-label">Pentacles</div>
+<div class="uz-sub">Where did it take place?</div>
+<div class="uz-status" id="uz-status-aarde">No image</div>
+<div class="uz-preview" id="uz-prev-aarde" style="display:none;"></div>
+</div>
+<div class="upload-zone lucht" id="uz-lucht" title="Swords — Air">
+<div class="uz-icon"></div>
+<div class="uz-label">Swords</div>
+<div class="uz-sub">What thoughts were present?</div>
+<div class="uz-status" id="uz-status-lucht">No image</div>
+<div class="uz-preview" id="uz-prev-lucht" style="display:none;"></div>
+</div>
+</div>
+</div>
+<!-- hidden file inputs -->
+<input accept="image/*" id="ga-file-input" multiple="" style="display:none" type="file"/>
+<input accept="image/*" id="file-vuur" onchange="loadSuit('vuur',this)" style="display:none" type="file"/>
+<input accept="image/*" id="file-water" onchange="loadSuit('water',this)" style="display:none" type="file"/>
+<input accept="image/*" id="file-aarde" onchange="loadSuit('aarde',this)" style="display:none" type="file"/>
+<input accept="image/*" id="file-lucht" onchange="loadSuit('lucht',this)" style="display:none" type="file"/>
+<button class="btn-send-deck" disabled="" id="send-to-deck-btn"> Send All Cards to Deck</button>
+<button class="btn-deck-dl" disabled="" id="all-export-btn">⬇ Download Full Deck as ZIP</button>
+<div id="deck-count-label" style="font-size:11px;color:#8fa0bf;text-align:center;margin-top:6px;min-height:16px;"></div>
+<div id="main-status"></div>
+<details>
+<summary>How it works</summary>
+<div style="font-size:13px;color:#b9c2d3;margin-top:8px;line-height:1.6;font-family:'Cormorant Garamond',serif;">
       The app analyses the image for variance, edge energy and colour saturation, then selects the most visually interesting regions.
       Major Arcana: 22 cards. Minor Arcana per suit: 14 cards (Ace through 10, Page, Knight, Queen, King).
-      <br><br>Each downloaded PNG has the number and title <b>baked into the image</b>.
+      <br/><br/>Each downloaded PNG has the number and title <b>baked into the image</b>.
       The ZIP contains all cards in subfolders per suit, plus a description file per card.
     </div>
-  </details>
+</details>
 </div>
-
 <!-- ══ SPREAD SECTION ══ -->
 <div class="card" id="spread-card" style="display:none;">
-  <h2 style="margin:0 0 14px;">✦ Tarot Spreads</h2>
-
-  <!-- Choices: user labels (shown only for choices spread) -->
-  <div id="choices-labels-row" style="display:none;gap:8px;margin-bottom:12px;">
-    <div style="flex:1;">
-      <label style="font-size:10px;color:#8fa0bf;font-family:'Cinzel',serif;letter-spacing:.05em;display:block;margin-bottom:4px;">PATH ONE represents…</label>
-      <input type="text" id="choice-label-a" placeholder="e.g. staying, yes, option A…" style="font-size:12px;padding:8px 10px;">
-    </div>
-    <div style="flex:1;">
-      <label style="font-size:10px;color:#8fa0bf;font-family:'Cinzel',serif;letter-spacing:.05em;display:block;margin-bottom:4px;">PATH TWO represents…</label>
-      <input type="text" id="choice-label-b" placeholder="e.g. leaving, no, option B…" style="font-size:12px;padding:8px 10px;">
-    </div>
-  </div>
-  <div class="spread-tabs" id="spread-tabs">
-    <button class="spread-tab active" data-spread="daycard">☀ Card of the Day</button>
-    <button class="spread-tab" data-spread="choices">⚖ Choices</button>
-    <button class="spread-tab" data-spread="deeper">🔮 Deeper Insight</button>
-  </div>
-
-  <div id="spread-area"></div>
-
-  <div style="display:flex;gap:10px;margin-top:14px;">
-    <button id="draw-spread-btn" style="flex:1;font-family:'Cinzel',serif;font-size:13px;letter-spacing:.04em;padding:12px;">🔀 Draw Cards</button>
-    <button id="clear-spread-btn" style="width:auto;padding:12px 16px;font-size:12px;color:#8fa0bf;" disabled>✕ Clear</button>
-  </div>
+<h2 style="margin:0 0 14px;">✦ Tarot Spreads</h2>
+<!-- Choices: user labels (shown only for choices spread) -->
+<div id="choices-labels-row" style="display:none;gap:8px;margin-bottom:12px;">
+<div style="flex:1;">
+<label style="font-size:10px;color:#8fa0bf;font-family:'Cinzel',serif;letter-spacing:.05em;display:block;margin-bottom:4px;">PATH ONE represents…</label>
+<input id="choice-label-a" placeholder="e.g. staying, yes, option A…" style="font-size:12px;padding:8px 10px;" type="text"/>
 </div>
-
+<div style="flex:1;">
+<label style="font-size:10px;color:#8fa0bf;font-family:'Cinzel',serif;letter-spacing:.05em;display:block;margin-bottom:4px;">PATH TWO represents…</label>
+<input id="choice-label-b" placeholder="e.g. leaving, no, option B…" style="font-size:12px;padding:8px 10px;" type="text"/>
+</div>
+</div>
+<div class="spread-tabs" id="spread-tabs">
+<button class="spread-tab active" data-spread="daycard">☀ Card of the Day</button>
+<button class="spread-tab" data-spread="choices">⚖ Choices</button>
+<button class="spread-tab" data-spread="deeper"> Deeper Insight</button>
+</div>
+<div id="spread-area"></div>
+<div style="display:flex;gap:10px;margin-top:14px;">
+<button id="draw-spread-btn" style="flex:1;font-family:'Cinzel',serif;font-size:13px;letter-spacing:.04em;padding:12px;"> Draw Cards</button>
+<button disabled="" id="clear-spread-btn" style="width:auto;padding:12px 16px;font-size:12px;color:#8fa0bf;">✕ Clear</button>
+</div>
+</div>
 <!-- ══ MAJOR ARCANA GRID ══ -->
 <div class="card" id="ga-grid-card" style="display:none;">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-    <h2 style="margin:0;">The 22 Major Arcana</h2>
-    <button id="reshuffle-btn" style="width:auto;padding:6px 14px;font-size:12px;" disabled>🔀 Reshuffle</button>
-  </div>
-  <div class="tgrid suit-groot" id="ga-grid"></div>
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+<h2 style="margin:0;">The 22 Major Arcana</h2>
+<button disabled="" id="reshuffle-btn" style="width:auto;padding:6px 14px;font-size:12px;"> Reshuffle</button>
 </div>
-
+<div class="tgrid suit-groot" id="ga-grid"></div>
+</div>
 <!-- ══ KLEINE ARCANA GRIDS ══ -->
 <div id="suits-container">
-  <div class="suit-section" data-suit="vuur">
-    <div class="tgrid suit-vuur" id="grid-vuur" style="display:none;"></div>
-  </div>
-  <div class="suit-section" data-suit="water">
-    <div class="tgrid suit-water" id="grid-water" style="display:none;"></div>
-  </div>
-  <div class="suit-section" data-suit="aarde">
-    <div class="tgrid suit-aarde" id="grid-aarde" style="display:none;"></div>
-  </div>
-  <div class="suit-section" data-suit="lucht">
-    <div class="tgrid suit-lucht" id="grid-lucht" style="display:none;"></div>
-  </div>
+<div class="suit-section" data-suit="vuur">
+<div class="tgrid suit-vuur" id="grid-vuur" style="display:none;"></div>
 </div>
-
+<div class="suit-section" data-suit="water">
+<div class="tgrid suit-water" id="grid-water" style="display:none;"></div>
+</div>
+<div class="suit-section" data-suit="aarde">
+<div class="tgrid suit-aarde" id="grid-aarde" style="display:none;"></div>
+</div>
+<div class="suit-section" data-suit="lucht">
+<div class="tgrid suit-lucht" id="grid-lucht" style="display:none;"></div>
+</div>
+</div>
 </div><!-- /wrap -->
-
 <!-- Export overlay -->
 <div id="export-overlay">
-  <div class="ex-title">Exporteren…</div>
-  <div id="exp-track"><div id="exp-fill"></div></div>
-  <div id="exp-msg">Bezig…</div>
+<div class="ex-title">Exporteren…</div>
+<div id="exp-track"><div id="exp-fill"></div></div>
+<div id="exp-msg">Bezig…</div>
 </div>
-
 <canvas id="work-canvas" style="display:none"></canvas>
 <canvas id="render-canvas" style="display:none"></canvas>
-
 <script>
 /* ══════════════════════════════════════════════
    CARD OVERLAYS — extracted from sprite sheet
@@ -429,22 +417,22 @@ const ARCANA = [
   {num:"I",  roman:"I",    sym:"", name:"The Magician",      kw:"Will · Skill · Manifestation",               el:"Air · Mercury",     full:"The Magician has all four symbols of the Minor Arcana before him and points simultaneously upward and downward: 'As above, so below.' He is the master of concentration and intention, turning ideas into reality. His lemniscate hat signals infinite energy and mastery."},
   {num:"II", roman:"II",   sym:"", name:"The High Priestess",kw:"Intuition · Mystery · Inner knowledge",      el:"Water · Moon",      full:"Between two pillars she sits in stillness. Behind her hangs a veil of pomegranates. She holds the Torah on her lap and wears a moon crown. She is the unconscious, the dream, the quiet voice you hear when you stop talking."},
   {num:"III",roman:"III",  sym:"", name:"The Empress",       kw:"Fertility · Nature · Abundance",             el:"Earth · Venus",     full:"She sits in a lush field surrounded by ripe wheat, her crown bearing twelve stars. She is the goddess of fertility, beauty, and abundance. She reminds us that the body is sacred, that the earth nourishes us, and that all creation is an act of love."},
-  {num:"IV", roman:"IV",   sym:"",  name:"The Emperor",       kw:"Structure · Authority · Stability",          el:"Fire · Aries",      full:"He sits on a stone throne adorned with ram heads. In his right hand the ankh, sign of life; in his left the orb. He is father-energy: structure, laws, protection, and discipline. Where the Empress flows, he builds walls."},
-  {num:"V",  roman:"V",    sym:"", name:"The Hierophant",    kw:"Tradition · Belief · Guidance",              el:"Earth · Taurus",    full:"Between two pillars he sits on his throne, hand raised in blessing, two monks at his feet. The Hierophant is the bridge between human and divine — guardian of tradition, ritual, and shared belief. He asks: what wisdom have you received, and what will you do with it?"},
+  {num:"IV", roman:"IV",   sym:"♛",  name:"The Emperor",       kw:"Structure · Authority · Stability",          el:"Fire · Aries",      full:"He sits on a stone throne adorned with ram heads. In his right hand the ankh, sign of life; in his left the orb. He is father-energy: structure, laws, protection, and discipline. Where the Empress flows, he builds walls."},
+  {num:"V",  roman:"V",    sym:"⛪", name:"The Hierophant",    kw:"Tradition · Belief · Guidance",              el:"Earth · Taurus",    full:"Between two pillars he sits on his throne, hand raised in blessing, two monks at his feet. The Hierophant is the bridge between human and divine — guardian of tradition, ritual, and shared belief. He asks: what wisdom have you received, and what will you do with it?"},
   {num:"VI", roman:"VI",   sym:"", name:"The Lovers",        kw:"Choice · Connection · Values",               el:"Air · Gemini",      full:"Two figures stand naked beneath an angel who blesses them. Behind the man stands the tree of life; behind the woman the tree of knowledge. The Lovers are not only about romance — they are about a fundamental choice: what values do you carry, and are they truly compatible with another's? Real connection begins with self-knowledge."},
   {num:"VII",roman:"VII",  sym:"", name:"The Chariot",       kw:"Willpower · Direction · Victory",            el:"Water · Cancer",    full:"On a star-draped stone chariot he rides, two sphinxes before him — one black, one white. They pull in opposite directions, but he steers them by will alone, without reins. The Chariot asks not for external control but for inner discipline: directing conflicting impulses toward a single purpose."},
   {num:"VIII",roman:"VIII",sym:"", name:"Strength",          kw:"Courage · Gentleness · Inner power",         el:"Fire · Leo",        full:"A woman gently closes the mouth of a lion. No force, no violence — only quiet courage. Above her head the figure eight on its side: the infinite. Strength in tarot is not dominance but the capacity to be with your own fear, anger, or instinct without suppressing or being overwhelmed by them."},
   {num:"IX", roman:"IX",   sym:"", name:"The Hermit",        kw:"Withdrawal · Wisdom · Inner light",          el:"Earth · Virgo",     full:"Cloaked in grey he stands on a snow-covered mountaintop, lantern raised with a six-pointed star inside. He has withdrawn to find himself. His light is for you — if you are willing to make the journey upward."},
   {num:"X",  roman:"X",    sym:"", name:"Wheel of Fortune",  kw:"Cycle · Fate · Turning point",               el:"Fire · Jupiter",    full:"On the wheel appear T-A-R-O and alchemical symbols. Four figures at the corners read calmly while the wheel turns. It represents the inevitable cycles of life. No one stays in the same position."},
-  {num:"XI", roman:"XI",   sym:"",  name:"Justice",           kw:"Truth · Balance · Consequence",              el:"Air · Libra",       full:"She sits with sword raised and scales in balance. Justice in tarot is not about human legal systems but about cosmic cause and effect. Every action carries a consequence. This card asks you to weigh honestly — not harshly, but clearly."},
+  {num:"XI", roman:"XI",   sym:"⚖",  name:"Justice",           kw:"Truth · Balance · Consequence",              el:"Air · Libra",       full:"She sits with sword raised and scales in balance. Justice in tarot is not about human legal systems but about cosmic cause and effect. Every action carries a consequence. This card asks you to weigh honestly — not harshly, but clearly."},
   {num:"XII",roman:"XII",  sym:"", name:"The Hanged Man",    kw:"Surrender · Sacrifice · New perspective",   el:"Water · Neptune",   full:"He hangs by his ankle, free leg crossed, face peaceful with a halo of light. He was not punished; he chose this. The Hanged Man represents voluntary surrender: releasing control to understand something deeper. The pause is not weakness — it is wisdom."},
   {num:"XIII",roman:"XIII",sym:"", name:"Death",             kw:"Transformation · Ending · Passage",          el:"Water · Scorpio",   full:"A skeleton in black armour rides a white horse; in the background the sun rises between two towers. Death does not ask for physical dying but for farewell: from an identity, a relationship, a phase. What ends makes space for what is true."},
   {num:"XIV",roman:"XIV",  sym:"", name:"Temperance",        kw:"Balance · Patience · Alchemy",               el:"Fire · Sagittarius",full:"The angel pours liquid from one cup into the other — upward, against gravity. Temperance is the alchemist who combines opposing forces into something new. Not abstinence but masterful calibration. Flow without forcing."},
   {num:"XV", roman:"XV",   sym:"", name:"The Devil",         kw:"Shadow · Addiction · Materialism",           el:"Earth · Capricorn", full:"Two chained figures — but their chains are wide enough to lift over their heads. They stay out of habit, fear, or comfort. The Devil is the mirror of our own shadow. Recognition is the first step toward liberation. You are not as trapped as you feel."},
-  {num:"XVI",roman:"XVI",  sym:"",  name:"The Tower",         kw:"Upheaval · Revelation · Catharsis",          el:"Fire · Mars",       full:"A tall tower is struck; figures fall as flames burst outward. The Tower is the sudden collapse of what was not true. What falls was meant to fall. On the empty ground something genuine can now be built. This is not destruction — it is clearing."},
-  {num:"XVII",roman:"XVII",sym:"",  name:"The Star",          kw:"Hope · Healing · Inspiration",               el:"Air · Aquarius",    full:"She kneels at a pool and pours water from two jugs. Above her a large yellow star shines. The Star follows The Tower: after destruction comes hope. Trust the process. Heal. Dream again. You are being renewed."},
+  {num:"XVI",roman:"XVI",  sym:"⚡",  name:"The Tower",         kw:"Upheaval · Revelation · Catharsis",          el:"Fire · Mars",       full:"A tall tower is struck; figures fall as flames burst outward. The Tower is the sudden collapse of what was not true. What falls was meant to fall. On the empty ground something genuine can now be built. This is not destruction — it is clearing."},
+  {num:"XVII",roman:"XVII",sym:"✦",  name:"The Star",          kw:"Hope · Healing · Inspiration",               el:"Air · Aquarius",    full:"She kneels at a pool and pours water from two jugs. Above her a large yellow star shines. The Star follows The Tower: after destruction comes hope. Trust the process. Heal. Dream again. You are being renewed."},
   {num:"XVIII",roman:"XVIII",sym:"",name:"The Moon",         kw:"Illusion · Fear · The unconscious",          el:"Water · Pisces",    full:"A full moon shines on a path between two towers. A crayfish crawls from the water; wolf and dog howl. The Moon is the unconscious, dreams, and fears. She invites you to walk through the darkness — not around it. What you face loses its power over you."},
-  {num:"XIX",roman:"XIX",  sym:"",  name:"The Sun",           kw:"Joy · Vitality · Success",                   el:"Fire · Sun",        full:"A triumphant child rides a white horse beneath a radiant sun. The Sun is the most benevolent card. Clarity, vitality, success, and authenticity. You are allowed to be here, exactly as you are. Let yourself shine."},
+  {num:"XIX",roman:"XIX",  sym:"☀",  name:"The Sun",           kw:"Joy · Vitality · Success",                   el:"Fire · Sun",        full:"A triumphant child rides a white horse beneath a radiant sun. The Sun is the most benevolent card. Clarity, vitality, success, and authenticity. You are allowed to be here, exactly as you are. Let yourself shine."},
   {num:"XX", roman:"XX",   sym:"", name:"Judgement",         kw:"Calling · Resurrection · Forgiveness",       el:"Fire · Pluto",      full:"Gabriel blows the trumpet; people rise from their graves. Judgement is not punishment but an invitation: become who you truly are. It asks for self-examination and forgiveness — of others, but above all of yourself. Answer the call."},
   {num:"XXI",roman:"XXI",  sym:"", name:"The World",         kw:"Completion · Integration · Dance",           el:"Earth · Saturn",    full:"A dancing figure in a laurel wreath with the four corner figures: bull, lion, eagle, angel. The World is the end of the Major Arcana journey. The Fool has come home. Now he dances — free, whole, present. The cycle is complete."}
 ];
@@ -699,7 +687,7 @@ function renderSuitGrid(suit){
     parent.insertBefore(wrapper,gridEl);
     const hdr=document.createElement('h2');
     hdr.style.margin='0 0 10px';
-    hdr.textContent=`${s.name} — ${s.element}`;
+    hdr.textContent=`${s.icon} ${s.name} — ${s.element}`;
     wrapper.appendChild(hdr);
     wrapper.appendChild(gridEl);
   }
@@ -748,7 +736,7 @@ function buildMasterDeck(){
 
   const btn = document.getElementById('send-to-deck-btn');
   btn.classList.add('loaded');
-  btn.textContent = `🃏 Deck updated (${masterDeck.length} cards)`;
+  btn.textContent = ` Deck updated (${masterDeck.length} cards)`;
   document.getElementById('deck-count-label').textContent = `${masterDeck.length} cards shuffled and ready to draw`;
   document.getElementById('spread-card').style.display='block';
   document.getElementById('spread-card').scrollIntoView({behavior:'smooth',block:'start'});
@@ -823,7 +811,7 @@ function renderSpreadArea(animate){
   if(masterDeck.length>0){
     const pill=document.createElement('div');
     pill.className='deck-pill';
-    pill.innerHTML=`<span>🃏</span><span class="dp-count">${masterDeck.length}</span><span> cards in deck</span>`;
+    pill.innerHTML=`<span></span><span class="dp-count">${masterDeck.length}</span><span> cards in deck</span>`;
     area.appendChild(pill);
   }
 
@@ -915,7 +903,7 @@ function makeSpreadSlot(slot, card, animate, idx){
       bImg.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:12px;';
       backFace.appendChild(bImg);
     } else {
-      backFace.innerHTML = `<span style="font-size:2.4rem;opacity:.5">🂠</span>`;
+      backFace.innerHTML = `<span style="font-size:2.4rem;opacity:.5"></span>`;
     }
 
     // Front face
@@ -944,7 +932,7 @@ function makeSpreadSlot(slot, card, animate, idx){
       ov.innerHTML=`<div class="ov-name">${esc(card.name)}</div><div class="ov-kw">${esc(card.kw)}</div>`;
       frame.appendChild(ov);
     } else {
-      frame.innerHTML=`<span style="font-size:1.6rem;opacity:.2">🂠</span>`;
+      frame.innerHTML=`<span style="font-size:1.6rem;opacity:.2"></span>`;
     }
   }
 
