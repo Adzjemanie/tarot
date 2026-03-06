@@ -523,11 +523,25 @@ const statusEl     = document.getElementById('main-status');
 ══════════════════════════════════════════════ */
 function setupUploadZone(zoneId, onFiles){
   const zone = document.getElementById(zoneId);
+
   zone.addEventListener('click', () => {
     const key = zoneId.replace('uz-','');
-    if(key === 'groot') gaFileInput.click();
-    else document.getElementById('file-'+key).click();
+    const picker = document.createElement('input');
+    picker.type = 'file';
+    picker.accept = 'image/*';
+    if(key === 'groot') picker.multiple = true;
+    picker.style.display = 'none';
+    document.body.appendChild(picker);
+
+    picker.addEventListener('change', () => {
+      const files = [...(picker.files || [])].filter(f => f.type.startsWith('image/'));
+      if(files.length) onFiles(files);
+      picker.remove();
+    }, { once:true });
+
+    picker.click();
   });
+
   zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
   zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
   zone.addEventListener('drop', e => {
