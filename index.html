@@ -423,7 +423,7 @@
 <canvas id="render-canvas" style="display:none"></canvas>
 
 <script>
-const APP_VERSION = "3.2.3";
+const APP_VERSION = "3.2.4";
 /* ══════════════════════════════════════════════
    CARD OVERLAYS — extracted from sprite sheet
 ══════════════════════════════════════════════ */
@@ -1257,14 +1257,54 @@ function wrapText(ctx,text,x,y,maxW,lineH){
 /* ══════════════════════════════════════════════
    DOWNLOAD SINGLE — composed
 ══════════════════════════════════════════════ */
-function dlComposed(hiResCvs, numLabel, title, subtitle, suitKey){
-  const composed=composeCard(hiResCvs,numLabel,title,subtitle);
-  const safe=title.replace(/[^a-zA-Z0-9\-_]/g,'-').replace(/-+/g,'-');
-  composed.toBlob(blob=>{
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob); a.download=`${numLabel}-${safe}.png`; a.click();
-    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
-  },'image/png');
+function dlComposed(hiResCvs,numLabel,name,sub,suit){
+  const safe = (name||'card').replace(/[^a-z0-9]+/gi,'_').replace(/^_+|_+$/g,'');
+  const filename = `${String(suit||'card')}_${safe || 'card'}.png`;
+
+  function triggerDownload(url){
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(e){} }, 1500);
+  }
+
+  function fallbackDataUrlDownload(){
+    try{
+      const dataUrl = hiResCvs.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      return true;
+    }catch(err){
+      console.error('Fallback download failed:', err);
+      alert('Download failed in this browser.');
+      return false;
+    }
+  }
+
+  try{
+    if(hiResCvs.toBlob){
+      hiResCvs.toBlob(blob=>{
+        if(blob){
+          const url = URL.createObjectURL(blob);
+          triggerDownload(url);
+        }else{
+          fallbackDataUrlDownload();
+        }
+      }, 'image/png');
+    }else{
+      fallbackDataUrlDownload();
+    }
+  }catch(err){
+    console.error('Download error:', err);
+    fallbackDataUrlDownload();
+  }
 }
 
 /* ══════════════════════════════════════════════
