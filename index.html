@@ -414,7 +414,7 @@
 </div>
 <div class="spread-tabs" id="spread-tabs">
 <button class="spread-tab active" data-spread="daycard">☀ Card of the Day</button>
-<button class="spread-tab" data-spread="choices">⚖ Choices</button>
+<button class="spread-tab" data-spread="choices">⚖ Choice</button>
 <button class="spread-tab" data-spread="deeper"> Deeper Insight</button>
 </div>
 <div id="spread-area"></div>
@@ -1105,6 +1105,19 @@ function buildChoicesNarrative(cards, slots){
 /* ══════════════════════════════════════════════
    CARD FACTORY
 ══════════════════════════════════════════════ */
+function romanToArabic(s){
+  const map={I:1,V:5,X:10,L:50,C:100,D:500,M:1000};
+  const str=String(s||'').trim().toUpperCase();
+  // If it's already a pure number or non-roman label (Ace, Page, etc.), return as-is
+  if(!str || !/^[IVXLCDM]+$/.test(str)) return s;
+  let result=0;
+  for(let i=0;i<str.length;i++){
+    const cur=map[str[i]], nxt=map[str[i+1]];
+    result += (nxt && nxt > cur) ? -cur : cur;
+  }
+  return String(result);
+}
+
 function makeDispCanvas(hiRes, numLabel, title, kw){
   // Pure image — stroke text only, zero fillRect, zero gradient
   const W=240, H=320;
@@ -1120,7 +1133,7 @@ function makeDispCanvas(hiRes, numLabel, title, kw){
   }
 
   // Number — top center: lighter, more ethereal
-  st(numLabel||'', W/2, 22, 'italic 14px Georgia,serif', 'rgba(200,215,255,0.55)', 4);
+  st(romanToArabic(numLabel)||'', W/2, 22, 'italic 14px Georgia,serif', 'rgba(200,215,255,0.35)', 3);
 
   // Title lines — tarot-style larger font, no keywords below
   ctx.font='italic 600 14px Georgia,serif';
@@ -1259,7 +1272,7 @@ function composeCard(hiResCvs, numLabel, title, kw){
   }
 
   // Number — lighter, more ethereal
-  st(numLabel||'', W/2, 36, 'italic 19px Georgia,serif', 'rgba(200,215,255,0.55)', 6);
+  st(romanToArabic(numLabel)||'', W/2, 36, 'italic 19px Georgia,serif', 'rgba(200,215,255,0.35)', 5);
 
   // Title — tarot-style italic, no keywords
   ctx.font='italic 600 22px Georgia,serif';
