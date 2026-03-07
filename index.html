@@ -795,7 +795,22 @@ function buildMasterDeck(){
   document.getElementById('deck-count-label').textContent = `${masterDeck.length} cards shuffled and ready to draw`;
   document.getElementById('spread-card').style.display='block';
   document.getElementById('spread-card').scrollIntoView({behavior:'smooth',block:'start'});
-  renderSpreadArea();
+
+  // Auto-draw so card backs appear immediately
+  autoDraw();
+  renderSpreadArea(true);
+}
+
+function autoDraw(){
+  const spread = SPREADS[activeSpread];
+  const needed = spread.slots.length;
+  const pool = [...masterDeck];
+  drawnCards = [];
+  for(let i=0;i<needed&&pool.length>0;i++){
+    const idx=Math.floor(Math.random()*pool.length);
+    drawnCards.push(pool.splice(idx,1)[0]);
+  }
+  document.getElementById('clear-spread-btn').disabled=false;
 }
 
 /* ══════════════════════════════════════════════
