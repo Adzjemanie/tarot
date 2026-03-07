@@ -848,7 +848,8 @@ document.querySelectorAll('.spread-tab').forEach(tab => {
     activeSpread = tab.dataset.spread;
     drawnCards = [];
     document.getElementById('choices-labels-row').style.display = activeSpread==='choices' ? 'flex' : 'none';
-    renderSpreadArea();
+    if(masterDeck.length > 0) autoDraw();
+    renderSpreadArea(true);
   });
 });
 
