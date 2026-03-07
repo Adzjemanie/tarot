@@ -223,6 +223,23 @@
   .synth-text em { color:#d6dcff; font-style:italic; }
   .synth-text strong { color:#e8ecff; font-weight:600; font-style:normal; }
 
+  /* ── Lightbox ── */
+  #card-lightbox {
+    display:none; position:fixed; inset:0; z-index:200;
+    background:rgba(5,7,14,0.92); backdrop-filter:blur(10px);
+    align-items:center; justify-content:center;
+    cursor:zoom-out;
+  }
+  #card-lightbox.visible { display:flex; }
+  #card-lightbox canvas {
+    max-width:min(88vw, 420px); max-height:min(88vh, 560px);
+    border-radius:18px;
+    box-shadow:0 24px 80px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.06);
+    animation:lbIn .22s cubic-bezier(.2,0,.2,1) both;
+  }
+  @keyframes lbIn { from{opacity:0;transform:scale(.88)} to{opacity:1;transform:scale(1)} }
+  .tcard { cursor:zoom-in; }
+
   /* Version badge */
   .version-badge {
     text-align:center; padding:10px; font-size:10px;
@@ -431,6 +448,8 @@
 </div>
 </div><!-- /wrap -->
 <!-- Export overlay -->
+<!-- Lightbox -->
+<div id="card-lightbox"><canvas id="lightbox-canvas"></canvas></div>
 <div id="export-overlay">
 <div class="ex-title">Exporteren…</div>
 <div id="exp-track"><div id="exp-fill"></div></div>
@@ -1096,16 +1115,15 @@ function makeDispCanvas(hiRes, numLabel, title, kw){
   // strokeText: dark outline + bright fill = legible on any background
   function st(text, x, y, font, color, lw){
     ctx.save(); ctx.font=font; ctx.textAlign='center'; ctx.lineJoin='round';
-    ctx.lineWidth=lw; ctx.strokeStyle='rgba(0,0,0,0.8)';
+    ctx.lineWidth=lw; ctx.strokeStyle='rgba(0,0,0,0.75)';
     ctx.strokeText(text,x,y); ctx.fillStyle=color; ctx.fillText(text,x,y); ctx.restore();
   }
 
-  // Number — top center
-  st(numLabel||'', W/2, 22, 'italic 15px Georgia,serif', 'rgba(220,228,255,0.96)', 5);
+  // Number — top center: lighter, more ethereal
+  st(numLabel||'', W/2, 22, 'italic 14px Georgia,serif', 'rgba(200,215,255,0.55)', 4);
 
-  // Title lines — computed, drawn from very bottom upward
-  const hint = getHint(kw);
-  ctx.font='600 12px Georgia,serif';
+  // Title lines — tarot-style larger font, no keywords below
+  ctx.font='italic 600 14px Georgia,serif';
   const tWords=(title||'').split(' ');
   const tLines=[]; let tLn='';
   for(const w of tWords){
@@ -1113,11 +1131,9 @@ function makeDispCanvas(hiRes, numLabel, title, kw){
     if(ctx.measureText(t).width>W-20 && tLn){tLines.push(tLn);tLn=w;}else tLn=t;
   }
   if(tLn) tLines.push(tLn);
-  const lH=15, hH=hint?14:0, pad=6;
-  // first line y: stack upward from bottom
-  let ty = H - pad - hH - (tLines.length-1)*lH;
-  tLines.forEach(l => { st(l, W/2, ty, '600 12px Georgia,serif', '#ffffff', 4.5); ty+=lH; });
-  if(hint) st(hint, W/2, H-pad, 'italic 10px Georgia,serif', 'rgba(190,210,248,0.92)', 3.5);
+  const lH=17, pad=8;
+  let ty = H - pad - (tLines.length-1)*lH;
+  tLines.forEach(l => { st(l, W/2, ty, 'italic 600 14px Georgia,serif', '#f0e8d8', 4.5); ty+=lH; });
 
   return cvs;
 }
@@ -1163,8 +1179,32 @@ function makeTCard(numLabel,sym,dispCvs,title,kw,sub,fullText,dlFn,animIdx,arcan
   dlBtn.addEventListener('click', e=>{ e.stopPropagation(); dlFn(); });
   imgWrap.appendChild(dlBtn);
 
+  // Click card to open lightbox
+  imgWrap.addEventListener('click', e => {
+    if(e.target.classList.contains('btn-dl-overlay')) return;
+    openLightbox(dispCvs);
+  });
+
   card.appendChild(imgWrap);
   return card;
+}
+
+/* ── Lightbox ── */
+(function(){
+  const lb = document.getElementById('card-lightbox');
+  const lbCvs = document.getElementById('lightbox-canvas');
+  lb.addEventListener('click', () => {
+    lb.classList.remove('visible');
+  });
+})();
+
+function openLightbox(srcCvs){
+  const lb = document.getElementById('card-lightbox');
+  const lbCvs = document.getElementById('lightbox-canvas');
+  lbCvs.width = srcCvs.width;
+  lbCvs.height = srcCvs.height;
+  lbCvs.getContext('2d').drawImage(srcCvs, 0, 0);
+  lb.classList.add('visible');
 }
 
 /* ══════════════════════════════════════════════
@@ -1214,14 +1254,15 @@ function composeCard(hiResCvs, numLabel, title, kw){
 
   function st(text, x, y, font, color, lw){
     ctx.save(); ctx.font=font; ctx.textAlign='center'; ctx.lineJoin='round';
-    ctx.lineWidth=lw; ctx.strokeStyle='rgba(0,0,0,0.8)';
+    ctx.lineWidth=lw; ctx.strokeStyle='rgba(0,0,0,0.75)';
     ctx.strokeText(text,x,y); ctx.fillStyle=color; ctx.fillText(text,x,y); ctx.restore();
   }
 
-  st(numLabel||'', W/2, 36, 'italic 20px Georgia,serif', 'rgba(220,228,255,0.96)', 7);
+  // Number — lighter, more ethereal
+  st(numLabel||'', W/2, 36, 'italic 19px Georgia,serif', 'rgba(200,215,255,0.55)', 6);
 
-  const hint = getHint(kw);
-  ctx.font='600 18px Georgia,serif';
+  // Title — tarot-style italic, no keywords
+  ctx.font='italic 600 22px Georgia,serif';
   const tWords=(title||'').split(' ');
   const tLines=[]; let tLn='';
   for(const w of tWords){
@@ -1229,10 +1270,9 @@ function composeCard(hiResCvs, numLabel, title, kw){
     if(ctx.measureText(t).width>W-48 && tLn){tLines.push(tLn);tLn=w;}else tLn=t;
   }
   if(tLn) tLines.push(tLn);
-  const lH=22, hH=hint?18:0, pad=10;
-  let ty=H-pad-hH-(tLines.length-1)*lH;
-  tLines.forEach(l => { st(l, W/2, ty, '600 18px Georgia,serif', '#ffffff', 6.5); ty+=lH; });
-  if(hint) st(hint, W/2, H-pad+4, 'italic 13px Georgia,serif', 'rgba(188,210,248,0.92)', 5);
+  const lH=26, pad=12;
+  let ty=H-pad-(tLines.length-1)*lH;
+  tLines.forEach(l => { st(l, W/2, ty, 'italic 600 22px Georgia,serif', '#f0e8d8', 7); ty+=lH; });
 
   return renderCvs;
 }
